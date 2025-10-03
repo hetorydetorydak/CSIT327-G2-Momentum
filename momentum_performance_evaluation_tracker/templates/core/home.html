@@ -19,13 +19,13 @@
                 </div>
                 <div class="nav-links-right">
                     <button id="loginBtn" class="nav-button">Login</button>
-                    <button id "getStartedBtn" class="get-started">Get Started</button>
+                    <button id="getStartedBtn" class="get-started">Get Started</button>
                 </div>
             </div>
         </nav>
     </header>
 
-      <!-- Login Modal -->
+    <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
@@ -46,9 +46,76 @@
                     <a href="#" class="forgot">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="btn-submit">Sign In</button>
+                <button id = "btnSubmitLogin" type="submit" class="btn-submit">Sign In</button>
             </form>
             <p class="signup-text">Don’t have an account? <a href="#" id="showRegisterFromLogin" >Sign Up</a></p>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">×</button>
+            <h2>Create Account</h2>
+            <p class="modal-subtitle">Fill in your details to get started</p>
+
+            <form id="registerForm" class="form">
+            <!-- Step 1: Personal -->
+            <div class="form-step active">
+                <label>First Name</label>
+                <input type="text" name="first_name" required>
+
+                <label>Last Name</label>
+                <input type="text" name="last_name" required>
+
+                <label>Email Address</label>
+                <input type="text" name="email" required>
+
+                <label>Date Hired</label>
+                <input type="date" name="date_hired" required>
+
+                <label>Position</label>
+                <input type="text" name="position" required>
+
+                <label>Department</label>
+                <input type="text" name="department" required>
+
+                <div class="form-footer">
+                <button type="button" class="btn-submit next-btn">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Account -->
+            <div class="form-step">
+                <label>Username</label>
+                <input type="text" name="username" required>
+
+                <label>Password</label>
+                <input type="password" name="password" required>
+
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" required>
+
+                <div class="form-footer">
+                <button type="button" class="btn-submit prev-btn">Back</button>
+                <button type="button" class="btn-submit next-btn">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div class="form-step">
+                <h3>Confirmation Details</h3>
+                <p>Please review your information before submitting.</p>
+                <div id="confirmation-details" class="confirmation-box"></div>
+
+                <div class="form-footer">
+                <button type="button" class="btn-submit prev-btn">Back</button>
+                <button id = "btnSubmitRegister" type="submit" class="btn-submit">Register</button>
+                </div>
+            </div>
+            </form>
+            <p class="signin-text">Already have an account? <a href="#" id="showLoginFromRegister" >Sign In</a></p>
         </div>
     </div>
 

@@ -5,30 +5,55 @@
 {% block title %}Home - Momentum{% endblock %}
 
 {% block extra_css %}
- 
+<link rel="stylesheet" href="{% static 'core/css/home.css' %}">
 {% endblock %}
 
 {% block content %}
     <header class="header">
         <nav class="nav">
-        <div class="nav-container">
-            <div class="logo-and-links">
-            <div class="logo">
-                <h1 class="logo-text">Momentum</h1>
+            <div class="nav-container">
+                <div class="logo-and-links">
+                    <div class="logo">
+                        <h1 class="logo-text">Momentum</h1>
+                    </div>
+                </div>
+                <div class="nav-links-right">
+                    <button id="loginBtn" class="nav-button">Login</button>
+                    <button id "getStartedBtn" class="get-started">Get Started</button>
+                </div>
             </div>
-            <!-- <div class="nav-links-left">
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#about" class="nav-link">About</a>
-            </div>
-            </div>
-            <div class="nav-links-right">
-            <button id="loginBtn" class="nav-button">Login</button>
-            <a id="getStartedBtn" class="get-started">Get Started</a> -->
-            <!-- <button id "getStartedBtn" class="get-started-btn">Get Started</button> -->
-            </div>
-        </div>
         </nav>
     </header>
+
+      <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">×</button>
+            <h2>Welcome Back</h2>
+            <p class="modal-subtitle">Sign in to your account</p>
+            <form class="form">
+                <label>Username</label>
+                <input type="text" placeholder="Enter your username" required>
+                
+                <label>Password</label>
+                <input type="password" placeholder="Enter your password" required>
+
+                <div class="form-footer">
+                    <div class="checkbox-container">
+                    <label><input type="checkbox"> Remember me</label>
+                    </div>
+                    <a href="#" class="forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">Sign In</button>
+            </form>
+            <p class="signup-text">Don’t have an account? <a href="#" id="showRegisterFromLogin" >Sign Up</a></p>
+        </div>
+    </div>
+
 {% endblock %}
 
-{% block extra_js %} {% endblock %}
+{% block extra_js %}
+<script src="{% static 'core/js/home.js' %}"></script>
+{% endblock %}

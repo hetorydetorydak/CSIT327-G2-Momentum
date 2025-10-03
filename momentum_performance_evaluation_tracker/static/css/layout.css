@@ -1,0 +1,34 @@
+/* Header + Nav Layout */
+.header {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.nav {
+  max-width: 1200px;
+  margin: auto;
+  padding: 1rem;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-and-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-links-left,
+.nav-links-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}

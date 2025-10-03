@@ -1,0 +1,41 @@
+/* Logo + Links */
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.nav-link,
+.nav-button,
+.get-started {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.nav-link {
+  color: #6b7280;
+}
+
+.nav-link:hover,
+.nav-button:hover {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 4px ;
+  text-decoration-thickness: 2px ;
+}
+.nav-button {
+  background: none;
+  border: none;
+  color: #6b7280;
+}
+.get-started {
+  background: #2563eb;
+  color: white;
+}
+
+.get-started:hover {
+  background: #1d4ed8;
+}

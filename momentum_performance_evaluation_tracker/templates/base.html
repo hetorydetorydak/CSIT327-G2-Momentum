@@ -1,18 +1,27 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}TechFlow{% endblock %}</title>
+  <title>{% block title %}Momentum{% endblock %}</title>
+
+  <!-- Global + Shared Styles -->
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap" >
+
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&display=swap">
+
+  <!-- Page-specific styles -->
   {% block extra_css %}{% endblock %}
 </head>
 <body>
   {% block content %}{% endblock %}
-  
+
+  <!-- Global JS -->
   <script src="{% static 'js/base.js' %}"></script>
+
+  <!-- Page-specific JS -->
   {% block extra_js %}{% endblock %}
 </body>
 </html>
-

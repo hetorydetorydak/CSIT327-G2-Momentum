@@ -77,6 +77,16 @@ if (registerForm) {
 
       if (!allFilled) return;
 
+      if (currentStep === 1) {
+        const password = registerForm.querySelector('input[name="password"]').value;
+        const confirmPassword = registerForm.querySelector('input[name="confirm_password"]').value;
+
+        if (password !== confirmPassword) {
+          alert("Passwords do not match!");
+          return;
+        }
+      }
+
       if (currentStep < formSteps.length - 1) {
         currentStep++;
         if (currentStep === 2) {
@@ -108,11 +118,11 @@ if (registerForm) {
   updateStep(currentStep);
 
   registerForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+    // e.preventDefault(); disable to allow form submission to server (django)
   console.log("SUBMIT FIRED");
     alert("Registration successful!");
-    closeAllModals();
-    resetRegisterForm();
+    // closeAllModals();
+    // resetRegisterForm();
   });
 }
 
@@ -150,7 +160,16 @@ backdrops.forEach(backdrop => {
 });
 
 // Login submit
-submitBtnLogin.addEventListener('click', () => {
-  alert("Login successful!");
-  loginModal.style.display = 'none';
+// submitBtnLogin.addEventListener('click', () => {
+//   alert("Login successful!");
+//   loginModal.style.display = 'none';
+// });
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.showLogin) {
+    showLoginModal();
+  }
+  if (window.showRegister) {
+    showRegisterModal();
+  }
 });

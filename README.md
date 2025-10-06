@@ -19,7 +19,7 @@ By offering **real-time visualization**, **employee performance cards**, and **t
 - **Backend:** Python, Django
 - **Frontend:** HTML, CSS, JavaScript
 - **Database:** Supabase (PostgreSQL)
-- **Other Tools:** Bootstrap (optional), Git & GitHub for version control
+- **Other Tools:** Git & GitHub for version control
 
 ---
 

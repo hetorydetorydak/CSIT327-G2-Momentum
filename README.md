@@ -27,14 +27,14 @@ By offering **real-time visualization**, **employee performance cards**, and **t
 
 ### 1. Clone the repository
 
-```
+```bash
 git clone https://github.com/hetorydetorydak/CSIT327-G2-Momentum.git
 cd CSIT327-G2-Momentum
 ```
 
 ### 2. Create and activate a virtual environment
 
-```
+```bash
 python -m venv .env
 
 # On macOS/Linux
@@ -46,14 +46,14 @@ source .env/bin/activate
 
 ### 3. Install dependencies
 
-```
+```bash
 pip install django
 pip install supabase
 ```
 
 ### 4. Start the development server
 
-```
+```bash
 # On macOS/Linux
 python3 manage.py runserver
 

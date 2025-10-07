@@ -1,0 +1,258 @@
+/* ===============================
+   HOME PAGE STYLING - Momentum
+   Dark Theme Version
+   =============================== */
+
+/* -------- HEADER + NAV -------- */
+.header {
+    background-color: #1a1a1a; /* very dark gray */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+
+
+.nav {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-container {
+    width: 90%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff; /* white text */
+}
+
+/* Right-aligned navigation buttons */
+.nav-links-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-button,
+.get-started {
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Login button - dark variant */
+.nav-button {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+.nav-button:hover {
+    background-color: #555555;
+}
+
+/* Get Started button - accent dark */
+.get-started {
+    background-color: #444444;
+    color: #ffffff;
+}
+
+.get-started:hover {
+    background-color: #666666;
+}
+
+/* -------- MODALS (Login / Register) -------- */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-backdrop {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* darker overlay */
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #1f1f1f; /* dark gray */
+    padding: 2rem 2.5rem;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* -------- MODAL HEADER -------- */
+.modal-content h2 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+}
+
+.modal-subtitle {
+    text-align: center;
+    color: #bbbbbb;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+/* -------- CLOSE BUTTON -------- */
+.modal-close {
+    position: absolute;
+    top: 0.8rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #aaaaaa;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: #ffffff;
+}
+
+/* -------- FORM -------- */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.form label {
+    font-size: 0.9rem;
+    color: #dddddd;
+    font-weight: 500;
+}
+
+.form input {
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #444444;
+    background-color: #2a2a2a;
+    font-size: 0.9rem;
+    color: #4a4a4a;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.form input:focus {
+    outline: none;
+    border-color: #666666;
+    background-color: #333333;
+}
+
+/* -------- FORM STEPS -------- */
+.form-step {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.form-step.active {
+    display: block;
+    opacity: 1;
+}
+
+@keyframes fadeInStep {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* -------- BUTTONS -------- */
+.btn-submit {
+    background-color: #444444;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: #666666;
+}
+
+/* Step navigation buttons (prev/next) */
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+/* -------- LINKS -------- */
+.forgot,
+.signup-text a,
+.signin-text a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot:hover,
+.signup-text a:hover,
+.signin-text a:hover {
+    color: #ffffff;
+}
+
+/* -------- CONFIRMATION BOX -------- */
+.confirmation-box {
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #dddddd;
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 500px) {
+    .modal-content {
+        padding: 1.5rem;
+        width: 90%;
+    }
+
+    .nav-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .logo-text {
+        font-size: 1.4rem;
+    }
+}

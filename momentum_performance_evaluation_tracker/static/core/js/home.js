@@ -45,6 +45,16 @@ function resetRegisterForm() {
 
   updateStep(currentStep);
 }
+// Function to display messages in the registration form
+function showRegisterMessage(msg) {
+  const msgDiv = document.getElementById('register-message');
+  msgDiv.innerHTML = `<p style="color: red;">${msg}</p>`;
+}
+// Function to clear messages in the registration form
+function clearRegisterMessage() {
+  const msgDiv = document.getElementById('register-message');
+  msgDiv.innerHTML = '';
+}
 
 // Multi-step form logic
 if (registerForm) {
@@ -60,9 +70,24 @@ if (registerForm) {
       input.style.backgroundColor = "white"; 
     });
   });
+// Check if email exists via AJAX
+  async function checkEmailExists(email) {
+    const response = await fetch(`/core/check_email/?email=${encodeURIComponent(email)}`);
+    const data = await response.json();
+    return data.exists;
+  }
+// Check if username exists via AJAX
+  async function checkUsernameExists(username) {
+    const response = await fetch(`/core/check_username/?username=${encodeURIComponent(username)}`);
+    const data = await response.json();
+    return data.exists;
+  }
 
   nextBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
+
+      clearRegisterMessage();
+
       const inputs = formSteps[currentStep].querySelectorAll("input, select, textarea");
       let allFilled = true;
 
@@ -76,13 +101,30 @@ if (registerForm) {
         } 
       });
 
-      if (!allFilled) return;
+      if (!allFilled) {
+        showRegisterMessage("Please fill in all required fields.");
+        return;
+      }
 
       if (currentStep === 0) {
-        const email = registerForm.querySelector("input[name='email']").value.trim();
+        // Validate email format and uniqueness
+        const emailInput = registerForm.querySelector("input[name='email']");
+        const email = emailInput.value.trim();
+
+        emailInput.style.border = "1px solid #d1d5db";
+        emailInput.style.backgroundColor = "white";
 
         if (!emailPattern.test(email)) {
-          alert("Please enter a valid email address.");
+          showRegisterMessage("Please enter a valid email address.");
+          emailInput.style.border = "2px solid #e63946";
+          emailInput.style.backgroundColor = "#ffe5e5";
+          return;
+        }
+
+        if (await checkEmailExists(email)) {
+          showRegisterMessage("Email address already in use.");
+          emailInput.style.border = "2px solid #e63946";
+          emailInput.style.backgroundColor = "#ffe5e5";
           return;
         }
       }
@@ -90,11 +132,26 @@ if (registerForm) {
       if (currentStep === 1) {
         const password = registerForm.querySelector('input[name="password"]').value;
         const confirmPassword = registerForm.querySelector('input[name="confirm_password"]').value;
+        
+        // Validate username uniqueness
+        const usernameInput = registerForm.querySelector('input[name="username"]');
+        const username = usernameInput.value.trim();
+
+        usernameInput.style.border = "1px solid #d1d5db";
+        usernameInput.style.backgroundColor = "white";
 
         if (password !== confirmPassword) {
-          alert("Passwords do not match!");
+          showRegisterMessage("Passwords do not match!");
           return;
         }
+
+        if (await checkUsernameExists(username)) {
+          showRegisterMessage("Username already exists.");
+          usernameInput.style.border = "2px solid #e63946";
+          usernameInput.style.backgroundColor = "#ffe5e5";
+          return;
+        }
+
       }
 
       if (currentStep < formSteps.length - 1) {

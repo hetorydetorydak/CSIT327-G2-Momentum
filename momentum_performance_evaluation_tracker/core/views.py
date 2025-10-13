@@ -5,7 +5,7 @@
 #     return render(request, 'core/home.html')
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from supabase import create_client, Client
 from django.contrib import messages
@@ -106,3 +106,19 @@ def registration(request):
             return render(request, "core/home.html", {"show_register": True})
 
     return redirect("core:home")
+
+def check_email_exists(request):
+    email = request.GET.get("email")
+    exists = False
+    if email:
+        response = supabase.table("Employee").select("email_address").eq("email_address", email).execute()
+        exists = bool(response.data)
+    return JsonResponse({"exists": exists})
+
+def check_username_exists(request):
+    username = request.GET.get("username")
+    exists = False
+    if username:
+        response = supabase.table("UserAccount").select("username").eq("username", username).execute()
+        exists = bool(response.data)
+    return JsonResponse({"exists": exists})

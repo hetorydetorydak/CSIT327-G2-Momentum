@@ -34,7 +34,7 @@
             <p class="modal-subtitle">Sign in to your account</p>
             <form class="form" method="post" action="{% url 'core:login' %}">
                 {% csrf_token %}
-                {% if messages %}
+                {% if messages %} <!-- For Django messages -->
                     <div class="messages">
                         {% for message in messages %}
                             <p style="color: red;">{{ message }}</p>
@@ -68,9 +68,10 @@
             <h2>Create Account</h2>
             <p class="modal-subtitle">Fill in your details to get started</p>
 
+            <div id="register-message" class="messages"></div> <!-- For JavaScript messages -->
             <form id="registerForm" class="form" method="POST" action="{% url 'core:registration' %}">
                 {% csrf_token %}
-                {% if messages %}
+                {% if messages %} <!-- For Django messages -->
                     <div class="messages">
                         {% for message in messages %}
                             <p style="color: red;">{{ message }}</p>

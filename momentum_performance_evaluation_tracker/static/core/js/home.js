@@ -8,6 +8,7 @@ const submitBtnLogin = document.getElementById('btnSubmitLogin');
 const registerForm = document.getElementById("registerForm");
 const showRegisterFromLogin = document.getElementById("showRegisterFromLogin");
 const showLoginFromRegister = document.getElementById("showLoginFromRegister");
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
 
@@ -76,6 +77,15 @@ if (registerForm) {
       });
 
       if (!allFilled) return;
+
+      if (currentStep === 0) {
+        const email = registerForm.querySelector("input[name='email']").value.trim();
+
+        if (!emailPattern.test(email)) {
+          alert("Please enter a valid email address.");
+          return;
+        }
+      }
 
       if (currentStep === 1) {
         const password = registerForm.querySelector('input[name="password"]').value;

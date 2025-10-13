@@ -6,14 +6,12 @@
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.conf import settings
 from supabase import create_client, Client
 from django.contrib import messages
 import os
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://daskjodohjfnrrrpdplu.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc2tqb2RvaGpmbnJycnBkcGx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NTI5NzYsImV4cCI6MjA3NTAyODk3Nn0.um6x9lnIHuc9vZO3u9QUYU6x9QeGQt5sBBhetViliZo")
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
+supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
 def home_page(request):
     return render(request, "core/home.html")

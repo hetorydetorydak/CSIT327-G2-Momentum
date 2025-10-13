@@ -82,6 +82,12 @@ DATABASES = {
     }
 }
 
+# --- SUPABASE CONFIGURATION ---
+# (Centralized here so views.py just imports from settings)
+
+SUPABASE_URL = "https://daskjodohjfnrrrpdplu.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc2tqb2RvaGpmbnJycnBkcGx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NTI5NzYsImV4cCI6MjA3NTAyODk3Nn0.um6x9lnIHuc9vZO3u9QUYU6x9QeGQt5sBBhetViliZo"
+SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhc2tqb2RvaGpmbnJycnBkcGx1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTQ1Mjk3NiwiZXhwIjoyMDc1MDI4OTc2fQ._TQ7dBKpHIeLgM1tCQpwQPbQXGO9ZG0lLc8e4x9o03E"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

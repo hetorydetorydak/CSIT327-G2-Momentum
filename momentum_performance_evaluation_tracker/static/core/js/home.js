@@ -130,9 +130,6 @@ if (registerForm) {
   registerForm.addEventListener("submit", (e) => {
     // e.preventDefault(); disable to allow form submission to server (django)
   console.log("SUBMIT FIRED");
-    alert("Registration successful!");
-    // closeAllModals();
-    // resetRegisterForm();
   });
 }
 
@@ -168,12 +165,6 @@ backdrops.forEach(backdrop => {
     resetRegisterForm();
   });
 });
-
-// Login submit
-// submitBtnLogin.addEventListener('click', () => {
-//   alert("Login successful!");
-//   loginModal.style.display = 'none';
-// });
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.showLogin) {

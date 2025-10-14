@@ -192,9 +192,7 @@ input:focus {
 .step-indicators .step-dot.active {
   background: #2563eb;
 }
-/* ===============================
-   HERO SECTION (Background Image)
-=============================== */
+/* Hero Section */
 .hero {
   position: relative;
   height: 90vh;
@@ -286,9 +284,7 @@ input:focus {
   color: #1e3a8a;
 }
 
-/* ===============================
-   ABOUT SECTION
-=============================== */
+/* About Section */
 .about {
   padding: 5rem 10%;
   background-color: #f9fafb;

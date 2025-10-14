@@ -1,11 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Welcome to the Dashboard</h1>
+
+{%extends "global/base.html" %}
+
+{%load static %}
+
+{% block title %}Dashboard - Momentum{% endblock %}
+
+{% block extra_css %}
+<!-- <link rel="stylesheet" href="{% static 'core/css/home.css' %}"> -->
+{% endblock %}
+
+{% block content %}
+<body style="margin: 0;background-color: rgb(213, 213, 213);" >
+
+    <!-- App Bar Container -->
+    <div id="app-bar" 
+    style="background-color: white; display: flex ; height: 100px; width: 100vw;">
+        <!-- Left Part App Bar  -->
+        <div id="left-ab" style=" flex: 1; display: flex; justify-content: flex-start; align-items: center; padding-left: 30px; box-sizing: border-box; ">
+
+            <!-- Logo -->
+            <img  id="Logo"
+            src="https://t4.ftcdn.net/jpg/03/75/38/73/360_F_375387396_wSJM4Zm0kIRoG7Ej8rmkXot9gN69H4u4.jpg" 
+            alt="Logo" 
+            style="height: 100%; aspect-ratio: 1 / 1; object-fit: contain;margin-left: auto">
+            <!-- Name -->
+            <p id="Name-Logo" style="font-size: 2rem; margin-left: auto ;">Momentum</p>
+            <!-- Profile -->
+            <div id="Profile"
+            style="margin-left: auto;">
+                <a href="#" 
+                title="Profile">
+                    <img 
+                    src="https://cdn-icons-png.flaticon.com/512/9187/9187475.png"
+                    alt="Profile-logo"
+                    style="height: 40px; object-fit: contain;">
+                </a>
+            </div>
+            <!-- Search Bar -->
+            <div id="Search-Bar" 
+            style="display: flex; align-items: center; background-color: #f1f1f1; border-radius: 25px; padding: 5px 10px ; width: 400px; margin-left: 4rem;">
+                <input 
+                    type="text" 
+                    placeholder="Search..." 
+                    style="border: none; background: none; outline: none; flex: 1; font-size: 1rem; padding: 5px;">
+                <button style="background: none; border: none; cursor: pointer;">
+                    <img
+                    src="https://cdn-icons-png.flaticon.com/512/2811/2811806.png"
+                    alt="Search-logo"
+                    style="height: 2rem; object-fit: contain;"
+                    >
+                </button>
+            </div>
+
+             
+        </div>
+
+
+        <!-- Right Part App Bar  -->
+        <div id="right-ab" 
+        style="flex: 1; display: flex; justify-content: flex-end; align-items: center; padding: 30px; box-sizing: border-box;">
+
+            <!-- UserProfile-->
+             <div id="Search-Bar" 
+             style="display: flex; align-items: center; background-color: #f1f1f1; border-radius: 25px; padding: 2.5px 5px ; width: 300px; margin-left: 4rem;">
+
+                <!-- Profile Picture-->
+                <img id="Profile-picture"
+                src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png "
+                style="height: 3.5rem; object-fit: contain;border-radius: 50%;margin-left: 15px;"
+                >
+                <!-- User Full name -->
+                <p id="Full-name"
+                style="font-size: 1.3rem; margin-left: auto;"
+                >Full Name</p>
+                <!-- Drop Down Button -->
+                <button id="Drop-down"
+                style="border-radius: 50%; margin-left: auto;height: 2rem;width: 2.2rem;margin-right: 15px; cursor: pointer; background: none; border: none; display: flex; align-items: center;">
+                    <img id="Dropdown-icon"
+                    src="   https://cdn-icons-png.flaticon.com/512/2722/2722987.png "
+                    alt="Dropdown icon"
+                    style="height: 1.2rem; width: 1.2rem; object-fit: contain;">
+                </button>
+
+
+             </div>
+        </div> 
+    </div>
+    <div id="">
+        Test
+    </div>
 </body>
-</html>
+{% endblock %}
+
+{% block extra_js %}
+
+
+{% endblock %}

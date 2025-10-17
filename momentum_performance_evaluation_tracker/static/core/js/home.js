@@ -193,11 +193,12 @@ if (registerForm) {
 // Open modals
 loginBtn.addEventListener('click', () => {
     showLoginModal();
-    
 });
+
 getStartedBtn.addEventListener('click', () => {
     showRegisterModal();
 });
+
 showRegisterFromLogin.addEventListener('click', (e) => {
     e.preventDefault();
     showRegisterModal();

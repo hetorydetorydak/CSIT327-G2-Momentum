@@ -1,17 +1,9 @@
-# from django.shortcuts import render
-
-# # Create your views here.
-# def home_page(request):
-#     return render(request, 'core/home.html')
-
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.conf import settings
-from supabase import create_client, Client
+from django.http import JsonResponse
 from django.contrib import messages
-import os
+from django.db import transaction
 
-supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
+from .models import Role, Employee, UserAccount
 
 def home_page(request):
     return render(request, "core/home.html")
@@ -21,25 +13,17 @@ def login_page(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        response = (
-            supabase.table("UserAccount")
-            .select("*")
-            .eq("username", username)
-            .execute()
-        )
-
-        print("DEBUG raw response:", response)
-
-        if response.data:
-            user = response.data[0]
-            if user["password"] == password:
-                return redirect("core:dashboard")
-            else:
-                messages.error(request, "Invalid password")
-                return render(request, "core/home.html", {"show_login": True})
-        else:
+        user = UserAccount.objects.filter(username__iexact=username).first()
+        if not user:
             messages.error(request, "User not found")
             return render(request, "core/home.html", {"show_login": True})
+
+        # use models.py's check_password
+        if not user.check_password(password):
+            messages.error(request, "Invalid password")
+            return render(request, "core/home.html", {"show_login": True})
+
+        return redirect("core:dashboard")
 
     return redirect("core:home")
 
@@ -64,42 +48,39 @@ def registration(request):
             messages.error(request, "Passwords do not match!")
             return render(request, "core/home.html", {"show_register": True})
 
-        email_check = supabase.table("Employee").select("email_address").eq("email_address", email_address).execute()
-        if email_check.data:
+        if Employee.objects.filter(email_address__iexact=email_address).exists():
             messages.error(request, "Email address already in use.")
             return render(request, "core/home.html", {"show_register": True})
-        
-        username_check = supabase.table("UserAccount").select("username").eq("username", username).execute()
-        if username_check.data:
+
+        if UserAccount.objects.filter(username__iexact=username).exists():
             messages.error(request, "Username already exists.")
             return render(request, "core/home.html", {"show_register": True})
 
-        try: 
-            employee_response = supabase.table("Employee").insert({
-                "first_name": first_name,
-                "last_name": last_name,
-                "department": department,
-                "position": position,
-                "hire_date": hire_date,
-                "email_address": email_address
-            }).execute()
+        # get role (use primary key 303 for Employee)
+        role = Role.objects.filter(pk=303).first()
+        if not role:
+            role, _ = Role.objects.get_or_create(role_id=303, defaults={"role_name": "Employee", "description": "Standard employee"})
 
-            if not employee_response.data:
-                messages.error(request, "Error creating employee record.")
-                return render(request, "core/home.html", {"show_register": True})
-
-            employee_id = employee_response.data[0]["employee_id"]
-
-            supabase.table("UserAccount").insert({
-                "employee_id": employee_id,
-                "username": username,
-                "password": password,
-                "role_id": 303
-            }).execute()
+        try:
+            with transaction.atomic():
+                employee = Employee.objects.create(
+                    first_name=first_name,
+                    last_name=last_name,
+                    department=department,
+                    position=position,
+                    hire_date=hire_date or None,
+                    email_address=email_address
+                )
+                user = UserAccount(
+                    employee=employee,
+                    username=username,
+                    role=role
+                )
+                user.set_password(password)
+                user.save()
 
             messages.success(request, "Account created successfully! Please login.")
             return render(request, "core/home.html", {"show_login": True})
-        
         except Exception as e:
             print("Error during registration:", e)
             messages.error(request, "An error occurred during registration. Please try again.")
@@ -107,18 +88,18 @@ def registration(request):
 
     return redirect("core:home")
 
+
 def check_email_exists(request):
     email = request.GET.get("email")
     exists = False
     if email:
-        response = supabase.table("Employee").select("email_address").eq("email_address", email).execute()
-        exists = bool(response.data)
+        exists = Employee.objects.filter(email_address__iexact=email).exists()
     return JsonResponse({"exists": exists})
+
 
 def check_username_exists(request):
     username = request.GET.get("username")
     exists = False
     if username:
-        response = supabase.table("UserAccount").select("username").eq("username", username).execute()
-        exists = bool(response.data)
+        exists = UserAccount.objects.filter(username__iexact=username).exists()
     return JsonResponse({"exists": exists})

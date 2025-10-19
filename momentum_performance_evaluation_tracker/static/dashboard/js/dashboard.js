@@ -3,11 +3,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownMenu = document.getElementById('profile-dropdown-menu');
     const dropdownIcon = document.getElementById('dropdown-icon');
     const logoutLink = document.querySelector('.logout-link');
-    
-    if (logoutLink) {
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const confirmLogout = document.getElementById('confirmLogout');
+
+    // Handle Logout Confirmation
+    if (logoutLink && logoutModal && cancelLogout && confirmLogout) {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = '/logout/';
+            console.log("Logout link clicked");
+            logoutModal.classList.remove('hidden'); // Show modal
+        });
+
+        cancelLogout.addEventListener('click', () => {
+            logoutModal.classList.add('hidden'); // Hide modal
+        });
+
+        // Confirm logout
+        confirmLogout.addEventListener('click', () => {
+            window.location.href = '/logout/'; // Redirect to Django logout URL
         });
     }
 

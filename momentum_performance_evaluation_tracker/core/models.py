@@ -25,6 +25,8 @@ class UserAccount(models.Model):
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
     role = models.ForeignKey(Role, on_delete=models.PROTECT)
+    last_login = models.DateTimeField(null=True, blank=True, default=None)
+    is_first_login = models.BooleanField(default=True) # Track first login
 
     def __str__(self):
         return self.username
@@ -34,3 +36,15 @@ class UserAccount(models.Model):
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
+
+    # make models work with Django's auth
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_anonymous(self):
+        return False
+    
+    def get_username(self):
+        return self.username

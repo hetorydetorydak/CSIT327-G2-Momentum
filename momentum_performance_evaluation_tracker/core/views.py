@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import login
+from django.contrib.auth import logout as auth_logout
 from django.db import transaction
 
 from .models import Role, Employee, UserAccount
@@ -10,6 +11,10 @@ def home_page(request):
     return render(request, "core/home.html")
 
 def login_page(request):
+    storage = messages.get_messages(request)
+    for message in storage:
+        pass
+
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -23,6 +28,9 @@ def login_page(request):
         if not user.check_password(password):
             messages.error(request, "Invalid password")
             return render(request, "core/home.html", {"show_login": True})
+
+        login(request, user, backend='core.backends.CustomUserBackend')
+        messages.success(request, f"Welcome back, {user.employee.first_name}!")
 
         return redirect("dashboard:home")
 
@@ -85,7 +93,14 @@ def registration(request):
     return redirect("core:home")
 
 def logout_view(request):
-    logout(request)  # This clears the session
+    request.session.flush() # Clear all session data
+
+    storage = messages.get_messages(request) # Clear existing messages
+    for message in storage:
+        pass
+
+    # auth_logout is Django's built-in logout function to clear the session
+    auth_logout(request)  # This clears the session
     return redirect("core:home")
 
 

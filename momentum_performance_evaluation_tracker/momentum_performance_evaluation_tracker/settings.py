@@ -88,6 +88,15 @@ DATABASES = {
     )
 }
 
+AUTHENTICATION_BACKENDS = [
+    'core.backends.CustomUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# 8-hour work day sessions
+SESSION_COOKIE_AGE = 28800  # 8 hours in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 

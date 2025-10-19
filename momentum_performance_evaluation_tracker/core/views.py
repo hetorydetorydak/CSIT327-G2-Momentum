@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.db import transaction
 
 from .models import Role, Employee, UserAccount
@@ -86,6 +87,10 @@ def registration(request):
             messages.error(request, "An error occurred during registration. Please try again.")
             return render(request, "core/home.html", {"show_register": True})
 
+    return redirect("core:home")
+
+def logout_view(request):
+    logout(request)  # This clears the session
     return redirect("core:home")
 
 

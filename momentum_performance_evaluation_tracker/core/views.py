@@ -24,14 +24,9 @@ def login_page(request):
             messages.error(request, "Invalid password")
             return render(request, "core/home.html", {"show_login": True})
 
-        return redirect("core:dashboard")
+        return redirect("dashboard:home")
 
     return redirect("core:home")
-
-
-def dashboard(request):
-    return render(request, "dashboard/dashboard.html")
-
 
 def registration(request):
     if request.method == "POST":

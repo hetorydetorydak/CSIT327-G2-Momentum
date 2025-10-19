@@ -44,11 +44,19 @@ source .env/bin/activate
 .env\Scripts\activate
 ```
 
+- Create a ```supabase.env``` file in Project Root(same level as ```manage.py```)
+```bash
+#supabase.env
+
+# Supabase PostgreSQL (Session Pooler) 
+DATABASE_URL="postgresql://postgres.gjxvixipmhrkgbxrmcul:1u11WHlQgfqax5v8@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+```
+
 ### 3. Install dependencies
 
 ```bash
 pip install django
-pip install supabase
+pip install psycopg2 dj-database-url python-dotenv 
 ```
 
 ### 4. Start the development server
@@ -60,7 +68,7 @@ python3 manage.py runserver
 # On Windows
 python manage.py runserver
  # or
-python
+py manage.py runserver
 ```
 
 ## 👥 Team members

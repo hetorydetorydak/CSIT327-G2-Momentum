@@ -2,6 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileBtn = document.getElementById('profile-toggle-btn');
     const dropdownMenu = document.getElementById('profile-dropdown-menu');
     const dropdownIcon = document.getElementById('dropdown-icon');
+    const logoutLink = document.querySelector('.logout-link');
+    
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/logout/';
+        });
+    }
 
     if (profileBtn && dropdownMenu && dropdownIcon) {
         // Function to toggle the dropdown menu visibility

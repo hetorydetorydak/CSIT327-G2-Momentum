@@ -123,6 +123,16 @@
             
         </div>
     </main>
+    <div id="logoutModal" class="logout-modal hidden">
+        <div class="logout-modal-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="modal-buttons">
+                <button id="cancelLogout" class="btn-cancel">Cancel</button>
+                <a href="{% url 'core:logout' %}" id="confirmLogout" class="btn-confirm">Logout</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}

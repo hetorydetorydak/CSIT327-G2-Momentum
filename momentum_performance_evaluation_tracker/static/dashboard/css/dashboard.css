@@ -1,0 +1,320 @@
+/* ---------------------------------- */
+/* 1. Dashboard Layout & Base Padding */
+/* ---------------------------------- */
+
+/* Apply necessary top padding to main content to clear the fixed header */
+.dashboard-main {
+    padding-top: 5rem; /* Ensures content is below the 60px fixed header + some margin */
+    padding-bottom: 3rem;
+    min-height: 100vh;
+    background-color: #f4f7fa; /* Light background for the content area */
+}
+
+/* Wrapper to center and contain the two-column layout */
+.dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: grid;
+    /* Define the two-column structure: 1fr sidebar, 3fr main content */
+    grid-template-columns: 1fr 3fr; 
+    gap: 2rem;
+}
+
+/* ---------------------------------- */
+/* 2. Header & Profile Dropdown Styling */
+/* ---------------------------------- */
+
+/* Profile Toggle Button in the Navbar */
+.profile-area {
+    position: relative;
+    z-index: 101; /* Above the header shadow */
+}
+
+.profile-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background-color: #f7f7f7;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    line-height: 1.2;
+}
+
+.profile-toggle:hover {
+    background-color: #e5e7eb;
+}
+
+.profile-avatar {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    color: #111827; /* Override nav-button color for the name/role text */
+}
+
+.profile-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.profile-role {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #6b7280;
+}
+
+.dropdown-icon {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s;
+}
+
+.dropdown-icon.open {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* Position below the button */
+    right: 0;
+    margin-top: 0.5rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    min-width: 200px;
+    display: none; /* Hidden by default, controlled by JS */
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.dropdown-menu.visible {
+    display: flex;
+}
+
+.dropdown-item {
+    text-decoration: none;
+    color: #374151;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+    color: #2563eb;
+    text-decoration: none; /* Prevent underline inherited from global nav-link */
+}
+
+.logout-link {
+    border-top: 1px solid #f3f4f6;
+    color: #ef4444;
+}
+
+.logout-link:hover {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* ---------------------------------- */
+/* 3. Sidebar Styling (Left-Content)  */
+/* ---------------------------------- */
+
+.sidebar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.profile-widget,
+.calendar-widget {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.widget-profile-img {
+    height: 64px;
+    width: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+}
+
+.widget-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.widget-username {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+.calendar-widget .widget-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+.calendar-placeholder {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.calendar-placeholder p {
+    grid-column: 1 / -1;
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-day {
+    padding: 0.4rem 0;
+    border-radius: 4px;
+    background-color: #f9fafb;
+    color: #374151;
+    cursor: pointer;
+}
+.calendar-day.active {
+    background-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+}
+.calendar-day.event {
+    border: 2px solid #f59e0b;
+}
+
+.calendar-link {
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+/* ---------------------------------- */
+/* 4. Main Content Area & Grid */
+/* ---------------------------------- */
+
+.content-header-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.content-header-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.wide-card {
+    grid-column: span 2; /* Make this card span two columns on large screens */
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.card-metric {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.card-metric.success { color: #10b981; } 
+.card-metric.warning { color: #f59e0b; } 
+
+.card-detail {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+/* Action List */
+.action-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-action {
+    width: 100%;
+    background: #eff6ff; /* Light blue background */
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-action:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+
+/* ---------------------------------- */
+/* 5. Responsiveness */
+/* ---------------------------------- */
+
+@media (max-width: 900px) {
+    .dashboard-wrapper {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+    .wide-card {
+        grid-column: 1 / -1; /* Ensure wide card stays full width */
+    }
+    .profile-info-text {
+        display: none; /* Hide name/role text in the header for mobile space */
+    }
+    .profile-toggle {
+        padding: 0.5rem;
+    }
+    .dropdown-menu {
+        left: auto;
+        right: 0;
+    }
+}

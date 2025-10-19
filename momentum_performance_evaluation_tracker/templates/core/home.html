@@ -29,42 +29,43 @@
             </div>
         </nav>
     </header>
-
-    <section id = "hero-section" class="hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-        <h1 class="hero-title">Drive Growth and Collaboration with <span>Momentum</span></h1>
-        <p class="hero-subtitle">
-        Empower your team with powerful performance tracking, real-time insights, and seamless collaboration — all in one platform.
-        </p>
-        <div class="hero-buttons">
-        <button id="heroGetStarted" class="btn-primary">Get Started</button>
-        <button id="heroLearnMore" class="btn-secondary">Learn More</button>
+    <main>
+        <section id = "hero-section" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Drive Growth and Collaboration with <span>Momentum</span></h1>
+            <p class="hero-subtitle">
+            Empower your team with powerful performance tracking, real-time insights, and seamless collaboration — all in one platform.
+            </p>
+            <div class="hero-buttons">
+            <button id="heroGetStarted" class="btn-primary">Get Started</button>
+            <button id="heroLearnMore" class="btn-secondary">Learn More</button>
+            </div>
         </div>
-    </div>
-    <img class="hero-bg" src="{% static 'core/img/new-york-city.jpg' %}" alt="City">
-    </section>
+        <img class="hero-bg" src="{% static 'core/img/new-york-city.jpg' %}" alt="City">
+        </section>
 
+
+        <section id = "about-section" class="about">
+        <div class="about-container">
+            <div class="about-text">
+            <h2>About Momentum</h2>
+            <p>
+                Momentum is a performance evaluation and productivity platform designed to help organizations make data-driven decisions.
+                It empowers managers and employees through transparent performance tracking, continuous feedback, and actionable analytics.
+            </p>
+            <p>
+                We believe that growth comes from clarity. Momentum provides teams with the tools they need to align goals,
+                measure success, and create a culture of continuous improvement.
+            </p>
+            </div>
+            <div class="about-image">
+            <img src="{% static 'core\img\man-jump-through-gap.jpg' %}" alt="Leaping man image">
+            </div>
+        </div>
+        </section>
+    </main>
     
-    <section id = "about-section" class="about">
-    <div class="about-container">
-        <div class="about-text">
-        <h2>About Momentum</h2>
-        <p>
-            Momentum is a performance evaluation and productivity platform designed to help organizations make data-driven decisions.
-            It empowers managers and employees through transparent performance tracking, continuous feedback, and actionable analytics.
-        </p>
-        <p>
-            We believe that growth comes from clarity. Momentum provides teams with the tools they need to align goals,
-            measure success, and create a culture of continuous improvement.
-        </p>
-        </div>
-        <div class="about-image">
-        <img src="{% static 'core\img\man-jump-through-gap.jpg' %}" alt="Leaping man image">
-        </div>
-    </div>
-    </section>
-
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-backdrop"></div>

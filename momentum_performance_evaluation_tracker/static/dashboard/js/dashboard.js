@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Confirm logout
         confirmLogout.addEventListener('click', () => {
-            window.location.href = '/logout/'; // Redirect to Django logout URL
+            window.location.href = '{% url "core:logout" %}'; //use Django template tag to get logout URL
         });
     }
 

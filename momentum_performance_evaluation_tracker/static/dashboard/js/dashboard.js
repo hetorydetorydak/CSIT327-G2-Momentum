@@ -50,3 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Profile dropdown elements not found. Check dashboard.html IDs.");
     }
 });
+
+// Auto-show password reset modal when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordResetModal = document.getElementById('passwordResetModal');
+    if (passwordResetModal) {
+        passwordResetModal.style.display = 'flex';
+    }
+});

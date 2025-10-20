@@ -5,6 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth import logout as auth_logout
 from django.db import transaction
 
+from .forms import SupervisorPasswordResetForm
 from .models import Role, Employee, UserAccount
 
 def home_page(request):
@@ -30,7 +31,9 @@ def login_page(request):
             return render(request, "core/home.html", {"show_login": True})
 
         login(request, user, backend='core.backends.CustomUserBackend')
-        messages.success(request, f"Welcome back, {user.employee.first_name}!")
+        
+        if not (user.role.role_id == 302 and user.is_first_login):
+            messages.success(request, f"Welcome back, {user.employee.first_name}!")
 
         return redirect("dashboard:home")
 
@@ -118,3 +121,29 @@ def check_username_exists(request):
     if username:
         exists = UserAccount.objects.filter(username__iexact=username).exists()
     return JsonResponse({"exists": exists})
+
+
+def handle_password_reset(request):
+    if not request.user.is_authenticated:
+        return redirect('core:login')
+    
+    if request.method == 'POST':
+        form = SupervisorPasswordResetForm(request.POST, user=request.user)
+        if form.is_valid():
+            # Update password
+            new_password = form.cleaned_data['new_password']
+            request.user.set_password(new_password)
+            request.user.is_first_login = False  # Mark as not first login
+            request.user.save()
+            
+            # Re-login the user with new password
+            login(request, request.user, backend='core.backends.CustomUserBackend')
+            
+            messages.success(request, "Password updated successfully!")
+            return redirect('dashboard:home')
+        else:
+            # If form is invalid, return to dashboard with errors
+            messages.error(request, "Please correct the errors below.")
+            # We'll handle displaying the form errors in the template
+
+    return redirect('dashboard:home')

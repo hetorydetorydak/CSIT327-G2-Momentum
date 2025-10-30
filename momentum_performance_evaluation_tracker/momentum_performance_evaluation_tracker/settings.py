@@ -24,10 +24,10 @@ load_dotenv(str(BASE_DIR / 'supabase.env'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3t^i8vcfe)^b680bt5uz+p--$1pujo6ge+z3on+8hr6l!7v(26'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True' # Set to 'True' for development(local), 'False' for production; set in supabase.env file
 
 ALLOWED_HOSTS = [ 'localhost', '.onrender.com', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']

@@ -39,3 +39,198 @@
 .get-started:hover {
   background: #1d4ed8;
 }
+
+/* Modal */
+.modal { 
+  position: fixed; 
+  inset: 0; 
+  display: none; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 200;
+  overflow-y: auto;
+}
+
+.modal-backdrop { 
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0,0,0,0.5); 
+}
+
+.modal-content { 
+  position: relative; 
+  background: #fff; 
+  border-radius: 8px; 
+  padding: 2rem; 
+  max-width: 400px; 
+  width: 90%; 
+  z-index: 10; 
+}
+
+.modal-close { 
+  position: absolute; 
+  top: 1rem; 
+  right: 1rem; 
+  background: none; 
+  border: none; 
+  font-size: 1.5rem; 
+  cursor: pointer; 
+  color: #6b7280; 
+}
+
+.modal-subtitle { 
+  color: #6b7280; 
+  margin-bottom: 1rem; 
+}
+
+/* Forms */
+.form, 
+.form-step.active { 
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; 
+  margin-top: 1rem;
+  overflow-y: auto;
+}
+
+input:not([type="checkbox"]) {
+  height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+input:focus { 
+  outline: none; 
+  border-color: #2563eb; 
+  box-shadow: 0 0 0 2px #2563eb33;
+}
+
+.form-footer { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  font-size: 0.85rem; 
+}
+
+.form-footer .checkbox-container {
+  display: flex; 
+  align-items: center;  
+}
+
+.form-footer label {
+  display: flex; 
+  align-items: center; 
+  gap: 0.25rem; 
+  cursor: pointer; 
+}
+
+.form-footer input[type="checkbox"] {
+  margin: 0; 
+}
+
+.forgot { 
+  color: #2563eb; 
+  text-decoration: none; 
+}
+
+/* Buttons */
+.btn-submit { 
+  background: #2563eb; 
+  color: #fff; 
+  padding: 0.75rem; 
+  border: none; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  transition: background 0.2s ease;
+}
+
+.btn-submit:hover { 
+  background: #1d4ed8; 
+}
+
+.next-btn, 
+.prev-btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* Back button */
+.prev-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+.prev-btn:hover {
+  background: #d1d5db;
+}
+
+/* Next button */
+.next-btn {
+  background: #2563eb;
+  color: #fff;
+}
+.next-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Auth links */
+.signup-text, 
+.signin-text { 
+  text-align: center; 
+  margin-top: 1rem; 
+  font-size: 0.85rem; 
+}
+
+.signup-text a, 
+.signin-text a { 
+  color: #2563eb; 
+  text-decoration: none; 
+}
+
+/* Multi-step form */
+.form-step { 
+  display: none; 
+}
+
+.form-step .step-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+
+/* Confirmation */
+.confirmation-box {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 1rem;
+}
+
+/* Step indicators */
+.step-indicators {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.step-indicators .step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: background 0.3s ease;
+}
+
+.step-indicators .step-dot.active {
+  background: #2563eb;
+}

@@ -89,8 +89,12 @@
             
             <!-- Main Dashboard Content -->
             <section class="main-content-area">
-                <h1 class="content-header-title">Dashboard Overview</h1>
-                <p class="content-header-subtitle">Key metrics and personalized action items.</p>
+                <h1 class="content-header-title">
+                    {{ user_account.employee.first_name }} {{ user_account.employee.last_name }}
+                </h1>
+                <p class="content-header-subtitle">
+                    {{ user_account.employee.position }}, {{ user_account.employee.department }}
+                </p>
                 
                 <!-- Dashboard Metrics Grid -->
                 <div class="dashboard-grid">

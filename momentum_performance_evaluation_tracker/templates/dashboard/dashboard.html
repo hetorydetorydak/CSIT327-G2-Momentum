@@ -9,17 +9,17 @@
 {% endblock %}
 
 {% block content %}
-    <!-- 1. FIXED HEADER (Replicating the structure and classes from home.html) -->
+    <!-- Main Navigation Header -->
     <header class="header">
         <nav class="nav">
             <div class="nav-container">
                 
-                <!-- Logo (Left Part) -->
+                <!-- Logo and Primary Navigation -->
                 <div class="logo-and-links">
                     <div class="logo">
-                        <a  class="logo-text">Momentum</a>
+                        <a class="logo-text">Momentum</a>
                     </div>
-                    <!-- Primary Nav Links -->
+                    <!-- Primary Navigation Links -->
                     <div class="nav-links-left">
                         <a href="#" class="nav-link current-page">Overview</a>
                         <a href="#" class="nav-link">Performance</a>
@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 
-                <!-- Right Part: Profile Dropdown Area (Replacing Login/Get Started buttons) -->
+                <!-- User Profile Section -->
                 <div class="profile-area">
                     <button id="profile-toggle-btn" class="profile-toggle nav-button">
                         <img class="profile-avatar" 
@@ -37,15 +37,15 @@
                             onerror="this.onerror=null; this.src='https://placehold.co/32x32/d1d5db/4b5563?text=UN'">
                         
                         <div class="profile-info-text">
-                            <!-- fetch employee information -->
+                            <!-- Display employee information from user account -->
                             <span class="profile-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</span>
                             <span class="profile-role">{{ user_account.employee.position }}, {{ user_account.employee.department }}</span>
                         </div>
                         
-                        <img id="dropdown-icon" class="dropdown-icon" src="https://cdn-icons-png.flaticon.com/512/2722/2722987.png" alt="Dropdown">
+                        <img id="dropdown-icon" class="dropdown-icon" src="https://cdn-icons-png.flaticon.com/512/2722/2722987.png" alt="Dropdown arrow">
                     </button>
 
-                    <!-- Dropdown Menu -->
+                    <!-- Profile Dropdown Menu -->
                     <div id="profile-dropdown-menu" class="dropdown-menu">
                         <a href="#" class="dropdown-item">Settings & privacy</a>
                         <a href="#" class="dropdown-item">Help and support</a>
@@ -57,16 +57,15 @@
         </nav>
     </header>
 
-    <!-- 2. MAIN CONTENT AREA (Implementing the requested two-column layout) -->
+    <!-- Dashboard Main Content Area -->
     <main class="dashboard-main">
         <div class="dashboard-wrapper">
             
-            <!-- Left Sidebar -->
+            <!-- Left Sidebar with User Profile and Calendar -->
             <aside class="sidebar-left">
                 <div class="profile-widget">
-                    <!-- This is a duplicate for visibility inside the main content -->
                     <img class="widget-profile-img" src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png" alt="Profile Picture">
-                    <!-- fetch employee information -->
+                    <!-- Display employee information -->
                     <p class="widget-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</p>
                     <p class="widget-username">@{{ user_account.username }}</p>
                 </div>
@@ -75,7 +74,7 @@
                     <h3 class="widget-title">Team Calendar</h3>
                     <div class="calendar-placeholder">
                         <p>Oct 2025</p>
-                        <!-- Simple visual for the calendar -->
+                        <!-- Calendar day indicators -->
                         <div class="calendar-day active">21</div>
                         <div class="calendar-day">22</div>
                         <div class="calendar-day">23</div>
@@ -88,29 +87,29 @@
                 </div>
             </aside>
             
-            <!-- Main Content Area -->
+            <!-- Main Dashboard Content -->
             <section class="main-content-area">
                 <h1 class="content-header-title">Dashboard Overview</h1>
                 <p class="content-header-subtitle">Key metrics and personalized action items.</p>
                 
-                <!-- Dashboard Grid of Cards -->
+                <!-- Dashboard Metrics Grid -->
                 <div class="dashboard-grid">
                     
-                    <!-- KPI Card 1 -->
+                    <!-- Compliance KPI Card -->
                     <div class="dashboard-card kpi-card">
                         <h3 class="card-title">Compliance</h3>
                         <p class="card-metric success">85%</p>
-                        <p class="card-detail">↑ +3% vs last month .</p>
+                        <p class="card-detail">↑ +3% vs last month</p>
                     </div>
 
-                    <!-- KPI Card 2 -->
+                    <!-- Attendance KPI Card -->
                     <div class="dashboard-card kpi-card">
                         <h3 class="card-title">Attendance</h3>
                         <p class="card-metric warning">2</p>
                         <p class="card-detail">Perfect attendance consistent and reliable!</p>
                     </div>
                     
-                    <!-- Action List Card -->
+                    <!-- Task List Card -->
                     <div class="dashboard-card wide-card">
                         <h3 class="card-title">Task List</h3>
                         <ul class="action-list">
@@ -127,7 +126,7 @@
     </main>
 
     
-    <!-- 3. PASSWORD RESET MODAL - After main content -->
+    <!-- Password Reset Modal (shown on first-time login) -->
     {% if show_password_reset %}
     <div id="passwordResetModal" class="modal" style="display: flex;">
         <div class="modal-backdrop"></div>
@@ -135,6 +134,7 @@
             <h2>Password Reset Required</h2>
             <p class="modal-subtitle">First-time login detected. Please set a new password for your account.</p>
 
+            <!-- Display any messages/errors -->
             {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -143,6 +143,7 @@
             </div>
             {% endif %}
 
+            <!-- Password Reset Form -->
             <form method="post" action="{% url 'core:handle_password_reset' %}" class="form">
                 {% csrf_token %}
                 
@@ -182,6 +183,7 @@
     </div>
     {% endif %}
 
+    <!-- Logout Confirmation Modal -->
     <div id="logoutModal" class="logout-modal hidden">
         <div class="logout-modal-content">
             <h3>Confirm Logout</h3>

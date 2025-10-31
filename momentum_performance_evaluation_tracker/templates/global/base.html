@@ -18,10 +18,8 @@
   {% block extra_css %}{% endblock %}
 </head>
 <body>
+  <!-- Main Content Area -->
   {% block content %}{% endblock %}
-
-  <!-- Global JS -->
-  <script src="{% static 'global/js/base.js' %}"></script>
 
   <!-- Page-specific JS -->
   {% block extra_js %}{% endblock %}

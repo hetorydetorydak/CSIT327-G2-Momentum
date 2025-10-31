@@ -1,1 +1,0 @@
-add app's javaScript files in this directory('/js')

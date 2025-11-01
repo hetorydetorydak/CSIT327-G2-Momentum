@@ -1,0 +1,80 @@
+<section class="main-content-area">
+  <h1 class="content-header-title">
+      {{ user_account.employee.first_name }} {{ user_account.employee.last_name }}
+  </h1>
+  <p class="content-header-subtitle">
+      {{ user_account.employee.position }}, {{ user_account.employee.department }}
+  </p>
+  
+  <!-- Dashboard Metrics Grid -->
+  <div class="dashboard-grid">
+      
+      <!-- Compliance KPI Card -->
+      <div class="dashboard-card kpi-card">
+          <!-- Card Logo -->
+          <div style="display: flex;justify-content: space-between;">
+              <h3 class="card-title">Compliance </h3>
+              <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
+              style="height: 1.5em;
+                  width: auto;
+                  margin-left: 8px;
+                  vertical-align: middle;">
+          </div>
+          
+          <p class="card-metric success">85%</p>
+          <!-- Progress Bar -->
+          <div style="width: 100%; max-width: 300px; height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+              <div style="width: 85%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;"></div>
+          </div>
+
+          <p class="card-detail">↑ +3% vs last month</p>
+      </div>
+
+      <!-- Attendance KPI Card -->
+      <div class="dashboard-card kpi-card">
+          <!-- Card Logo -->
+          <div style="display: flex;justify-content: space-between;">
+              <h3 class="card-title">Attendance </h3>
+              <img src="https://cdn-icons-png.flaticon.com/512/1286/1286879.png"
+              style="height: 1.5em;
+                  width: auto;
+                  margin-left: 8px;
+                  vertical-align: middle;">
+          </div>
+          <p class="card-metric success">89%</p>
+          <!-- Progress Bar -->
+          <div style="width: 100%; max-width: 300px; height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+              <div style="width: 89%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;"></div>
+          </div>
+          <p class="card-detail">Perfect attendance consistent and reliable!</p>
+      </div>
+      
+      <!-- Backlogs KPI Card -->
+      <div class="dashboard-card kpi-card">
+          <!-- Card Logo -->
+            <div style="display: flex;justify-content: space-between;">
+              <h3 class="card-title">Backlogs </h3>
+              <img src="https://cdn-icons-png.flaticon.com/512/10308/10308693.png "
+              style="height: 1.5em;
+                  width: auto;
+                  margin-left: 8px;
+                  vertical-align: middle;">
+          </div>
+          <p class="card-metric success">1</p>
+          <p class="card-detail">Outstanding items</p>
+          <p class="card-detail">Manageable workload</p>
+      </div>
+      
+      
+      <!-- Task List Card -->
+      <div class="dashboard-card wide-card">
+          <h3 class="card-title">Task List</h3>
+          <ul class="action-list">
+              <li><button class="btn-action">Submit Weekly Report</button></li>
+              <li><button class="btn-action">Approve PTO Request (John)</button></li>
+              <li><button class="btn-action">Review Q4 Budget</button></li>
+          </ul>
+      </div>
+      
+  </div>
+</section>

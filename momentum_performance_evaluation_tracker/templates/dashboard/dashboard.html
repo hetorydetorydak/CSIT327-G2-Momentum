@@ -54,7 +54,10 @@
                 </div>
                 
             </div>
-                        <div class="sub-nav-container">
+
+            <!-- Sub Navigation Bar  for Managers Only-->
+            {% if user_is_manager %}
+            <div class="sub-nav-container">
                 <!-- Primary Navigation Links -->
                 <div class="search-container">
                     
@@ -78,98 +81,37 @@
                     <option value="dept3">Status 3</option>
                 </select>
 
-
                 <div class="to-right">
-                        <button class="add-employee-btn">
-                            <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
-                            Add Employee
-                        </button>
+                    <button class="add-employee-btn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
+                        Add Employee
+                    </button>
 
-                        <button class="add-employee-btn btn-white">
-                            <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
-                            Export Report
-                        </button>
+                    <button class="add-employee-btn btn-white">
+                        <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
+                        Export Report
+                    </button>
 
-                        <button class="employee-count-btn">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2529/2529521.png" alt="Employees" class="employee-icon">
-                            <span class="count-box">3</span>
-                        </button>
+                    <button class="employee-count-btn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2529/2529521.png" alt="Employees" class="employee-icon">
+                        <span class="count-box">3</span>
+                    </button>
 
-                        <button class="employee-count-btn">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png " alt="Employees" class="employee-icon">
-                        </button>
-                    </div>
+                    <button class="employee-count-btn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png " alt="Employees" class="employee-icon">
+                    </button>
+                </div>
             </div>
+            {% endif %}
         </nav>
     </header>
 
     <!-- Dashboard Main Content Area -->
-    <main class="dashboard-main">
-        <div class="dashboard-wrapper">
-            
-            <!-- Left Sidebar with User Profile and Calendar -->
-            <aside class="sidebar-left">
-                <div class="profile-widget">
-                    <img class="widget-profile-img" src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png" alt="Profile Picture">
-                    <!-- Display employee information -->
-                    <p class="widget-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</p>
-                    <p class="widget-username">@{{ user_account.username }}</p>
-                </div>
-                
-                <div class="calendar-widget">
-                    <h3 class="widget-title">Team Calendar</h3>
-                    <div class="calendar-placeholder">
-                        <p>Oct 2025</p>
-                        <!-- Calendar day indicators -->
-                        <div class="calendar-day active">21</div>
-                        <div class="calendar-day">22</div>
-                        <div class="calendar-day">23</div>
-                        <div class="calendar-day">24</div>
-                        <div class="calendar-day event">25</div>
-                        <div class="calendar-day">26</div>
-                        <div class="calendar-day">27</div>
-                    </div>
-                    <a href="#" class="calendar-link">View Full Calendar</a>
-                </div>
-            </aside>
-            
-            <!-- Main Dashboard Content -->
-            <section class="main-content-area">
-                <h1 class="content-header-title">Dashboard Overview</h1>
-                <p class="content-header-subtitle">Key metrics and personalized action items.</p>
-                
-                <!-- Dashboard Metrics Grid -->
-                <div class="dashboard-grid">
-                    
-                    <!-- Compliance KPI Card -->
-                    <div class="dashboard-card kpi-card">
-                        <h3 class="card-title">Compliance</h3>
-                        <p class="card-metric success">85%</p>
-                        <p class="card-detail">↑ +3% vs last month</p>
-                    </div>
-
-                    <!-- Attendance KPI Card -->
-                    <div class="dashboard-card kpi-card">
-                        <h3 class="card-title">Attendance</h3>
-                        <p class="card-metric warning">2</p>
-                        <p class="card-detail">Perfect attendance consistent and reliable!</p>
-                    </div>
-                    
-                    <!-- Task List Card -->
-                    <div class="dashboard-card wide-card">
-                        <h3 class="card-title">Task List</h3>
-                        <ul class="action-list">
-                            <li><button class="btn-action">Submit Weekly Report</button></li>
-                            <li><button class="btn-action">Approve PTO Request (John)</button></li>
-                            <li><button class="btn-action">Review Q4 Budget</button></li>
-                        </ul>
-                    </div>
-                    
-                </div>
-            </section>
-            
-        </div>
-    </main>
+    {% if user_is_manager %}
+        {% include "dashboard/manager_dashboard.html" %}
+    {% else %}
+        {% include "dashboard/employee_dashboard.html" %}
+    {% endif %}
 
     
     <!-- Password Reset Modal (shown on first-time login) -->

@@ -10,11 +10,16 @@ def dashboard_home(request):
     if not request.user.is_authenticated:
         return redirect('core:login')
 
+    user_is_manager = False
     show_password_reset = False
     password_reset_form = None
 
+    # Check if user is a manager
+    if hasattr(request.user, 'role') and request.user.role.role_id == 302:
+        user_is_manager = True
+
     # Check if supervisor needs password reset
-    if hasattr(request.user, 'role') and request.user.role.role_id == 302 and request.user.is_first_login:
+    if hasattr(request.user, 'role') and user_is_manager and request.user.is_first_login:
         show_password_reset = True
         password_reset_form = SupervisorPasswordResetForm(user=request.user)
     
@@ -23,5 +28,6 @@ def dashboard_home(request):
         'employee': request.user.employee,
         'show_password_reset': show_password_reset,
         'password_reset_form': password_reset_form,
+        'user_is_manager': user_is_manager,
     }
     return render(request, "dashboard/dashboard.html", context)

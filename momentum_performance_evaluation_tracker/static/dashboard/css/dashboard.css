@@ -30,6 +30,25 @@
   margin-bottom: 2rem;
 }
 
+.no-overflow-img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px; /* optional */
+}
+
+.sub-kpi-wrapper {
+  display: grid;
+  margin: 0 auto;
+  padding: 1rem;
+  max-width: 1200px;
+  grid-template-columns: repeat(2, 1fr); /* 2 equal columns */
+  gap: 1rem; /* space between columns */
+  align-items: start;
+}
+
+
 /* Header & Profile Dropdown Styling */
 .nav-links-right:hover {
     text-decoration: none !important;
@@ -191,6 +210,8 @@
     vertical-align: middle;
 }
 
+
+
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -331,6 +352,7 @@
 
 .card-metric.success { color: #10b981; } 
 .card-metric.warning { color: #f59e0b; } 
+.card-metric-kpi { color: #000 !important; }
 
 .card-detail {
     font-size: 0.9rem;
@@ -376,12 +398,28 @@
 /* Search Bar */
 .search-container {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   width: 400px;
   background: #f5f5f5;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
+  height: 36px; /* ✅ smaller total height */
+}
+
+.search-container button {
+  background: none;
+  border: none;
+  padding: 0 8px; /* ✅ small side padding */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-container .search-icon {
+  width: 16px;  /* ✅ smaller icon size */
+  height: 16px;
 }
 
 .search-container input {
@@ -389,8 +427,8 @@
   background: none;
   outline: none;
   flex: 1;
-  font-size: 16px;
-  padding: 10px 12px;
+  font-size: 14px;
+  padding: 4px 8px; /* ✅ compact input padding */
 }
 
 .search-container button {
@@ -401,7 +439,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 16px;
+  padding: 0 14px;
   transition: background 0.2s;
 }
 
@@ -411,6 +449,7 @@
 
 .search-icon {
   width: 18px;
+  margin-left: 1rem;
   height: 18px;
   filter: brightness(0) invert(0); /* black icon */
 }
@@ -419,19 +458,35 @@
   filter: brightness(0) invert(1); /* white icon when hovered */
 }
 
+#searchInput:focus {
+  outline: none;       /* removes blue border highlight */
+  box-shadow: none;    /* removes subtle glow some browsers add */
+}
+#searchInput {
+  border: none;
+  background: none;
+}
+
+#searchInput:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+
 
 /* Drop Down */
 .select-container {
-  padding: 10px 16px;
-  font-size: 16px;
+  padding: 8px 10px;
+  font-size: 14px;
   border: none;
   border-radius: 10px;
   background: #f5f5f5;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   outline: none;
   cursor: pointer;
-  appearance: none; /* remove default arrow */
-  width: 150px;
+  appearance: none; /* removes default arrow */
+  width: 160px;
 
   /* custom dropdown arrow */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
@@ -440,25 +495,34 @@
   background-size: 12px;
 }
 
-.departmentSelect:hover {
-  background-color: #ebebeb;
+.select-container option:hover {
+  background-color: #e9f3ff;
+  color: #000;
+}
+.select-container option {
+  background-color: #fff;
+  color: #333;
+  padding: 8px;
+  font-size: 14px;
 }
 
-.departmentSelect:focus {
-  box-shadow: 0 0 3px rgba(41,136,204,0.4);
+.select-container:focus {
+  border: 1px solid #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+  background-color: #fff;
 }
 
 /* Add Employee */
 .add-employee-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background-color: #000000;
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 10px 18px;
-  font-size: 14px;
+  padding: 10px 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -494,11 +558,11 @@
 .employee-count-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 10px;
-  padding: 8px 14px;
+  padding: 8px 10px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   transition: background 0.2s, transform 0.1s;

@@ -53,9 +53,9 @@
                 <!-- Primary Navigation Links -->
                 <div class="search-container">
                     
-                    <button>
-                        <img src="https://cdn-icons-png.flaticon.com/512/17216/17216943.png" alt="search" class="search-icon">
-                    </button>
+                    
+                    <img src="https://cdn-icons-png.flaticon.com/512/17216/17216943.png" alt="search" class="search-icon">
+                    
                     <input type="text" id="searchInput" placeholder="Search employees...">
                 </div>
 
@@ -83,105 +83,70 @@
     <main class="dashboard-main extra-padding">
         <div class="kpi-wrapper">
             <!-- KPI 1 -->
-            <div class="dashboard-card kpi-card">
+            <div class="dashboard-card kpi-card metric-black">
                 <!-- Card Logo -->
                 <div class="card-header">
-                    <h3 class="card-title">Compliance </h3>
-                    <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
+                    <h3 class="card-title">Total Employees </h3>
+                    <img src="https://cdn-icons-png.flaticon.com/512/18819/18819990.png "
                     class="card-icon">
                 </div>
-                <p class="card-metric success">85%</p>
-                <p class="card-detail">↑ +3% vs last month</p>
+                <p class="card-metric-kpi card-metric  success">6</p>
+                <p class="card-detail">Active employees tracked</p>
             </div>
 
             <!-- KPI 2 -->
-            <div class="dashboard-card kpi-card">
+            <div class="dashboard-card kpi-card metric-black">
                 <!-- Card Logo -->
                 <div class="card-header">
-                    <h3 class="card-title">Compliance </h3>
-                    <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
+                    <h3 class="card-title">Avg Compliance </h3>
+                    <img src="   https://cdn-icons-png.flaticon.com/512/5405/5405851.png  "
                     class="card-icon">
                 </div>
-                <p class="card-metric success">85%</p>
-                <p class="card-detail">↑ +3% vs last month</p>
+                <p class="card-metric-kpi card-metric  success">89%</p>
+                <p class="card-detail">Needs improvement</p>
             </div>
 
             <!-- KPI 3 -->
-            <div class="dashboard-card kpi-card">
+            <div class="dashboard-card kpi-card metric-black">
                 <!-- Card Logo -->
                 <div class="card-header">
-                    <h3 class="card-title">Compliance </h3>
-                    <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
+                    <h3 class="card-title">Avg Attendance </h3>
+                    <img src="   https://cdn-icons-png.flaticon.com/512/5184/5184399.png  "
                     class="card-icon">
                 </div>
-                <p class="card-metric success">85%</p>
-                <p class="card-detail">↑ +3% vs last month</p>
+                <p class="card-metric-kpi card-metric  success">92%</p>
+                <p class="card-detail">Within target range</p>
             </div>
 
             <!-- KPI 4 -->
-            <div class="dashboard-card kpi-card">
+            <div class="dashboard-card kpi-card metric-black">
                 <!-- Card Logo -->
                 <div class="card-header">
-                    <h3 class="card-title">Compliance </h3>
-                    <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
+                    <h3 class="card-title">Total Backlogs </h3>
+                    <img src="https://cdn-icons-png.flaticon.com/512/10308/10308693.png "
                     class="card-icon">
                 </div>
-                <p class="card-metric success">85%</p>
-                <p class="card-detail">↑ +3% vs last month</p>
+                <p class="card-metric-kpi card-metric  success">19</p>
+                <p class="card-detail">2 employees need attention</p>
             </div>
 
         </div>
 
 
 
-        <div class="dashboard-wrapper">
-            <!-- Left Sidebar with User Profile and Calendar -->
-            <aside class="sidebar-left">
-                <div class="profile-widget">
-                    <img class="widget-profile-img" src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png" alt="Profile Picture">
-                    <!-- Display employee information -->
-                    <p class="widget-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</p>
-                    <p class="widget-username">@{{ user_account.username }}</p>
-                </div>
+        <div class="sub-kpi-wrapper">
+           <div class="dashboard-card kpi-card metric-black">
+                <h3 class="card-title">Department Performance </h3>
+                <p class="card-detail">Compliance and attendance by department</p>
+                <img src="https://www.cdc.gov/cove/media/images/2024/09/Bar-Chart-01.png" alt="Performance Chart" class="no-overflow-img">
+            </div>
+
+            <div class="dashboard-card kpi-card metric-black">
+                <h3 class="card-title">Performance Distribution </h3>
+                <p class="card-detail">Employee performance categories</p>
+                <img src="https://www.researchgate.net/publication/341674171/figure/fig2/AS:895782454566913@1590582588173/A-Pie-Chart-displaying-the-distribution-of-reviewed-articles-by-the-journal-database.ppm" alt="Performance Chart" class="no-overflow-img">
                 
-                <div class="calendar-widget">
-                    <h3 class="widget-title">Team Calendar</h3>
-                    <div class="calendar-placeholder">
-                        <p>Oct 2025</p>
-                        <!-- Calendar day indicators -->
-                        <div class="calendar-day active">21</div>
-                        <div class="calendar-day">22</div>
-                        <div class="calendar-day">23</div>
-                        <div class="calendar-day">24</div>
-                        <div class="calendar-day event">25</div>
-                        <div class="calendar-day">26</div>
-                        <div class="calendar-day">27</div>
-                    </div>
-                    <a href="#" class="calendar-link">View Full Calendar</a>
-                </div>
-            </aside>
-            
-            <!-- Main Dashboard Content -->
-            <section class="main-content-area">
-                <h1 class="content-header-title">Dashboard Overview</h1>
-                <p class="content-header-subtitle">Key metrics and personalized action items.</p>
-                
-                <!-- Dashboard Metrics Grid -->
-                <div class="dashboard-grid">
-                    
-                    
-                    <!-- Task List Card -->
-                    <div class="dashboard-card wide-card">
-                        <h3 class="card-title">Task List</h3>
-                        <ul class="action-list">
-                            <li><button class="btn-action">Submit Weekly Report</button></li>
-                            <li><button class="btn-action">Approve PTO Request (John)</button></li>
-                            <li><button class="btn-action">Review Q4 Budget</button></li>
-                        </ul>
-                    </div>
-                    
-                </div>
-            </section>
+            </div>
             
         </div>
     </main>

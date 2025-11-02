@@ -3,10 +3,9 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import logout as auth_logout
-from django.db import transaction
 
-from .forms import SupervisorPasswordResetForm
-from .models import Role, Employee, UserAccount
+from .forms import SupervisorPasswordResetForm, LoginForm, RegistrationForm
+from .models import UserAccount, Employee
 
 def home_page(request):
     return render(request, "core/home.html")
@@ -17,111 +16,75 @@ def login_page(request):
         pass
 
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            login(request, user, backend='core.backends.CustomUserBackend')
+            
+            if not (user.role.role_id == 302 and user.is_first_login):
+                messages.success(request, f"Welcome back, {user.employee.first_name}!")
 
-        user = UserAccount.objects.filter(username__iexact=username).first()
-        if not user:
-            messages.error(request, "User not found")
-            return render(request, "core/home.html", {"show_login": True})
-
-        # use models.py's check_password
-        if not user.check_password(password):
-            messages.error(request, "Invalid password")
-            return render(request, "core/home.html", {"show_login": True})
-
-        login(request, user, backend='core.backends.CustomUserBackend')
-        
-        if not (user.role.role_id == 302 and user.is_first_login):
-            messages.success(request, f"Welcome back, {user.employee.first_name}!")
-
-        return redirect("dashboard:home")
+            return redirect("dashboard:home")
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+            
+            return render(request, "core/home.html", {"show_login": True, "login_form": form})
 
     return redirect("core:home")
 
 def registration(request):
     if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email_address = request.POST.get("email")
-        hire_date = request.POST.get("date_hired")
-        position = request.POST.get("position")
-        department = request.POST.get("department")
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
-
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match!")
-            return render(request, "core/home.html", {"show_register": True})
-
-        if Employee.objects.filter(email_address__iexact=email_address).exists():
-            messages.error(request, "Email address already in use.")
-            return render(request, "core/home.html", {"show_register": True})
-
-        if UserAccount.objects.filter(username__iexact=username).exists():
-            messages.error(request, "Username already exists.")
-            return render(request, "core/home.html", {"show_register": True})
-
-        # get role (use primary key 303 for Employee)
-        role = Role.objects.filter(pk=303).first()
-        if not role:
-            role, _ = Role.objects.get_or_create(role_id=303, defaults={"role_name": "Employee", "description": "Standard employee"})
-
-        try:
-            with transaction.atomic():
-                employee = Employee.objects.create(
-                    first_name=first_name,
-                    last_name=last_name,
-                    department=department,
-                    position=position,
-                    hire_date=hire_date or None,
-                    email_address=email_address
-                )
-                user = UserAccount(
-                    employee=employee,
-                    username=username,
-                    role=role
-                )
-                user.set_password(password)
-                user.save()
-
-            messages.success(request, "Account created successfully! Please login.")
-            return render(request, "core/home.html", {"show_login": True})
-        except Exception as e:
-            print("Error during registration:", e)
-            messages.error(request, "An error occurred during registration. Please try again.")
-            return render(request, "core/home.html", {"show_register": True})
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = form.save()
+                messages.success(request, "Account created successfully! Please login.")
+                return render(request, "core/home.html", {"show_login": True})
+            except Exception as e:
+                print("Error during registration:", e)
+                messages.error(request, "An error occurred during registration. Please try again.")
+                return render(request, "core/home.html", {
+                    "show_register": True, 
+                    "register_form": form,
+                    "form_data": request.POST
+                })
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            
+            return render(request, "core/home.html", {
+                "show_register": True, 
+                "register_form": form,
+                "form_data": request.POST
+            })
 
     return redirect("core:home")
 
 def logout_view(request):
-    request.session.flush() # Clear all session data
-
-    storage = messages.get_messages(request) # Clear existing messages
+    request.session.flush()
+    
+    storage = messages.get_messages(request)
     for message in storage:
         pass
 
-    # auth_logout is Django's built-in logout function to clear the session
-    auth_logout(request)  # This clears the session
+    auth_logout(request)
     return redirect("core:home")
-
 
 def check_email_exists(request):
     email = request.GET.get("email")
     exists = False
     if email:
-        exists = Employee.objects.filter(email_address__iexact=email).exists()
+        exists = Employee.email_exists(email)
     return JsonResponse({"exists": exists})
-
 
 def check_username_exists(request):
     username = request.GET.get("username")
     exists = False
     if username:
-        exists = UserAccount.objects.filter(username__iexact=username).exists()
+        exists = UserAccount.username_exists(username)
     return JsonResponse({"exists": exists})
-
 
 def handle_password_reset(request):
     if not request.user.is_authenticated:
@@ -130,20 +93,16 @@ def handle_password_reset(request):
     if request.method == 'POST':
         form = SupervisorPasswordResetForm(request.POST, user=request.user)
         if form.is_valid():
-            # Update password
             new_password = form.cleaned_data['new_password']
             request.user.set_password(new_password)
-            request.user.is_first_login = False  # Mark as not first login
+            request.user.is_first_login = False
             request.user.save()
             
-            # Re-login the user with new password
             login(request, request.user, backend='core.backends.CustomUserBackend')
-            
             messages.success(request, "Password updated successfully!")
             return redirect('dashboard:home')
         else:
-            # If form is invalid, return to dashboard with errors
-            messages.error(request, "Please correct the errors below.")
-            # We'll handle displaying the form errors in the template
+            for error in form.errors.values():
+                messages.error(request, error)
 
     return redirect('dashboard:home')

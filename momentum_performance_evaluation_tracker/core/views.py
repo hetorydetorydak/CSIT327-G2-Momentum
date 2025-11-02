@@ -11,7 +11,6 @@ def home_page(request):
     return render(request, "core/home.html")
 
 def login_page(request):
-    # Clear existing messages
     storage = messages.get_messages(request)
     for message in storage:
         pass
@@ -27,7 +26,6 @@ def login_page(request):
 
             return redirect("dashboard:home")
         else:
-            # Add form errors to messages
             for error in form.errors.values():
                 messages.error(request, error)
             
@@ -46,23 +44,20 @@ def registration(request):
             except Exception as e:
                 print("Error during registration:", e)
                 messages.error(request, "An error occurred during registration. Please try again.")
-                # Return the form with data to maintain the multi-step state
                 return render(request, "core/home.html", {
                     "show_register": True, 
                     "register_form": form,
-                    "form_data": request.POST  # Pass back the form data
+                    "form_data": request.POST
                 })
         else:
-            # Add form errors to messages
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
             
-            # Return to registration with form data preserved
             return render(request, "core/home.html", {
                 "show_register": True, 
                 "register_form": form,
-                "form_data": request.POST  # Pass back the form data
+                "form_data": request.POST
             })
 
     return redirect("core:home")
@@ -70,7 +65,6 @@ def registration(request):
 def logout_view(request):
     request.session.flush()
     
-    # Clear existing messages
     storage = messages.get_messages(request)
     for message in storage:
         pass

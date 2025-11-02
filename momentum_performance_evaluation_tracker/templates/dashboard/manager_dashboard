@@ -13,27 +13,27 @@
                 
                 <!-- Top Right -->
                 <div class="profile-area">
-                    <div class="sub-nav-container">
-                        <button class="add-employee-btn">
-                            <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
-                            Add Employee
-                        </button>
+                    <button id="profile-toggle-btn" class="profile-toggle nav-button">
+                        <img class="profile-avatar" 
+                            src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png" 
+                            alt="User Avatar"
+                            onerror="this.onerror=null; this.src='https://placehold.co/32x32/d1d5db/4b5563?text=UN'">
+                        
+                        <div class="profile-info-text">
+                            <!-- Display employee information from user account -->
+                            <span class="profile-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</span>
+                            <span class="profile-role">{{ user_account.employee.position }}, {{ user_account.employee.department }}</span>
+                        </div>
+                        
+                        <img id="dropdown-icon" class="dropdown-icon" src="https://cdn-icons-png.flaticon.com/512/2722/2722987.png" alt="Dropdown arrow">
+                    </button>
 
-                        <button class="add-employee-btn btn-white">
-                            <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
-                            Export Report
-                        </button>
-
-                        <button class="employee-count-btn">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2529/2529521.png" alt="Employees" class="employee-icon">
-                            <span class="count-box">3</span>
-                        </button>
-
-                        <button class="employee-count-btn">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png " alt="Employees" class="employee-icon">
-                        </button>
+                    <!-- Profile Dropdown Menu -->
+                    <div id="profile-dropdown-menu" class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Settings & privacy</a>
+                        <a href="#" class="dropdown-item">Help and support</a>
+                        <a href="{% url 'core:logout' %}" class="dropdown-item logout-link">Logout</a>
                     </div>
-
                     
                 </div>
                 
@@ -61,6 +61,29 @@
                     <option value="dept2">Status 2</option>
                     <option value="dept3">Status 3</option>
                 </select>
+
+
+                <div class="to-right">
+                        <button class="add-employee-btn">
+                            <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
+                            Add Employee
+                        </button>
+
+                        <button class="add-employee-btn btn-white">
+                            <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
+                            Export Report
+                        </button>
+
+                        <button class="employee-count-btn">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2529/2529521.png" alt="Employees" class="employee-icon">
+                            <span class="count-box">3</span>
+                        </button>
+
+                        <button class="employee-count-btn">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png " alt="Employees" class="employee-icon">
+                        </button>
+                    </div>
+
 
             </div>
 

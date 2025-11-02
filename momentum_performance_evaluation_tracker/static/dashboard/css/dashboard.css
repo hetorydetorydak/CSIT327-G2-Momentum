@@ -395,6 +395,12 @@
     width: 100%; /* allow them to stretch inside */
 }
 
+.to-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto; 
+}
 /* Search Bar */
 .search-container {
   display: flex;

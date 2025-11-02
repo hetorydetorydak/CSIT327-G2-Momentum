@@ -116,59 +116,7 @@
     
     <!-- Password Reset Modal (shown on first-time login) -->
     {% if show_password_reset %}
-    <div id="passwordResetModal" class="modal" style="display: flex;">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content">
-            <h2>Password Reset Required</h2>
-            <p class="modal-subtitle">First-time login detected. Please set a new password for your account.</p>
-
-            <!-- Display any messages/errors -->
-            {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <div style="color: red; margin-bottom: 1rem;">{{ message }}</div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Password Reset Form -->
-            <form method="post" action="{% url 'core:handle_password_reset' %}" class="form">
-                {% csrf_token %}
-                
-                <label>Current Password</label>
-                {{ password_reset_form.current_password }}
-                {% if password_reset_form.current_password.errors %}
-                <div style="color: red; font-size: 0.875rem;">
-                    {{ password_reset_form.current_password.errors.0 }}
-                </div>
-                {% endif %}
-                <br>
-                <label>New Password</label>
-                {{ password_reset_form.new_password }}
-                {% if password_reset_form.new_password.errors %}
-                <div style="color: red; font-size: 0.875rem;">
-                    {{ password_reset_form.new_password.errors.0 }}
-                </div>
-                {% endif %}
-                <br>
-                <label>Confirm New Password</label>
-                {{ password_reset_form.confirm_password }}
-                {% if password_reset_form.confirm_password.errors %}
-                <div style="color: red; font-size: 0.875rem;">
-                    {{ password_reset_form.confirm_password.errors.0 }}
-                </div>
-                {% endif %}
-                <br>
-                {% if password_reset_form.non_field_errors %}
-                <div style="color: red; margin-bottom: 1rem;">
-                    {{ password_reset_form.non_field_errors.0 }}
-                </div>
-                {% endif %}
-
-                <button type="submit" class="btn-submit" style="width: 100%;">Update Password</button>
-            </form>
-        </div>
-    </div>
+        {% include "core/password-reset-modal.html" %}
     {% endif %}
 
     {% include "dashboard/logout-modal.html" %}

@@ -22,29 +22,22 @@
                     
                 </div>
                 
-                <!-- User Profile Section -->
+                <!-- Top Right -->
                 <div class="profile-area">
-                    <button id="profile-toggle-btn" class="profile-toggle nav-button">
-                        <img class="profile-avatar" 
-                            src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png" 
-                            alt="User Avatar"
-                            onerror="this.onerror=null; this.src='https://placehold.co/32x32/d1d5db/4b5563?text=UN'">
-                        
-                        <div class="profile-info-text">
-                            <!-- Display employee information from user account -->
-                            <span class="profile-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</span>
-                            <span class="profile-role">{{ user_account.employee.position }}, {{ user_account.employee.department }}</span>
-                        </div>
-                        
-                        <img id="dropdown-icon" class="dropdown-icon" src="https://cdn-icons-png.flaticon.com/512/2722/2722987.png" alt="Dropdown arrow">
-                    </button>
+                    <div class="sub-nav-container">
+                        <button class="add-employee-btn">
+                            <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
+                            Add Employee
+                        </button>
 
-                    <!-- Profile Dropdown Menu -->
-                    <div id="profile-dropdown-menu" class="dropdown-menu">
-                        <a href="#" class="dropdown-item">Settings & privacy</a>
-                        <a href="#" class="dropdown-item">Help and support</a>
-                        <a href="{% url 'core:logout' %}" class="dropdown-item logout-link">Logout</a>
+                        <button class="add-employee-btn btn-white">
+                            <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
+                            Export Report
+                        </button>
                     </div>
+                   
+
+                    
                 </div>
                 
             </div>
@@ -58,12 +51,20 @@
                     <input type="text" id="searchInput" placeholder="Search employees...">
                 </div>
 
-                <select class="departmentSelect">
+                <select class="select-container">
                     <option value="">Department</option>
                     <option value="dept1">Department 1</option>
                     <option value="dept2">Department 2</option>
                     <option value="dept3">Department 3</option>
                 </select>
+
+                <select class="select-container">
+                    <option value="">Status</option>
+                    <option value="dept1">Status 1</option>
+                    <option value="dept2">Status 2</option>
+                    <option value="dept3">Status 3</option>
+                </select>
+
             </div>
 
             

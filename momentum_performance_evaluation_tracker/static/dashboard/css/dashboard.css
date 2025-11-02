@@ -341,6 +341,9 @@
 
 .sub-nav-container {
     display: flex;
+    align-items: center;
+    gap: 12px; /* add spacing between dropdown & search bar */
+    width: 100%; /* allow them to stretch inside */
 }
 
 /* Search Bar */
@@ -391,7 +394,7 @@
 
 
 /* Drop Down */
-.departmentSelect {
+.select-container {
   padding: 10px 16px;
   font-size: 16px;
   border: none;
@@ -401,7 +404,7 @@
   outline: none;
   cursor: pointer;
   appearance: none; /* remove default arrow */
-  width: 200px;
+  width: 150px;
 
   /* custom dropdown arrow */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
@@ -416,6 +419,47 @@
 
 .departmentSelect:focus {
   box-shadow: 0 0 3px rgba(41,136,204,0.4);
+}
+
+/* Add Employee */
+.add-employee-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #000000;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background 0.2s, transform 0.1s;
+}
+
+.add-employee-btn:hover {
+  background-color: #202020;
+}
+
+.add-icon {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1); /* make icon white */
+}
+
+.btn-white {
+  background-color: #ffffff !important;
+  color: #333 !important;
+  border: 1px solid #ddd;
+}
+
+.btn-white:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.btn-white .add-icon {
+  filter: brightness(0); /* make icon dark for white background */
 }
 
 

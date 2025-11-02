@@ -31,8 +31,6 @@ class UserAccountAdmin(admin.ModelAdmin):
         return obj.employee.email_address
     get_employee_email.short_description = 'Email'
 
-
-# Register your models here
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(UserAccount, UserAccountAdmin)

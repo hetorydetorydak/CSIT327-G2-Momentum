@@ -5,6 +5,10 @@
     background-color: #f4f7fa; /* Light background for the content area */
 }
 
+.extra-padding {
+  padding-top: 10rem !important; /* increase top padding */
+}
+
 /* Wrapper to center and contain the two-column layout */
 .dashboard-wrapper {
     max-width: 1200px;
@@ -14,6 +18,16 @@
     /* Define the two-column structure: 1fr sidebar, 3fr main content */
     grid-template-columns: 1fr 3fr; 
     gap: 2rem;
+}
+
+.kpi-wrapper {
+  display: grid;
+  margin: 0 auto;
+  padding: 1rem;
+  max-width: 1200px;
+  grid-template-columns: repeat(4, 1fr); /* 4 equal-width columns */
+  gap: 1.5rem; /* space between cards */
+  margin-bottom: 2rem;
 }
 
 /* Header & Profile Dropdown Styling */
@@ -168,6 +182,18 @@
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
+}
+
+.card-icon {
+    height: 1.5em;
+    width: auto;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
 }
 
 
@@ -340,6 +366,7 @@
 }
 
 .sub-nav-container {
+    margin-top: 1rem;
     display: flex;
     align-items: center;
     gap: 12px; /* add spacing between dropdown & search bar */
@@ -431,7 +458,7 @@
   border: none;
   border-radius: 10px;
   padding: 10px 18px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -461,6 +488,42 @@
 .btn-white .add-icon {
   filter: brightness(0); /* make icon dark for white background */
 }
+
+/* Notification */
+
+.employee-count-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background 0.2s, transform 0.1s;
+}
+
+.employee-count-btn:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+.employee-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.count-box {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
 
 
 

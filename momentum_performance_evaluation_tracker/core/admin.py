@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.sessions.models import Session
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
+from django import forms
 from .models import Role, Employee, UserAccount
 
 # Session
@@ -56,9 +58,19 @@ class EmployeeAdmin(admin.ModelAdmin):
     search_fields = ['first_name', 'last_name', 'email_address']
     list_filter = ['department', 'position', 'hire_date']
 
+class UserAccountAdminForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(render_value=True),
+        required=False,
+        help_text="Leave empty to keep current password, or enter a new password."
+    )
 
-# UserAccount Admin
+    class Meta:
+        model = UserAccount
+        fields = '__all__'
+
 class UserAccountAdmin(admin.ModelAdmin):
+    form = UserAccountAdminForm
     list_display = ['username', 'get_employee_name', 'get_employee_email', 'role', 'is_first_login', 'last_login']
     list_filter = ['role', 'is_first_login', 'last_login']
     search_fields = ['username', 'employee__first_name', 'employee__last_name']
@@ -70,6 +82,11 @@ class UserAccountAdmin(admin.ModelAdmin):
     def get_employee_email(self, obj):
         return obj.employee.email_address
     get_employee_email.short_description = 'Email'
+
+    def save_model(self, request, obj, form, change):
+        if form.cleaned_data.get('password'):
+            obj.password = make_password(form.cleaned_data['password'])
+        super().save_model(request, obj, form, change)
 
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Employee, EmployeeAdmin)

@@ -5,7 +5,7 @@ from core.forms import SupervisorPasswordResetForm
 from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_kpis
 from django.http import JsonResponse
 from core.models import Employee, Evaluation, BacklogItem, AttendanceRecord
-from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate
+from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_performance_data
 
 @never_cache
 @login_required(login_url='/login/')
@@ -17,10 +17,13 @@ def dashboard_home(request):
     show_password_reset = False
     password_reset_form = None
     kpi_data = {}
+    team_performance = []
+    
 
     # Check if user is a manager
     if hasattr(request.user, 'role') and request.user.role.role_id == 302:
         user_is_manager = True
+        team_performance = get_team_performance_data(request.user)
 
     # Check if supervisor needs password reset
     if hasattr(request.user, 'role') and user_is_manager and request.user.is_first_login:
@@ -47,6 +50,7 @@ def dashboard_home(request):
         'password_reset_form': password_reset_form,
         'user_is_manager': user_is_manager,
         'kpi_data': kpi_data,
+        'team_performance': team_performance,
     }
     return render(request, "dashboard/dashboard.html", context)
 

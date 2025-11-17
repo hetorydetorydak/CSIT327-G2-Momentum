@@ -112,3 +112,65 @@ def get_team_kpis(manager):
             'employees_needing_attention': False,
             'employees_needing_attention_count': 0
         }
+
+def calculate_performance_score(employee):
+    """Calculate overall performance score (0-100)"""
+    try:
+        attendance = calculate_attendance_rate(employee)
+        compliance = calculate_compliance_rate(employee)
+        backlog_count = calculate_backlog_count(employee)
+
+        # Convert backlog count to a score (fewer backlogs = higher score)
+        backlog_score = max(0, 100 - (backlog_count * 5))
+
+        # Weighted average
+        overall_score = (attendance * 0.3) + (compliance * 0.5) + (backlog_score * 0.2)
+        return round(overall_score, 1)
+    except Exception as e:
+        print(f"Error calculating performance score: {e}")
+        return 0.0
+
+def get_employee_status(employee):
+    """Determine employee performance status"""
+    score = calculate_performance_score(employee)
+    if score >= 85:
+        return 'excellent'
+    elif score >= 70:
+        return 'good'
+    elif score >= 60:
+        return 'needs_improvement'
+    else:
+        return 'poor'
+
+def get_team_performance_data(manager):
+    """Get detailed performance data for all team members"""
+    try:
+        manager_department = manager.employee.department
+        team_employees = Employee.objects.filter(
+            department=manager_department,
+            accounts__role_id=303  # Regular employees only
+        ).exclude(id=manager.employee.id)
+
+        team_performance = []
+        for employee in team_employees:
+            performance_score = calculate_performance_score(employee)
+
+            team_performance.append({
+                'employee_id': employee.id,
+                'name': f"{employee.first_name} {employee.last_name}",
+                'position': employee.position,
+                'department': employee.department,
+                'performance_score': performance_score,
+                'attendance_rate': calculate_attendance_rate(employee),
+                'compliance_rate': calculate_compliance_rate(employee),
+                'backlog_count': calculate_backlog_count(employee),
+                'status': get_employee_status(employee)
+            })
+
+        # Sort by performance score (highest first)
+        team_performance.sort(key=lambda x: x['performance_score'], reverse=True)
+        return team_performance
+
+    except Exception as e:
+        print(f"Error getting team performance data: {e}")
+        return []

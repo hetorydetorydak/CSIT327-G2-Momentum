@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.hashers import make_password
 from django import forms
 from .models import Role, Employee, UserAccount
+from django.contrib.auth.models import User
 
 # Session
 class SessionAdmin(admin.ModelAdmin):
@@ -17,10 +18,14 @@ class SessionAdmin(admin.ModelAdmin):
         user_id = session_data.get('_auth_user_id')
         if user_id:
             try:
-                user = UserAccount.objects.get(id=user_id)
-                return f"{user.username} ({user.employee.first_name} {user.employee.last_name})"
-            except UserAccount.DoesNotExist:
-                return "User not found"
+                user = User.objects.get(id=user_id)
+                return f"{user.username} (Admin User)"
+            except User.DoesNotExist:
+                try:
+                    user = UserAccount.objects.get(id=user_id)
+                    return f"{user.username} ({user.employee.first_name} {user.employee.last_name})"
+                except UserAccount.DoesNotExist:
+                    return "User not found"
         return "No user"
     get_user.short_description = 'User'
    

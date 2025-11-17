@@ -1,57 +1,70 @@
-<!-- Dashboard Main Content Area -->
+<!-- This is an INCLUDED template - no extends, no blocks, just the content -->
 <main class="dashboard-main extra-padding">
     <div class="kpi-wrapper">
         <!-- KPI 1 -->
         <div class="dashboard-card kpi-card metric-black">
-            <!-- Card Logo -->
             <div class="card-header">
                 <h3 class="card-title">Total Employees </h3>
-                <img src="https://cdn-icons-png.flaticon.com/512/18819/18819990.png "
-                class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/18819/18819990.png" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric  success">6</p>
+            <p class="card-metric-kpi card-metric success">{{ kpi_data.total_employees|default:0 }}</p>
             <p class="card-detail">Active employees tracked</p>
         </div>
 
         <!-- KPI 2 -->
         <div class="dashboard-card kpi-card metric-black">
-            <!-- Card Logo -->
             <div class="card-header">
                 <h3 class="card-title">Avg Compliance </h3>
-                <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
-                class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric  success">89%</p>
-            <p class="card-detail">Needs improvement</p>
+            <p class="card-metric-kpi card-metric {% if kpi_data.avg_compliance >= 80 %}success{% else %}warning{% endif %}">
+                {{ kpi_data.avg_compliance|default:0 }}%
+            </p>
+            <p class="card-detail">
+                {% if kpi_data.avg_compliance >= 80 %}
+                    Meeting targets
+                {% else %}
+                    Needs improvement
+                {% endif %}
+            </p>
         </div>
 
         <!-- KPI 3 -->
         <div class="dashboard-card kpi-card metric-black">
-            <!-- Card Logo -->
             <div class="card-header">
                 <h3 class="card-title">Avg Attendance </h3>
-                <img src="   https://cdn-icons-png.flaticon.com/512/5184/5184399.png  "
-                class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/5184/5184399.png" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric  success">92%</p>
-            <p class="card-detail">Within target range</p>
+            <p class="card-metric-kpi card-metric {% if kpi_data.avg_attendance >= 85 %}success{% else %}warning{% endif %}">
+                {{ kpi_data.avg_attendance|default:0 }}%
+            </p>
+            <p class="card-detail">
+                {% if kpi_data.avg_attendance >= 90 %}
+                    Within target range
+                {% else %}
+                    Below target
+                {% endif %}
+            </p>
         </div>
 
         <!-- KPI 4 -->
         <div class="dashboard-card kpi-card metric-black">
-            <!-- Card Logo -->
             <div class="card-header">
                 <h3 class="card-title">Total Backlogs </h3>
-                <img src="https://cdn-icons-png.flaticon.com/512/10308/10308693.png "
-                class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/10308/10308693.png" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric  success">19</p>
-            <p class="card-detail">2 employees need attention</p>
+            <p class="card-metric-kpi card-metric {% if kpi_data.total_backlogs <= 15 %}success{% else %}warning{% endif %}">
+                {{ kpi_data.total_backlogs|default:0 }}
+            </p>
+            <p class="card-detail">
+                {% if kpi_data.employees_needing_attention %}
+                    {{ kpi_data.employees_needing_attention_count|default:0 }} employees need attention
+                {% else %}
+                    Manageable workload
+                {% endif %}
+            </p>
         </div>
-
     </div>
-
-
 
     <div class="sub-kpi-wrapper">
         <div class="dashboard-card kpi-card metric-black">
@@ -64,8 +77,6 @@
             <h3 class="card-title">Performance Distribution </h3>
             <p class="card-detail">Employee performance categories</p>
             <img src="https://www.researchgate.net/publication/341674171/figure/fig2/AS:895782454566913@1590582588173/A-Pie-Chart-displaying-the-distribution-of-reviewed-articles-by-the-journal-database.ppm" alt="Performance Chart" class="no-overflow-img">
-            
         </div>
-        
     </div>
 </main>

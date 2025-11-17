@@ -65,6 +65,89 @@
         </div>
     </div>
 
+    <!-- Performance Cards Section -->
+    <div class="performance-cards-section">
+        <div class="section-header">
+            <h2>Team Performance</h2>
+            <p>Click on any employee card to view detailed performance metrics</p>
+        </div>
+
+        <div class="performance-cards-grid">
+            {% for employee in team_performance %}
+            <div class="performance-card" data-employee-id="{{ employee.employee_id }}">
+                <div class="performance-card-header">
+                    <div class="employee-avatar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Employee Avatar">
+                    </div>
+                    <div class="employee-info">
+                        <h3 class="employee-name">{{ employee.name }}</h3>
+                        <p class="employee-position">{{ employee.position }}</p>
+                    </div>
+                    <div class="performance-badge {{ employee.status }}">
+                        <span class="badge-text">
+                            {% if employee.status == 'excellent' %} ★ Excellent
+                            {% elif employee.status == 'good' %} ✓ Good
+                            {% elif employee.status == 'needs_improvement' %} ⚠ Needs Improvement
+                            {% else %} ▼ Poor
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Performance Gauge -->
+                <div class="performance-gauge">
+                    <div class="gauge-container">
+                        <div class="gauge-background">
+                            <div class="gauge-fill" data-score="{{ employee.performance_score|default:0 }}"></div>
+                        </div>
+                        <div class="gauge-center">
+                            <span class="gauge-score">{{ employee.performance_score|default:0 }}</span>
+                        </div>
+                    </div>
+                    <div class="gauge-labels">
+                        <span>0</span>
+                        <span>50</span>
+                        <span>100</span>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Attendance</span>
+                        <span class="stat-value {% if employee.attendance_rate >= 85 %}success{% else %}warning{% endif %}">
+                            {{ employee.attendance_rate|default:0 }}%
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Compliance</span>
+                        <span class="stat-value {% if employee.compliance_rate >= 80 %}success{% else %}warning{% endif %}">
+                            {{ employee.compliance_rate|default:0 }}%
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Backlogs</span>
+                        <span class="stat-value {% if employee.backlog_count <= 2 %}success{% else %}warning{% endif %}">
+                            {{ employee.backlog_count|default:0 }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Drilldown Button -->
+                <button class="drilldown-btn" onclick="viewEmployeeDetails({{ employee.employee_id }})">
+                    View Details
+                    <img src="https://cdn-icons-png.flaticon.com/512/271/271228.png" alt="View" class="drilldown-icon">
+                </button>
+            </div>
+            {% empty %}
+            <div class="no-employees-message">
+                <p>No team members found in your department.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
     <div class="sub-kpi-wrapper">
         <div class="dashboard-card kpi-card metric-black">
             <h3 class="card-title">Department Performance </h3>

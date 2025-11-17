@@ -87,3 +87,75 @@ class UserAccount(models.Model):
     
     def get_username(self):
         return self.username
+
+class KPI(models.Model):
+    kpi_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200)
+    kpi_type = models.CharField(max_length=50)
+    description = models.TextField()
+    target_value = models.FloatField()
+
+    def __str__(self):
+        return self.name
+
+class Evaluation(models.Model):
+    evaluation_id = models.AutoField(primary_key=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='evaluations')
+    created_by = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    evaluation_date = models.DateField()
+    period = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"Evaluation {self.evaluation_id}"
+
+class EvaluationKPI(models.Model):
+    eval_kpi_id = models.AutoField(primary_key=True)
+    evaluation = models.ForeignKey(Evaluation, on_delete=models.CASCADE, related_name='kpi_scores')
+    kpi = models.ForeignKey(KPI, on_delete=models.CASCADE)
+    value = models.FloatField()
+    target = models.FloatField()
+
+    def __str__(self):
+        return f"EvalKPI {self.eval_kpi_id}"
+
+class AttendanceRecord(models.Model):
+    attendance_id = models.AutoField(primary_key=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    date = models.DateField()
+    status = models.CharField(max_length=20)  # Present, Absent, Late
+
+    def __str__(self):
+        return f"Attendance {self.attendance_id}"
+
+    class Meta:
+        unique_together = ['employee', 'date']
+
+class BacklogItem(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('In Progress', 'In Progress'),
+        ('Cancelled', 'Cancelled'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('Low', 'Low'),
+        ('Medium', 'Medium'),
+        ('High', 'High'),
+        ('Critical', 'Critical'),
+    ]
+    
+    backlog_id = models.AutoField(primary_key=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='backlog_items')
+    task_description = models.TextField()
+    due_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='Medium')
+    created_date = models.DateField(auto_now_add=True)
+    completed_date = models.DateField(blank=True, null=True)
+    
+    def __str__(self):
+        return f"Backlog {self.backlog_id} - {self.employee} - {self.status}"
+    
+    class Meta:
+        ordering = ['priority', 'due_date']

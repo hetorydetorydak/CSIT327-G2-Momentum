@@ -6,6 +6,7 @@ from core.utils import calculate_attendance_rate, calculate_backlog_count, calcu
 from django.http import JsonResponse
 from core.models import Employee, Evaluation, BacklogItem, AttendanceRecord
 from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_performance_data
+from .models import TeamMember
 
 @never_cache
 @login_required(login_url='/login/')
@@ -135,6 +136,148 @@ def team_kpi_api(request):
         
         team_data = get_team_kpis(request.user)
         return JsonResponse(team_data)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def search_employees_api(request):
+    """API endpoint for searching employees"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        search_query = request.GET.get('q', '').strip()
+        
+        existing_team_member_ids = TeamMember.objects.filter(
+            is_active=True
+        ).values_list('employee_id', flat=True)
+        
+        employees = Employee.objects.exclude(
+            id__in=existing_team_member_ids
+        ).exclude(
+            id=request.user.employee.id
+        ).exclude(
+            accounts__role__role_id=302
+        ).distinct()
+        
+        if search_query:
+            employees = employees.filter(
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(department__icontains=search_query) |
+                Q(position__icontains=search_query) |
+                Q(email_address__icontains=search_query)
+            )
+        
+        employees = employees[:50]
+        
+        employee_data = []
+        for employee in employees:
+            employee_data.append({
+                'id': employee.id,
+                'first_name': employee.first_name,
+                'last_name': employee.last_name,
+                'full_name': f"{employee.first_name} {employee.last_name}",
+                'department': employee.department or 'Not specified',
+                'position': employee.position or 'Not specified',
+                'email': employee.email_address,
+                'hire_date': employee.hire_date.strftime('%Y-%m-%d') if employee.hire_date else 'Not specified'
+            })
+        
+        return JsonResponse({'employees': employee_data})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def add_employees_to_team_api(request):
+    """API endpoint to add employees to manager's team"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        if request.method == 'POST':
+            employee_ids = request.POST.getlist('employee_ids[]')
+            
+            if not employee_ids:
+                return JsonResponse({'error': 'No employees selected'}, status=400)
+            
+            added_employees = []
+            failed_employees = []
+            
+            for employee_id in employee_ids:
+                try:
+                    employee = Employee.objects.get(id=employee_id)
+                    
+                    if TeamMember.objects.filter(manager=request.user, employee=employee, is_active=True).exists():
+                        failed_employees.append({
+                            'id': employee_id,
+                            'name': f"{employee.first_name} {employee.last_name}",
+                            'error': 'Already in team'
+                        })
+                        continue
+                    
+                    team_member = TeamMember.objects.create(
+                        manager=request.user,
+                        employee=employee
+                    )
+                    
+                    added_employees.append({
+                        'id': employee_id,
+                        'name': f"{employee.first_name} {employee.last_name}"
+                    })
+                    
+                except Employee.DoesNotExist:
+                    failed_employees.append({
+                        'id': employee_id,
+                        'name': 'Unknown',
+                        'error': 'Employee not found'
+                    })
+                except Exception as e:
+                    failed_employees.append({
+                        'id': employee_id,
+                        'name': f"{employee.first_name} {employee.last_name}" if 'employee' in locals() else 'Unknown',
+                        'error': str(e)
+                    })
+            
+            return JsonResponse({
+                'success': True,
+                'added': added_employees,
+                'failed': failed_employees,
+                'message': f'Successfully added {len(added_employees)} employees to your team'
+            })
+        
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def get_team_members_api(request):
+    """API endpoint to get current team members"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        team_members = TeamMember.objects.filter(
+            manager=request.user, 
+            is_active=True
+        ).select_related('employee')
+        
+        team_data = []
+        for member in team_members:
+            employee = member.employee
+            team_data.append({
+                'id': employee.id,
+                'name': f"{employee.first_name} {employee.last_name}",
+                'department': employee.department,
+                'position': employee.position,
+                'email': employee.email_address,
+                'added_date': member.added_date.strftime('%Y-%m-%d')
+            })
+        
+        return JsonResponse({'team_members': team_data})
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

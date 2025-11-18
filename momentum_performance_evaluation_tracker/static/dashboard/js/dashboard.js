@@ -7,6 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelLogout = document.getElementById('cancelLogout');
     const confirmLogout = document.getElementById('confirmLogout');
     const passwordResetModal = document.getElementById('passwordResetModal');
+    const performanceModal = document.getElementById('performanceModal');
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    const closeModals = document.querySelectorAll('.modal-close');
+
+    // Close modals
+    closeModals.forEach(closeModal => {
+    closeModal.addEventListener('click', () => {
+        closeAllModals();
+        resetRegisterForm();
+    });
+    });
+    
+    backdrops.forEach(backdrop => {
+    backdrop.addEventListener('click', () => {
+        closeAllModals();
+        resetRegisterForm();
+    });
+    });
 
     // Handle Logout Confirmation
     if (logoutLink && logoutModal && cancelLogout && confirmLogout) {
@@ -60,6 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initializePerformanceGauges();
     initializePerformanceSearch();
 });
+
+function closeAllModals() {
+  performanceModal.style.display = 'none';
+}
+
 
 // Performance Cards Functionality - MOVE THESE OUTSIDE DOMContentLoaded
 function initializePerformanceGauges() {

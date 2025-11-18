@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from core.models import Employee, Evaluation, BacklogItem, AttendanceRecord
 from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_performance_data
 from .models import TeamMember
+from django.db.models import Q 
 
 @never_cache
 @login_required(login_url='/login/')
@@ -279,5 +280,120 @@ def get_team_members_api(request):
         
         return JsonResponse({'team_members': team_data})
         
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def employee_performance_modal(request, employee_id):
+    """Render performance modal for a specific employee"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        employee = Employee.objects.get(id=employee_id)
+        
+        # detailed performance data
+        performance_data = {
+            'employee_name': f"{employee.first_name} {employee.last_name}",
+            'position': employee.position,
+            'department': employee.department,
+            'attendance_rate': calculate_attendance_rate(employee),
+            'backlog_count': calculate_backlog_count(employee),
+            'compliance_rate': calculate_compliance_rate(employee),
+            'recent_evaluations': [],
+            'pending_tasks': [],
+            'attendance_history': []
+        }
+        
+        # recent evaluations
+        recent_evaluations = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date')[:5]
+        
+        for evaluation in recent_evaluations:
+            performance_data['recent_evaluations'].append({
+                'period': evaluation.period,
+                'date': evaluation.evaluation_date.strftime('%Y-%m-%d'),
+                'kpi_scores': [
+                    {
+                        'kpi_name': ekpi.kpi.name,
+                        'score': ekpi.value,
+                        'target': ekpi.target
+                    }
+                    for ekpi in evaluation.kpi_scores.all()
+                ]
+            })
+        
+        # pending tasks
+        pending_tasks = BacklogItem.objects.filter(
+            employee=employee, 
+            status='Pending'
+        ).order_by('due_date')[:10]
+        
+        for task in pending_tasks:
+            performance_data['pending_tasks'].append({
+                'description': task.task_description,
+                'due_date': task.due_date.strftime('%Y-%m-%d'),
+                'priority': task.priority
+            })
+        
+        # Get recent attendance
+        recent_attendance = AttendanceRecord.objects.filter(
+            employee=employee
+        ).order_by('-date')[:10]
+        
+        for attendance in recent_attendance:
+            performance_data['attendance_history'].append({
+                'date': attendance.date.strftime('%Y-%m-%d'),
+                'status': attendance.status
+            })
+        
+        # combined template with data
+        return render(request, "dashboard/employee_performance_modal.html", {
+            'employee_data': performance_data,
+            'employee_id': employee_id
+        })
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def remove_employee_from_team_api(request, employee_id):
+    """API endpoint to remove employee from manager's team"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        if request.method == 'POST':
+            employee = Employee.objects.get(id=employee_id)
+            
+            # team member relationship
+            team_member = TeamMember.objects.filter(
+                manager=request.user,
+                employee=employee,
+                is_active=True
+            ).first()
+            
+            if not team_member:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Employee not found in your team'
+                }, status=404)
+            
+            # delete record in team member table
+            employee_name = f"{employee.first_name} {employee.last_name}"
+            team_member.delete() 
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'{employee_name} has been removed from your team'
+            })
+        
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

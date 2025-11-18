@@ -1208,3 +1208,32 @@
     margin-bottom: 1rem;
     border: 1px solid #c3e6cb;
 }
+
+/* Remove From Team Section */
+.remove-team-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e9ecef;
+    text-align: center;
+}
+
+.remove-from-team-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.remove-from-team-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.remove-from-team-btn:active {
+    transform: translateY(0);
+}

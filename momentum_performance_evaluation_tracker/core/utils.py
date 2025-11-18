@@ -66,51 +66,47 @@ def calculate_compliance_rate(employee, period=None):
         print(f"Error calculating compliance: {e}")
         return 0.0
 
-def get_team_kpis(manager):
-    """Get team-wide KPI data for manager dashboard"""
+def get_team_kpis(manager_user):
+    """Get KPI data for manager's team"""
     try:
-        manager_department = manager.employee.department
-        team_employees = Employee.objects.filter(
-            department=manager_department,
-            accounts__role_id=303
-        ).exclude(id=manager.employee.id)
+        from dashboard.models import TeamMember
+        team_members = TeamMember.objects.filter(
+            manager=manager_user, 
+            is_active=True
+        ).select_related('employee')
         
-        total_employees = team_employees.count()
+        if not team_members.exists():
+            return {
+                'total_employees': 0,
+                'avg_compliance': 0,
+                'avg_attendance': 0,
+                'total_backlogs': 0
+            }
+        total_employees = team_members.count()
+        total_compliance = 0
+        total_attendance = 0
         total_backlogs = 0
-        total_attendance = 0.0
-        total_compliance = 0.0
         
-        for employee in team_employees:
-            total_backlogs += calculate_backlog_count(employee)
-            total_attendance += calculate_attendance_rate(employee)
+        for team_member in team_members:
+            employee = team_member.employee
             total_compliance += calculate_compliance_rate(employee)
-        
-        avg_attendance = round(total_attendance / total_employees, 2) if total_employees > 0 else 0.0
-        avg_compliance = round(total_compliance / total_employees, 2) if total_employees > 0 else 0.0
-        
-        # Calculate how many employees need attention (those with more than 2 backlogs)
-        employees_needing_attention_count = 0
-        for employee in team_employees:
-            if calculate_backlog_count(employee) > 2:
-                employees_needing_attention_count += 1
+            total_attendance += calculate_attendance_rate(employee)
+            total_backlogs += calculate_backlog_count(employee)
         
         return {
             'total_employees': total_employees,
-            'avg_attendance': avg_attendance,
-            'avg_compliance': avg_compliance,
-            'total_backlogs': total_backlogs,
-            'employees_needing_attention': total_backlogs > 15,
-            'employees_needing_attention_count': employees_needing_attention_count
+            'avg_compliance': round(total_compliance / total_employees, 2),
+            'avg_attendance': round(total_attendance / total_employees, 2),
+            'total_backlogs': total_backlogs
         }
+        
     except Exception as e:
-        print(f"Error calculating team KPIs: {e}")
+        print(f"Error getting team KPIs: {e}")
         return {
             'total_employees': 0,
-            'avg_attendance': 0.0,
-            'avg_compliance': 0.0,
-            'total_backlogs': 0,
-            'employees_needing_attention': False,
-            'employees_needing_attention_count': 0
+            'avg_compliance': 0,
+            'avg_attendance': 0,
+            'total_backlogs': 0
         }
 
 def calculate_performance_score(employee):
@@ -144,33 +140,49 @@ def get_employee_status(employee):
     else:
         return 'poor'
 
-def get_team_performance_data(manager):
-    """Get detailed performance data for all team members"""
+def get_team_performance_data(manager_user):
+    """Get performance data for manager's team members"""
     try:
-        manager_department = manager.employee.department
-        team_employees = Employee.objects.filter(
-            department=manager_department,
-            accounts__role_id=303  # Regular employees only
-        ).exclude(id=manager.employee.id)
+        from dashboard.models import TeamMember
+    
+        team_members = TeamMember.objects.filter(
+            manager=manager_user, 
+            is_active=True
+        ).select_related('employee')
         
         team_performance = []
-        for employee in team_employees:
-            performance_score = calculate_performance_score(employee)
+        
+        for team_member in team_members:
+            employee = team_member.employee
+            
+            attendance_rate = calculate_attendance_rate(employee)
+            backlog_count = calculate_backlog_count(employee)
+            compliance_rate = calculate_compliance_rate(employee)
+            
+            performance_score = round((attendance_rate + compliance_rate) / 2, 2)
+            
+            if performance_score >= 90:
+                status = 'excellent'
+            elif performance_score >= 80:
+                status = 'good'
+            elif performance_score >= 70:
+                status = 'needs_improvement'
+            else:
+                status = 'poor'
             
             team_performance.append({
                 'employee_id': employee.id,
                 'name': f"{employee.first_name} {employee.last_name}",
-                'position': employee.position,
-                'department': employee.department,
+                'position': employee.position or 'Not specified',
+                'department': employee.department or 'Not specified',
                 'performance_score': performance_score,
-                'attendance_rate': calculate_attendance_rate(employee),
-                'compliance_rate': calculate_compliance_rate(employee),
-                'backlog_count': calculate_backlog_count(employee),
-                'status': get_employee_status(employee)
+                'attendance_rate': attendance_rate,
+                'compliance_rate': compliance_rate,
+                'backlog_count': backlog_count,
+                'status': status
             })
         
-        # Sort by performance score (highest first)
-        team_performance.sort(key=lambda x: x['performance_score'], reverse=True)
+        print(f"DEBUG: Found {len(team_performance)} team members for {manager_user.username}")
         return team_performance
         
     except Exception as e:

@@ -1,0 +1,31 @@
+<div id="addEmployeeModal" class="modal hidden">    
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Employees to Team</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Search Bar -->
+            <div class="search-container-modal">
+                <img src="https://cdn-icons-png.flaticon.com/512/17216/17216943.png" alt="search" class="search-icon">
+                <input type="text" id="employeeSearch" placeholder="Search employees by name, department, or position...">
+            </div>
+            
+            <!-- Selected Counter -->
+            <div class="selection-info">
+                <span id="selectedCount">0</span> employees selected
+            </div>
+            
+            <!-- Employees List -->
+            <div class="employees-list" id="employeesList">
+                <div class="loading-message">Loading employees...</div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-cancel">Cancel</button>
+            <button class="btn-add-to-team" disabled>Add to Team</button>
+        </div>
+    </div>
+</div>

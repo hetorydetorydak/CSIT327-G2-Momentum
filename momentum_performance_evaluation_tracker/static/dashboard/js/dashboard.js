@@ -99,3 +99,16 @@ function viewEmployeeDetails(employeeId) {
     alert(`Viewing details for employee ID: ${employeeId}`);
     // You can implement modal or redirect here
 }
+
+function initializeTeamManagement() {
+    // The TeamManager class will handle everything
+    // It's loaded from team-management.js
+}
+
+// Call this in your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    // ... your existing code ...
+    
+    // Initialize team management
+    initializeTeamManagement();
+});

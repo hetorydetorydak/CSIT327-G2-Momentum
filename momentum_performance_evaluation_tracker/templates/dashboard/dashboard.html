@@ -81,4 +81,14 @@
 
 {% block extra_js %}
 <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+<script>
+window.teamManagementConfig = {
+    searchUrl: "{% url 'dashboard:search_employees_api' %}",
+    addToTeamUrl: "{% url 'dashboard:add_employees_to_team' %}",
+    getTeamMembersUrl: "{% url 'dashboard:get_team_members' %}"
+};
+</script>
+{% if user_is_manager %}
+<script src="{% static 'dashboard/js/team-management.js' %}"></script>
+{% endif %}
 {% endblock %}

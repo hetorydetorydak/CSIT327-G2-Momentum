@@ -23,12 +23,12 @@
     </select>
 
     <div class="to-right">
-        <button class="add-employee-btn">
+        <button class="add-employee-btn" id="openAddEmployeeModal">
             <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
             Add Employee
         </button>
 
-        <button class="add-employee-btn btn-white">
+        <button class="export-report-btn btn-white">
             <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
             Export Report
         </button>
@@ -43,3 +43,5 @@
         </button>
     </div>
 </div>
+
+{% include 'dashboard/add_employee_modal.html' %}

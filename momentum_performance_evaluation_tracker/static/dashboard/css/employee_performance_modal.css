@@ -1,0 +1,396 @@
+/* Performance Modal Content Styling */
+.employee-basic-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.info-item {
+  font-size: 0.95rem;
+}
+
+.info-item strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.info-item span {
+  color: #6b7280;
+}
+
+/* Performance Metrics Grid */
+.performance-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Overall Performance Highlight */
+.metric-card.overall-performance {
+  grid-column: 1 / -1; /* FULL-WIDTH EMPHASIS */
+  padding: 2rem;
+  border-left: 6px solid #2563eb;
+  background: linear-gradient(to bottom right, #eff6ff, #ffffff);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card.overall-performance h3 {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: #1e3a8a;
+}
+
+.metric-card.overall-performance .metric-value {
+  font-size: 2.5rem;
+}
+
+.metric-card.overall-performance .metric-value.large {
+  font-size: 3rem;
+}
+
+/* Standard Metric Cards */
+.metric-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.metric-value.large {
+  font-size: 2rem;
+}
+
+.metric-value.good {
+  color: #10b981;
+}
+
+.metric-value.poor {
+  color: #ef4444;
+}
+
+
+/* Sections */
+.evaluations-section,
+.tasks-section,
+.attendance-section {
+  margin-bottom: 2rem;
+}
+
+.evaluations-section h3,
+.tasks-section h3,
+.attendance-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+/* Evaluations List */
+.evaluations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.evaluation-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.evaluation-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.eval-period {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.eval-date {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.eval-kpis {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kpi-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.kpi-line:last-child {
+  border-bottom: none;
+}
+
+.kpi-name {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.kpi-values {
+  font-weight: 600;
+  color: #2563eb;
+  font-size: 0.9rem;
+}
+
+/* Tasks List */
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease;
+  gap: 1rem;
+}
+
+.task-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.task-item.high {
+  border-left: 4px solid #ef4444;
+}
+
+.task-item.medium {
+  border-left: 4px solid #f59e0b;
+}
+
+.task-item.low {
+  border-left: 4px solid #10b981;
+}
+
+.task-desc {
+  flex: 1;
+  font-weight: 500;
+  color: #374151;
+}
+
+.task-due {
+  color: #6b7280;
+  font-size: 0.85rem;
+  min-width: 100px;
+}
+
+.task-priority {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.task-priority.high {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.task-priority.medium {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.task-priority.low {
+  background: #f0fdf4;
+  color: #059669;
+}
+
+/* Attendance List */
+.attendance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attendance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.attendance-item:hover {
+  background: #f9fafb;
+}
+
+.attendance-item.present {
+  border-left: 3px solid #10b981;
+}
+
+.attendance-item.absent {
+  border-left: 3px solid #ef4444;
+}
+
+.attendance-item.late {
+  border-left: 3px solid #f59e0b;
+}
+
+.attendance-date {
+  font-weight: 500;
+  color: #374151;
+}
+
+.attendance-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.attendance-status.present {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.attendance-status.absent {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.attendance-status.late {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* No Data States */
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-style: italic;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #e5e7eb;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+/* Remove From Team Section */
+.remove-team-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e9ecef;
+  text-align: center;
+}
+
+.remove-from-team-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.remove-from-team-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.remove-from-team-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design for Content */
+@media (max-width: 768px) {
+  .performance-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .employee-basic-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .task-due,
+  .task-priority {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .metric-card {
+    padding: 1rem;
+  }
+  
+  .metric-value.large {
+    font-size: 1.75rem;
+  }
+  
+  .metric-value {
+    font-size: 1.25rem;
+  }
+}

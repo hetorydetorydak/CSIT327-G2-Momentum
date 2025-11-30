@@ -150,16 +150,17 @@ def search_employees_api(request):
         
         search_query = request.GET.get('q', '').strip()
         
-        existing_team_member_ids = TeamMember.objects.filter(
+        # fix: only exclude employees who are currently active in any team
+        currently_active_team_member_ids = TeamMember.objects.filter(
             is_active=True
         ).values_list('employee_id', flat=True)
         
         employees = Employee.objects.exclude(
-            id__in=existing_team_member_ids
+            id__in=currently_active_team_member_ids  # only exclude active team members
         ).exclude(
-            id=request.user.employee.id
+            id=request.user.employee.id  # exclude self
         ).exclude(
-            accounts__role__role_id=302
+            accounts__role__role_id=302  # exclude other managers
         ).distinct()
         
         if search_query:
@@ -211,6 +212,7 @@ def add_employees_to_team_api(request):
                 try:
                     employee = Employee.objects.get(id=employee_id)
                     
+                    # check if employee is already active in team
                     if TeamMember.objects.filter(manager=request.user, employee=employee, is_active=True).exists():
                         failed_employees.append({
                             'id': employee_id,
@@ -219,10 +221,24 @@ def add_employees_to_team_api(request):
                         })
                         continue
                     
-                    team_member = TeamMember.objects.create(
-                        manager=request.user,
-                        employee=employee
-                    )
+                    # check if inactive record exists, reactivate it
+                    existing_inactive_member = TeamMember.objects.filter(
+                        manager=request.user, 
+                        employee=employee, 
+                        is_active=False
+                    ).first()
+                    
+                    if existing_inactive_member:
+                        # reactivate the existing record
+                        existing_inactive_member.is_active = True
+                        existing_inactive_member.save()
+                        team_member = existing_inactive_member
+                    else:
+                        # create new record
+                        team_member = TeamMember.objects.create(
+                            manager=request.user,
+                            employee=employee
+                        )
                     
                     added_employees.append({
                         'id': employee_id,
@@ -361,7 +377,7 @@ def employee_performance_modal(request, employee_id):
 
 @login_required
 def remove_employee_from_team_api(request, employee_id):
-    """API endpoint to remove employee from manager's team"""
+    """API endpoint to remove employee from manager's team using soft deletion"""
     try:
         if request.user.role.role_id != 302:
             return JsonResponse({'error': 'Unauthorized'}, status=403)
@@ -369,7 +385,7 @@ def remove_employee_from_team_api(request, employee_id):
         if request.method == 'POST':
             employee = Employee.objects.get(id=employee_id)
             
-            # team member relationship
+            # find active team member relationship
             team_member = TeamMember.objects.filter(
                 manager=request.user,
                 employee=employee,
@@ -382,9 +398,10 @@ def remove_employee_from_team_api(request, employee_id):
                     'error': 'Employee not found in your team'
                 }, status=404)
             
-            # delete record in team member table
+            team_member.is_active = False
+            team_member.save()
+            
             employee_name = f"{employee.first_name} {employee.last_name}"
-            team_member.delete() 
             
             return JsonResponse({
                 'success': True,

@@ -5,116 +5,147 @@
         <button class="modal-close" id="closePerformanceModal">×</button>
         <h2 id="performanceModalTitle">
             {% if employee_data %}
-                Performance Details - {{ employee_data.employee_name }}
+            Performance Details - {{ employee_data.employee_name }}
             {% else %}
-                Performance Details
+            Performance Details
             {% endif %}
         </h2>
         <div class="modal-body" id="performanceModalBody">
             {% if employee_data %}
-                <!-- Performance Content when data is available -->
-                <div class="employee-basic-info">
-                    <div class="info-item">
-                        <strong>Position:</strong> {{ employee_data.position|default:"Not specified" }}
-                    </div>
-                    <div class="info-item">
-                        <strong>Department:</strong> {{ employee_data.department|default:"Not specified" }}
+            <!-- Performance Content when data is available -->
+            <div class="employee-basic-info">
+                <div class="info-item">
+                    <strong>Position:</strong> {{ employee_data.position|default:"Not specified" }}
+                </div>
+                <div class="info-item">
+                    <strong>Department:</strong> {{ employee_data.department|default:"Not specified" }}
+                </div>
+            </div>
+
+            <div class="performance-metrics-grid">
+                <div class="metric-card overall-performance">
+                    <h3>Overall Performance</h3>
+                    <div
+                        class="metric-value large {% if employee_data.attendance_rate >= 85 %}good{% else %}poor{% endif %}">
+                        {{ employee_data.attendance_rate }}%
                     </div>
                 </div>
-
-                <div class="performance-metrics-grid">
-                    <div class="metric-card overall-performance">
-                        <h3>Overall Performance</h3>
-                        <div class="metric-value large {% if employee_data.attendance_rate >= 85 %}good{% else %}poor{% endif %}">
-                            {{ employee_data.attendance_rate }}%
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Attendance Rate</h3>
-                        <div class="metric-value {% if employee_data.attendance_rate >= 85 %}good{% else %}poor{% endif %}">
-                            {{ employee_data.attendance_rate }}%
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Compliance Rate</h3>
-                        <div class="metric-value {% if employee_data.compliance_rate >= 80 %}good{% else %}poor{% endif %}">
-                            {{ employee_data.compliance_rate }}%
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Backlog Items</h3>
-                        <div class="metric-value {% if employee_data.backlog_count <= 2 %}good{% else %}poor{% endif %}">
-                            {{ employee_data.backlog_count }}
-                        </div>
+                <div class="metric-card">
+                    <h3>Attendance Rate</h3>
+                    <div class="metric-value {% if employee_data.attendance_rate >= 85 %}good{% else %}poor{% endif %}">
+                        {{ employee_data.attendance_rate }}%
                     </div>
                 </div>
+                <div class="metric-card">
+                    <h3>Compliance Rate</h3>
+                    <div class="metric-value {% if employee_data.compliance_rate >= 80 %}good{% else %}poor{% endif %}">
+                        {{ employee_data.compliance_rate }}%
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Backlog Items</h3>
+                    <div class="metric-value {% if employee_data.backlog_count <= 2 %}good{% else %}poor{% endif %}">
+                        {{ employee_data.backlog_count }}
+                    </div>
+                </div>
+            </div>
 
-                {% if employee_data.recent_evaluations %}
-                <div class="evaluations-section">
-                    <h3>Recent Evaluations</h3>
-                    <div class="evaluations-list">
-                        {% for eval in employee_data.recent_evaluations %}
-                        <div class="evaluation-item">
-                            <div class="eval-period">{{ eval.period }}</div>
-                            <div class="eval-date">{{ eval.date }}</div>
-                            <div class="eval-kpis">
-                                {% for kpi in eval.kpi_scores %}
-                                <div class="kpi-line">
-                                    <span class="kpi-name">{{ kpi.kpi_name }}:</span>
-                                    <span class="kpi-values">{{ kpi.score|floatformat:2 }}/{{ kpi.target|floatformat:2 }}</span>
-                                </div>
-                                {% endfor %}
+            {% if employee_data.recent_evaluations %}
+            <div class="evaluations-section">
+                <h3>Recent Evaluations</h3>
+                <div class="evaluations-list">
+                    {% for eval in employee_data.recent_evaluations %}
+                    <div class="evaluation-item">
+                        <div class="eval-period">{{ eval.period }}</div>
+                        <div class="eval-date">{{ eval.date }}</div>
+                        <div class="eval-kpis">
+                            {% for kpi in eval.kpi_scores %}
+                            <div class="kpi-line">
+                                <span class="kpi-name">{{ kpi.kpi_name }}:</span>
+                                <span class="kpi-values">{{ kpi.score|floatformat:2 }}/{{ kpi.target|floatformat:2
+                                    }}</span>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="no-data">No recent evaluations found.</div>
-                {% endif %}
+            </div>
+            {% else %}
+            <div class="no-data">No recent evaluations found.</div>
+            {% endif %}
 
-                {% if employee_data.pending_tasks %}
-                <div class="tasks-section">
-                    <h3>Pending Tasks</h3>
-                    <div class="tasks-list">
-                        {% for task in employee_data.pending_tasks %}
-                        <div class="task-item {{ task.priority|lower }}">
-                            <span class="task-desc">{{ task.description }}</span>
-                            <span class="task-due">Due: {{ task.due_date }}</span>
-                            <span class="task-priority">{{ task.priority }}</span>
-                        </div>
-                        {% endfor %}
+            {% if employee_data.pending_tasks %}
+            <div class="tasks-section">
+                <h3>Pending Tasks</h3>
+                <div class="tasks-list">
+                    {% for task in employee_data.pending_tasks %}
+                    <div class="task-item {{ task.priority|lower }}">
+                        <span class="task-desc">{{ task.description }}</span>
+                        <span class="task-due">Due: {{ task.due_date }}</span>
+                        <span class="task-priority">{{ task.priority }}</span>
                     </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="no-data">No pending tasks found.</div>
-                {% endif %}
+            </div>
+            {% else %}
+            <div class="no-data">No pending tasks found.</div>
+            {% endif %}
 
-                {% if employee_data.attendance_history %}
-                <div class="attendance-section">
-                    <h3>Recent Attendance</h3>
-                    <div class="attendance-list">
-                        {% for attendance in employee_data.attendance_history %}
-                        <div class="attendance-item {{ attendance.status|lower }}">
-                            <span class="attendance-date">{{ attendance.date }}</span>
-                            <span class="attendance-status">{{ attendance.status }}</span>
-                        </div>
-                        {% endfor %}
+            {% if employee_data.attendance_history %}
+            <div class="attendance-section">
+                <h3>Recent Attendance</h3>
+                <div class="attendance-list">
+                    {% for attendance in employee_data.attendance_history %}
+                    <div class="attendance-item {{ attendance.status|lower }}">
+                        <span class="attendance-date">{{ attendance.date }}</span>
+                        <span class="attendance-status">{{ attendance.status }}</span>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endif %}
+            </div>
+            {% endif %}
+            <div class="task-assignment-section">
+                <h3>Assign New Task</h3>
+                <form id="assignTaskForm" class="task-assignment-form">
+                    <input type="hidden" id="assignEmployeeId" value="{{ employee_id }}">
 
-                {% if employee_data %}
-                <div class="remove-team-section">
-                    <button class="remove-from-team-btn" onclick="removeFromTeam({{ employee_id }})">
-                        Remove From Team
-                    </button>
-                </div>
-                {% endif %}
+                    <div class="form-group">
+                        <label for="taskDescription">Task Description</label>
+                        <textarea id="taskDescription" name="task_description" required
+                            placeholder="Enter task description..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate" name="due_date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority" name="priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Assign Task</button>
+                </form>
+            </div>
+
+            {% if employee_data %}
+            <div class="remove-team-section">
+                <button class="remove-from-team-btn" onclick="removeFromTeam({{ employee_id }})">
+                    Remove From Team
+                </button>
+            </div>
+            {% endif %}
 
             {% else %}
-                <!-- Default content when no data (initial state) -->
-                <div class="loading">Select an employee to view performance details...</div>
+            <!-- Default content when no data (initial state) -->
+            <div class="loading">Select an employee to view performance details...</div>
             {% endif %}
         </div>
     </div>

@@ -12,4 +12,15 @@ urlpatterns = [
     path("api/team/members/", views.get_team_members_api, name="get_team_members"),
     path("modal/employee/<int:employee_id>/performance/", views.employee_performance_modal, name="employee_performance_modal"),
     path("api/team/remove-employee/<int:employee_id>/", views.remove_employee_from_team_api, name="remove_employee_from_team"),
+    
+    path('api/tasks/employee/', views.get_employee_tasks_api, name='employee_tasks'),
+    path('api/tasks/<int:task_id>/update-status/', views.update_task_status_api, name='update_task_status'),
+    path('api/tasks/assign/', views.assign_task_api, name='assign_task'),
+    path('api/tasks/team/', views.get_team_tasks_api, name='team_tasks'),
+
+    path('api/tasks/employee/', views.get_employee_tasks_api, name='employee_tasks'),
+    path('api/tasks/<int:task_id>/update-status/', views.update_task_status_api, name='update_task_status'),
+    path('api/tasks/assign/', views.assign_task_api, name='assign_task'),
+    path('api/tasks/team/', views.get_team_tasks_api, name='team_tasks'),
+
 ]

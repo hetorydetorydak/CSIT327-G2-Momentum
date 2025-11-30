@@ -1,3 +1,6 @@
+{% load static %}
+
+
 <section class="main-content-area">
   <h1 class="content-header-title">
       {{ user_account.employee.first_name }} {{ user_account.employee.last_name }}
@@ -13,7 +16,7 @@
       <div class="dashboard-card kpi-card">
           <div style="display: flex;justify-content: space-between;">
               <h3 class="card-title">Compliance </h3>
-              <img src="https://cdn-icons-png.flaticon.com/512/8438/8438644.png"
+              <img src="{% static 'images/compliance-icon.png' %}"
               style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
           </div>
           
@@ -38,7 +41,7 @@
       <div class="dashboard-card kpi-card">
           <div style="display: flex;justify-content: space-between;">
               <h3 class="card-title">Attendance </h3>
-              <img src="https://cdn-icons-png.flaticon.com/512/1286/1286879.png"
+              <img src="{% static 'images/attendance-icon.png' %}"
               style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
           </div>
           <p class="card-metric {% if kpi_data.attendance_rate >= 85 %}success{% else %}warning{% endif %}">
@@ -64,7 +67,7 @@
       <div class="dashboard-card kpi-card">
           <div style="display: flex;justify-content: space-between;">
               <h3 class="card-title">Backlogs </h3>
-              <img src="https://cdn-icons-png.flaticon.com/512/10308/10308693.png"
+              <img src="{% static 'images/backlog-icon.png' %}"
               style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
           </div>
           <p class="card-metric {% if kpi_data.backlog_count <= 2 %}success{% else %}warning{% endif %}">

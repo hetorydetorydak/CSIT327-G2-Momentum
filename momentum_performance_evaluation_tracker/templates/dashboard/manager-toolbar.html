@@ -1,9 +1,11 @@
+{% load static %}
 <div class="sub-nav-container">
     <!-- Primary Navigation Links -->
     <div class="search-container">
         
         
-        <img src="https://cdn-icons-png.flaticon.com/512/17216/17216943.png" alt="search" class="search-icon">
+        <img src="{% static 'images/search-icon.png' %}"
+        alt="search" class="search-icon">
         
         <input type="text" id="searchInput" placeholder="Search employees...">
     </div>
@@ -24,22 +26,26 @@
 
     <div class="to-right">
         <button class="add-employee-btn" id="openAddEmployeeModal">
-            <img src="https://cdn-icons-png.flaticon.com/512/11911/11911077.png" alt="Add" class="add-icon">
+            <img src="{% static 'images/add-employee-icon.png' %}"
+            alt="Add" class="add-icon">
             Add Employee
         </button>
 
         <button class="export-report-btn btn-white">
-            <img src="https://cdn-icons-png.flaticon.com/512/151/151900.png" alt="Export" class="add-icon">
+            <img src="{% static 'images/export-icon.png' %}"
+            alt="Export" class="add-icon">
             Export Report
         </button>
 
         <button class="employee-count-btn">
-            <img src="https://cdn-icons-png.flaticon.com/512/2529/2529521.png" alt="Employees" class="employee-icon">
+            <img src="{% static 'images/notification-icon.png' %}"
+            alt="Employees" class="employee-icon">
             <span class="count-box">3</span>
         </button>
 
         <button class="employee-count-btn">
-            <img src="https://cdn-icons-png.flaticon.com/512/2040/2040504.png " alt="Employees" class="employee-icon">
+            <img src="{% static 'images/settings-icon.png' %}"
+            alt="Settings" class="employee-icon">
         </button>
     </div>
 </div>

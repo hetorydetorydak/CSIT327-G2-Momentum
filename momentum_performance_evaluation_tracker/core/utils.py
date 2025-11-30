@@ -1,6 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from .models import AttendanceRecord, BacklogItem, EvaluationKPI, KPI, Employee
+from dashboard.models import TeamMember
 
 def calculate_attendance_rate(employee, period=None):
     """Calculate attendance rate for an employee"""
@@ -69,7 +70,6 @@ def calculate_compliance_rate(employee, period=None):
 def get_team_kpis(manager_user):
     """Get KPI data for manager's team"""
     try:
-        from dashboard.models import TeamMember
         team_members = TeamMember.objects.filter(
             manager=manager_user, 
             is_active=True
@@ -143,7 +143,6 @@ def get_employee_status(employee):
 def get_team_performance_data(manager_user):
     """Get performance data for manager's team members"""
     try:
-        from dashboard.models import TeamMember
     
         team_members = TeamMember.objects.filter(
             manager=manager_user, 

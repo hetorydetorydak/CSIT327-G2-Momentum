@@ -132,6 +132,7 @@ class AttendanceRecord(models.Model):
 
 class BacklogItem(models.Model):
     STATUS_CHOICES = [
+        ('Not Started', 'Not Started'),
         ('Pending', 'Pending'),
         ('Completed', 'Completed'),
         ('In Progress', 'In Progress'),
@@ -149,7 +150,7 @@ class BacklogItem(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='backlog_items')
     task_description = models.TextField()
     due_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Not Started')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='Medium')
     created_date = models.DateField(auto_now_add=True)
     completed_date = models.DateField(blank=True, null=True)

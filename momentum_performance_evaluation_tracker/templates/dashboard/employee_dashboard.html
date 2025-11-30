@@ -1,97 +1,98 @@
 {% load static %}
 
-
 <section class="main-content-area">
-  <h1 class="content-header-title">
-      {{ user_account.employee.first_name }} {{ user_account.employee.last_name }}
-  </h1>
-  <p class="content-header-subtitle">
-      {{ user_account.employee.position }}, {{ user_account.employee.department }}
-  </p>
-  
-  <!-- Dashboard Metrics Grid -->
-  <div class="dashboard-grid">
-      
-      <!-- Compliance KPI Card -->
-      <div class="dashboard-card kpi-card">
-          <div style="display: flex;justify-content: space-between;">
-              <h3 class="card-title">Compliance </h3>
-              <img src="{% static 'images/compliance-icon.png' %}"
-              style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
-          </div>
-          
-          <p class="card-metric {% if kpi_data.compliance_rate >= 80 %}success{% else %}warning{% endif %}">
-              {{ kpi_data.compliance_rate|default:0 }}%
-          </p>
-          
-          <div style="width: 100%; max-width: 300px; height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
-              <div style="width: {{ kpi_data.compliance_rate|default:0 }}%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;"></div>
-          </div>
+    <h1 class="content-header-title">
+        {{ user_account.employee.first_name }} {{ user_account.employee.last_name }}
+    </h1>
+    <p class="content-header-subtitle">
+        {{ user_account.employee.position }}, {{ user_account.employee.department }}
+    </p>
 
-          <p class="card-detail">
-              {% if kpi_data.compliance_rate >= 80 %}
-                  ↑ Meeting targets
-              {% else %}
-                  ⚠ Needs improvement
-              {% endif %}
-          </p>
-      </div>
+    <!-- Dashboard Metrics Grid -->
+    <div class="dashboard-grid">
 
-      <!-- Attendance KPI Card -->
-      <div class="dashboard-card kpi-card">
-          <div style="display: flex;justify-content: space-between;">
-              <h3 class="card-title">Attendance </h3>
-              <img src="{% static 'images/attendance-icon.png' %}"
-              style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
-          </div>
-          <p class="card-metric {% if kpi_data.attendance_rate >= 85 %}success{% else %}warning{% endif %}">
-              {{ kpi_data.attendance_rate|default:0 }}%
-          </p>
-          
-          <div style="width: 100%; max-width: 300px; height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
-              <div style="width: {{ kpi_data.attendance_rate|default:0 }}%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;"></div>
-          </div>
-          
-          <p class="card-detail">
-              {% if kpi_data.attendance_rate >= 95 %}
-                  Perfect attendance consistent and reliable!
-              {% elif kpi_data.attendance_rate >= 85 %}
-                  Good attendance record
-              {% else %}
-                  Attendance needs improvement
-              {% endif %}
-          </p>
-      </div>
-      
-      <!-- Backlogs KPI Card -->
-      <div class="dashboard-card kpi-card">
-          <div style="display: flex;justify-content: space-between;">
-              <h3 class="card-title">Backlogs </h3>
-              <img src="{% static 'images/backlog-icon.png' %}"
-              style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
-          </div>
-          <p class="card-metric {% if kpi_data.backlog_count <= 2 %}success{% else %}warning{% endif %}">
-              {{ kpi_data.backlog_count|default:0 }}
-          </p>
-          <p class="card-detail">Outstanding items</p>
-          <p class="card-detail">
-              {% if kpi_data.backlog_count <= 2 %}
-                  Manageable workload
-              {% else %}
-                  High workload alert
-              {% endif %}
-          </p>
-      </div>
-      
-      <!-- Task List Card -->
-      <div class="dashboard-card wide-card">
-          <h3 class="card-title">Task List</h3>
-          <ul class="action-list">
-              <li><button class="btn-action">Submit Weekly Report</button></li>
-              <li><button class="btn-action">Approve PTO Request (John)</button></li>
-              <li><button class="btn-action">Review Q4 Budget</button></li>
-          </ul>
-      </div>
-      
-  </div>
+        <!-- Compliance KPI Card -->
+        <div class="dashboard-card kpi-card">
+            <div style="display: flex;justify-content: space-between;">
+                <h3 class="card-title">Compliance </h3>
+                <img src="{% static 'images/compliance-icon.png' %}"
+                    style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
+            </div>
+
+            <p class="card-metric {% if kpi_data.compliance_rate >= 80 %}success{% else %}warning{% endif %}">
+                {{ kpi_data.compliance_rate|default:0 }}%
+            </p>
+
+            <div
+                style="width: 100%; max-width: 300px; height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+                <div
+                    style="width: {{ kpi_data.compliance_rate|default:0 }}%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;">
+                </div>
+            </div>
+
+            <p class="card-detail">
+                {% if kpi_data.compliance_rate >= 80 %}
+                ↑ Meeting targets
+                {% else %}
+                ⚠ Needs improvement
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Attendance KPI Card -->
+        <div class="dashboard-card kpi-card">
+            <div style="display: flex;justify-content: space-between;">
+                <h3 class="card-title">Attendance </h3>
+                <img src="{% static 'images/attendance-icon.png' %}"
+                    style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
+            </div>
+            <p class="card-metric {% if kpi_data.attendance_rate >= 85 %}success{% else %}warning{% endif %}">
+                {{ kpi_data.attendance_rate|default:0 }}%
+            </p>
+
+            <div
+                style="width: 100%; max-width: 300px; height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+                <div
+                    style="width: {{ kpi_data.attendance_rate|default:0 }}%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;">
+                </div>
+            </div>
+
+            <p class="card-detail">
+                {% if kpi_data.attendance_rate >= 95 %}
+                Perfect attendance consistent and reliable!
+                {% elif kpi_data.attendance_rate >= 85 %}
+                Good attendance record
+                {% else %}
+                Attendance needs improvement
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Backlogs KPI Card -->
+        <div class="dashboard-card kpi-card">
+            <div style="display: flex;justify-content: space-between;">
+                <h3 class="card-title">Backlogs </h3>
+                <img src="{% static 'images/backlog-icon.png' %}"
+                    style="height: 1.5em; width: auto; margin-left: 8px; vertical-align: middle;">
+            </div>
+            <p class="card-metric {% if kpi_data.backlog_count <= 2 %}success{% else %}warning{% endif %}">
+                {{ kpi_data.backlog_count|default:0 }}
+            </p>
+            <p class="card-detail">Outstanding items</p>
+            <p class="card-detail">
+                {% if kpi_data.backlog_count <= 2 %} Manageable workload {% else %} High workload alert {% endif %} </p>
+        </div>
+
+        <!-- Task List Card -->
+        <div class="dashboard-card wide-card">
+            <h3 class="card-title">Task List</h3>
+            <div id="tasksList">
+                <div class="loading-message">Loading tasks...</div>
+            </div>
+        </div>
+
+    </div>
 </section>
+
+<!-- Add task management JavaScript only for employee dashboard -->
+<script src="{% static 'dashboard/js/task-management.js' %}"></script>

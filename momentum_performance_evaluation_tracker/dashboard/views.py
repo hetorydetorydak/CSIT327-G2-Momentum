@@ -8,6 +8,9 @@ from core.models import Employee, Evaluation, BacklogItem, AttendanceRecord
 from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_performance_data
 from .models import TeamMember
 from django.db.models import Q 
+from core.models import BacklogItem
+from django.utils import timezone
+from datetime import datetime
 
 @never_cache
 @login_required(login_url='/login/')
@@ -339,11 +342,10 @@ def employee_performance_modal(request, employee_id):
                     for ekpi in evaluation.kpi_scores.all()
                 ]
             })
-        
         # pending tasks
         pending_tasks = BacklogItem.objects.filter(
             employee=employee, 
-            status='Pending'
+            status='Not Started'  # CHANGED FROM 'Pending' TO 'Not Started'
         ).order_by('due_date')[:10]
         
         for task in pending_tasks:
@@ -412,5 +414,192 @@ def remove_employee_from_team_api(request, employee_id):
         
     except Employee.DoesNotExist:
         return JsonResponse({'error': 'Employee not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def get_employee_tasks_api(request):
+    """API endpoint for employee to get their assigned tasks"""
+    try:
+        employee = request.user.employee
+        
+        tasks = BacklogItem.objects.filter(
+            employee=employee
+        ).order_by('-created_date', 'priority')
+        
+        task_data = []
+        for task in tasks:
+            task_data.append({
+                'id': task.backlog_id,
+                'description': task.task_description,
+                'due_date': task.due_date.strftime('%Y-%m-%d'),
+                'status': task.status,
+                'priority': task.priority,
+                'created_date': task.created_date.strftime('%Y-%m-%d'),
+                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None
+            })
+        
+        return JsonResponse({'tasks': task_data})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def update_task_status_api(request, task_id):
+    """API endpoint for employee to update task status"""
+    try:
+        if request.method != 'POST':
+            return JsonResponse({'error': 'Invalid request method'}, status=400)
+            
+        employee = request.user.employee
+        
+        # Get the task and verify ownership
+        try:
+            task = BacklogItem.objects.get(backlog_id=task_id, employee=employee)
+        except BacklogItem.DoesNotExist:
+            return JsonResponse({'error': 'Task not found or unauthorized'}, status=404)
+        
+        new_status = request.POST.get('status')
+        
+        # Validate status - now using 'Not Started' instead of 'Pending'
+        valid_statuses = ['Not Started', 'In Progress', 'Completed', 'Cancelled']
+        if new_status not in valid_statuses:
+            return JsonResponse({'error': 'Invalid task status'}, status=400)
+        
+        # Update task status
+        task.status = new_status
+        
+        # Set completed_date if task is being marked as completed
+        if new_status == 'Completed' and not task.completed_date:
+            task.completed_date = timezone.now().date()
+        elif new_status != 'Completed':
+            task.completed_date = None
+            
+        task.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Task status updated to {new_status}',
+            'task': {
+                'id': task.backlog_id,
+                'status': task.status,
+                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def assign_task_api(request):
+    """API endpoint for supervisor to assign tasks to employees"""
+    try:
+        print("DEBUG: assign_task_api called")
+        print("DEBUG: User role:", request.user.role.role_id)
+        
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        if request.method != 'POST':
+            print("DEBUG: Wrong method - got", request.method)
+            return JsonResponse({'error': 'Invalid request method'}, status=400)
+        
+        employee_id = request.POST.get('employee_id')
+        task_description = request.POST.get('task_description')
+        due_date = request.POST.get('due_date')
+        priority = request.POST.get('priority', 'Medium')
+        
+        print("DEBUG: Form data - employee_id:", employee_id, "description:", task_description, "due_date:", due_date)
+        
+        # Validate required fields
+        if not all([employee_id, task_description, due_date]):
+            print("DEBUG: Missing required fields")
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Verify employee is in supervisor's team
+        try:
+            team_member = TeamMember.objects.get(
+                manager=request.user,
+                employee_id=employee_id,
+                is_active=True
+            )
+            employee = team_member.employee
+            print("DEBUG: Employee found:", employee.first_name, employee.last_name)
+        except TeamMember.DoesNotExist:
+            print("DEBUG: Employee not in team")
+            return JsonResponse({'error': 'Employee not found in your team'}, status=403)
+        
+        # Create the task with 'Not Started' status
+        task = BacklogItem.objects.create(
+            employee=employee,
+            task_description=task_description,
+            due_date=due_date,
+            priority=priority,
+            status='Not Started'
+        )
+        
+        print("DEBUG: Task created successfully - ID:", task.backlog_id)
+        
+        # Format the due_date for response
+        if isinstance(task.due_date, str):
+            due_date_obj = datetime.strptime(task.due_date, '%Y-%m-%d')
+            due_date_str = due_date_obj.strftime('%Y-%m-%d')
+        else:
+            due_date_str = task.due_date.strftime('%Y-%m-%d')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Task assigned to {employee.first_name} {employee.last_name}',
+            'task': {
+                'id': task.backlog_id,
+                'description': task.task_description,
+                'due_date': due_date_str,
+                'priority': task.priority,
+                'status': task.status
+            }
+        })
+        
+    except Exception as e:
+        print("DEBUG: Error in assign_task_api:", str(e))
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def get_team_tasks_api(request):
+    """API endpoint for supervisor to get all team tasks"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # Get all active team members
+        team_members = TeamMember.objects.filter(
+            manager=request.user, 
+            is_active=True
+        ).select_related('employee')
+        
+        team_tasks = []
+        for member in team_members:
+            employee = member.employee
+            tasks = BacklogItem.objects.filter(employee=employee).order_by('-created_date')
+            
+            employee_tasks = []
+            for task in tasks:
+                employee_tasks.append({
+                    'id': task.backlog_id,
+                    'description': task.task_description,
+                    'due_date': task.due_date.strftime('%Y-%m-%d'),
+                    'status': task.status,
+                    'priority': task.priority,
+                    'created_date': task.created_date.strftime('%Y-%m-%d')
+                })
+            
+            team_tasks.append({
+                'employee_id': employee.id,
+                'employee_name': f"{employee.first_name} {employee.last_name}",
+                'tasks': employee_tasks
+            })
+        
+        return JsonResponse({'team_tasks': team_tasks})
+        
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

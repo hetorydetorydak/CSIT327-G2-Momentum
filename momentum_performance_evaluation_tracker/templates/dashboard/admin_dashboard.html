@@ -1,0 +1,141 @@
+{% load static %}
+<main class="dashboard-main extra-padding">
+
+
+
+    <div class="create-user-container">
+
+        <!-- ========================= -->
+        <!-- 1. CREATE ADMIN SECTION   -->
+        <!-- ========================= -->
+        <div class="create-user-top" id="createAdminToggle" role="button" aria-expanded="false" tabindex="0">
+            <h3 style="margin:0;display:inline-block;">Create Admin</h3>
+            <span class="chev" aria-hidden="true" style="margin-left:8px;">▾</span>
+        </div>
+
+        <div class="create-admin-wrapper collapsed" id="createAdminContent" aria-hidden="true">
+            <div class="kpi-wrapper">
+                <div class="search-container">
+                    <img src="{% static 'images/search-icon.png' %}" alt="search" class="search-icon">
+                    <input type="text" id="searchAdminInput" placeholder="Search employees...">
+                </div>
+
+                <button class="btn">
+                    <img src="{% static 'images/add-employee-icon.png' %}" alt="Add" class="add-icon">
+                    Create User
+                </button>
+            </div>
+
+            <div class="user-table-wrapper">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col">
+                                <input type="checkbox" id="select-admin-all" class="table-checkbox">
+                            </th>
+                            <th>USERNAME</th>
+                            <th>EMPLOYEE NAME</th>
+                            <th>EMAIL</th>
+                            <th>ROLE</th>
+                            <th>IS FIRST LOGIN</th>
+                            <th>LAST LOGIN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="user-row">
+                            <td class="checkbox-col">
+                                <input type="checkbox" class="user-checkbox table-checkbox admin-checkbox">
+                            </td>
+                            <td>kiran</td>
+                            <td>Kiran Koko</td>
+                            <td>connect@telusko.com</td>
+                            <td>Admin</td>
+                            <td>true</td>
+                            <td>2025-12-01</td>
+                        </tr>
+                        <tr class="user-row alt-row">
+                            <td class="checkbox-col">
+                                <input type="checkbox" class="user-checkbox table-checkbox admin-checkbox">
+                            </td>
+                            <td>navin</td>
+                            <td>Navin Never</td>
+                            <td>connect@telusko.com</td>
+                            <td>Admin</td>
+                            <td>false</td>
+                            <td>2025-12-01</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================= -->
+        <!-- 2. CREATE SUPERVISOR SECTION  -->
+        <!-- ============================= -->
+        <div class="create-user-top" id="createSupervisorToggle" role="button" aria-expanded="false" tabindex="0">
+            <h3 style="margin:0;display:inline-block;">Create Supervisor</h3>
+            <span class="chev" aria-hidden="true" style="margin-left:8px;">▾</span>
+        </div>
+
+        <div class="create-admin-wrapper collapsed" id="createSupervisorContent" aria-hidden="true">
+            <div class="kpi-wrapper">
+                <div class="search-container">
+                    <img src="{% static 'images/search-icon.png' %}" alt="search" class="search-icon">
+                    <input type="text" id="searchSupervisorInput" placeholder="Search supervisors...">
+                </div>
+
+                <button class="btn">
+                    <img src="{% static 'images/add-employee-icon.png' %}" alt="Add" class="add-icon">
+                    Create Supervisor
+                </button>
+            </div>
+
+            <div class="user-table-wrapper">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col">
+                                <input type="checkbox" id="select-supervisor-all" class="table-checkbox">
+                            </th>
+                            <th>USERNAME</th>
+                            <th>EMPLOYEE NAME</th>
+                            <th>EMAIL</th>
+                            <th>ROLE</th>
+                            <th>IS FIRST LOGIN</th>
+                            <th>LAST LOGIN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="user-row">
+                            <td class="checkbox-col">
+                                <input type="checkbox" class="user-checkbox table-checkbox supervisor-checkbox">
+                            </td>
+                            <td>josie</td>
+                            <td>Josie Lane</td>
+                            <td>josie@example.com</td>
+                            <td>Supervisor</td>
+                            <td>true</td>
+                            <td>2025-12-01</td>
+                        </tr>
+                        <tr class="user-row alt-row">
+                            <td class="checkbox-col">
+                                <input type="checkbox" class="user-checkbox table-checkbox supervisor-checkbox">
+                            </td>
+                            <td>harry</td>
+                            <td>Harry Stone</td>
+                            <td>harry@example.com</td>
+                            <td>Supervisor</td>
+                            <td>false</td>
+                            <td>2025-12-01</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+</main>
+
+<script src="{% static 'dashboard/js/admin-dashboard.js' %}"></script>

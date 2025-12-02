@@ -1,0 +1,226 @@
+
+
+.create-user-container {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
+}
+
+/* Clickable TOP header */
+.create-user-top {
+    background: #ffffff;
+    padding: 14px 18px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.create-user-top:hover {
+    background: #f6f6f6;
+}
+
+.create-user-top .chev {
+    transition: transform 0.25s ease;
+}
+
+/* rotate when expanded */
+.create-user-top.active .chev {
+    transform: rotate(180deg);
+}
+
+/* ------------------------- */
+/* DROPDOWN CONTENT           */
+/* ------------------------- */
+
+.create-admin-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    padding: 16px;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease;
+    max-height: 1000px; /* Expanded */
+    opacity: 1;
+}
+
+.create-admin-wrapper.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 16px;
+    pointer-events: none;
+}
+
+/* KPI bar and search area */
+.kpi-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.search-container input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent;
+}
+
+/* ------------------------- */
+/* TABLE WRAPPER + TABLE     */
+/* ------------------------- */
+
+.user-table-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 2rem;
+}
+
+.user-table thead tr {
+    background-color: #f0f0f0;
+}
+
+.user-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.checkbox-col {
+    width: 40px;
+    text-align: center;
+}
+
+.sortable {
+    cursor: pointer;
+}
+
+.sort-icon {
+    margin-left: 4px;
+    font-size: 10px;
+    color: #999;
+}
+
+.user-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-row {
+    background-color: white;
+    transition: background-color 0.15s;
+}
+
+.user-row.alt-row {
+    background-color: #fafafa;
+}
+
+.user-row:hover {
+    background-color: #f5f5f5;
+}
+
+.table-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.user-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.user-link:hover {
+    text-decoration: underline;
+}
+
+.text-muted {
+    color: #666;
+}
+
+.status-col {
+    text-align: center;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* ------------------------- */
+/* BUTTON STYLE              */
+/* ------------------------- */
+
+.btn {
+    display: inline-flex;           /* keep icon + text aligned */
+    align-items: center;
+    justify-content: center;
+    gap: 6px;                       /* slightly more space between icon & text */
+    padding: 10px 16px;             /* more horizontal padding for balance */
+    min-width: 140px;               /* flexible width but consistent */
+    font-size: 13px;                /* readable, standard */
+    font-weight: 600;               /* slightly bolder */
+    color: #ffffff;
+    background-color: #1f2937;      /* dark gray-blue instead of pure black */
+    border: none;
+    border-radius: 8px;             /* slightly softer corners */
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12); /* subtle shadow */
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #111827;      /* slightly darker on hover */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}

@@ -1,3 +1,39 @@
+/* dashboard/css/kpi-inline.css */
+
+/* header flex used in each KPI card */
+.kpi-card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* icon sizing & spacing used on each KPI card header */
+.kpi-card-header-icon {
+  height: 1.5em; 
+  width: auto; 
+  margin-left: 8px; 
+  vertical-align: middle;
+}
+
+/* outer progress bar wrapper */
+.kpi-progress-wrapper {
+  width: 100%; 
+  max-width: 300px; 
+  height: 20px; 
+  background-color: #e0e0e0; 
+  border-radius: 10px; 
+  overflow: hidden; 
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* inner progress fill; width must still be set dynamically inline or via style attribute from template */
+.kpi-progress-fill {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 10px 0 0 10px;
+  transition: width 0.5s ease-in-out;
+}
+
+
 .dashboard-main {
     padding-top: 5rem; /* Ensures content is below the 60px fixed header + some margin */
     padding-bottom: 3rem;
@@ -277,9 +313,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
+    width: 1200px;
+    margin: 0 auto;
+
 }
 
 .dashboard-card {
+    height: fit-content; 
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;

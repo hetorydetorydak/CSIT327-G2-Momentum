@@ -27,7 +27,7 @@
                     <h3>Overall Performance</h3>
                     <div
                         class="metric-value large {% if employee_data.attendance_rate >= 85 %}good{% else %}poor{% endif %}">
-                        {{ employee_data.attendance_rate }}%
+                        {{ employee_data.performance_score }}%
                     </div>
                 </div>
                 <div class="metric-card">
@@ -62,8 +62,7 @@
                             {% for kpi in eval.kpi_scores %}
                             <div class="kpi-line">
                                 <span class="kpi-name">{{ kpi.kpi_name }}:</span>
-                                <span class="kpi-values">{{ kpi.score|floatformat:2 }}/{{ kpi.target|floatformat:2
-                                    }}</span>
+                                <span class="kpi-values">{{ kpi.score|floatformat:2 }}/{{ kpi.target|floatformat:2 }}</span>
                             </div>
                             {% endfor %}
                         </div>

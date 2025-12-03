@@ -58,7 +58,7 @@
 }
 
 /* KPI bar and search area */
-.kpi-wrapper {
+.kpi-wrapper-admin {
     display: flex;
     align-items: center;
     justify-content: space-between;

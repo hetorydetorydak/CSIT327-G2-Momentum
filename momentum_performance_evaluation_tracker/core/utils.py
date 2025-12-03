@@ -157,8 +157,7 @@ def get_team_performance_data(manager_user):
             attendance_rate = calculate_attendance_rate(employee)
             backlog_count = calculate_backlog_count(employee)
             compliance_rate = calculate_compliance_rate(employee)
-            
-            performance_score = round((attendance_rate + compliance_rate) / 2, 2)
+            performance_score = calculate_performance_score(employee)
             
             if performance_score >= 90:
                 status = 'excellent'

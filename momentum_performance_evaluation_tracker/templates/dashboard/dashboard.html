@@ -1,5 +1,4 @@
 {% extends "global/base.html" %}
-
 {% load static %}
 
 {% block title %}Dashboard - Momentum{% endblock %}
@@ -44,7 +43,15 @@
                         <div class="profile-info-text">
                             <!-- Display employee information from user account -->
                             <span class="profile-name">{{ user_account.employee.first_name }} {{ user_account.employee.last_name }}</span>
-                            <span class="profile-role">{{ user_account.employee.position }}, {{ user_account.employee.department }}</span>
+                            <span class="profile-role">
+                                {% if user_is_admin %}
+                                    Administrator
+                                {% elif user_is_manager %}
+                                    Supervisor, {{ user_account.employee.department }}
+                                {% else %}
+                                    {{ user_account.employee.position }}, {{ user_account.employee.department }}
+                                {% endif %}
+                            </span>
                         </div>
                         
                         <img id="dropdown-icon" class="dropdown-icon" 
@@ -62,7 +69,6 @@
                 
             </div>
 
-            <!-- Sub Navigation Bar  for Managers Only-->
             {% if user_is_manager %}
                 {% include "dashboard/manager-toolbar.html" %}
             {% endif %}
@@ -70,14 +76,15 @@
     </header>
 
     <!-- Dashboard Main Content Area -->
-    {% if user_is_manager %}
+    {% if user_is_admin %}
+        {% include "dashboard/admin_dashboard.html" %}
+    {% elif user_is_manager %}
         {% include "dashboard/manager_dashboard.html" %}
     {% else %}
         {% include "dashboard/employee_dashboard.html" %}
     {% endif %}
-
     
-    <!-- Password Reset Modal (shown on first-time login) -->
+    <!-- Password Reset Modal (shown on first-time login for supervisors only) -->
     {% if show_password_reset %}
         {% include "core/password-reset-modal.html" %}
     {% endif %}
@@ -97,5 +104,8 @@ window.teamManagementConfig = {
 </script>
 {% if user_is_manager %}
 <script src="{% static 'dashboard/js/team-management.js' %}"></script>
+{% endif %}
+{% if user_is_admin %}
+<script src="{% static 'dashboard/js/admin-dashboard.js' %}"></script>
 {% endif %}
 {% endblock %}

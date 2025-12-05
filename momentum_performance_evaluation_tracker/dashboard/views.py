@@ -19,17 +19,21 @@ def dashboard_home(request):
         return redirect('core:login')
 
     user_is_manager = False
+    user_is_admin = False
     show_password_reset = False
     password_reset_form = None
     kpi_data = {}
     team_performance = []
     
-
     # Check if user is a manager
     if hasattr(request.user, 'role') and request.user.role.role_id == 302:
         user_is_manager = True
         team_performance = get_team_performance_data(request.user)
 
+    # Check if user is an admin (role_id = 301)
+    if hasattr(request.user, 'role') and request.user.role.role_id == 301:
+        user_is_admin = True
+    
     # Check if supervisor needs password reset
     if hasattr(request.user, 'role') and user_is_manager and request.user.is_first_login:
         show_password_reset = True
@@ -54,6 +58,7 @@ def dashboard_home(request):
         'show_password_reset': show_password_reset,
         'password_reset_form': password_reset_form,
         'user_is_manager': user_is_manager,
+        'user_is_admin': user_is_admin,
         'kpi_data': kpi_data,
         'team_performance': team_performance,
     }

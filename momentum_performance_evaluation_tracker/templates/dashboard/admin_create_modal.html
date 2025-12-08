@@ -1,0 +1,79 @@
+<!-- CREATE ADMIN MODAL -->
+<div id="createAdminModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create Admin</h2>
+            <span class="close-modal" data-modal="createAdminModal">&times;</span>
+        </div>
+        <form id="createAdminForm" class="modal-form">
+            <div class="form-group">
+                <label for="adminUsername">Username <span class="required">*</span></label>
+                <input type="text" id="adminUsername" name="username" required>
+                <span class="error-message" id="adminUsernameError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmployeeName">Employee Name <span class="required">*</span></label>
+                <input type="text" id="adminEmployeeName" name="employeeName" required>
+                <span class="error-message" id="adminEmployeeNameError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPosition">Position <span class="required">*</span></label>
+                <input type="text" id="adminPosition" name="position" required>
+                <span class="error-message" id="adminPositionError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmail">Email <span class="required">*</span></label>
+                <input type="email" id="adminEmail" name="email" required>
+                <span class="error-message" id="adminEmailError"></span>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" data-modal="createAdminModal">Cancel</button>
+                <button type="submit" class="btn-submit">Create Admin</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CREATE SUPERVISOR MODAL -->
+<div id="createSupervisorModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create Supervisor</h2>
+            <span class="close-modal" data-modal="createSupervisorModal">&times;</span>
+        </div>
+        <form id="createSupervisorForm" class="modal-form">
+            <div class="form-group">
+                <label for="supervisorUsername">Username <span class="required">*</span></label>
+                <input type="text" id="supervisorUsername" name="username" required>
+                <span class="error-message" id="supervisorUsernameError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="supervisorEmployeeName">Employee Name <span class="required">*</span></label>
+                <input type="text" id="supervisorEmployeeName" name="employeeName" required>
+                <span class="error-message" id="supervisorEmployeeNameError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="supervisorPosition">Position <span class="required">*</span></label>
+                <input type="text" id="supervisorPosition" name="position" required>
+                <span class="error-message" id="supervisorPositionError"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="supervisorEmail">Email <span class="required">*</span></label>
+                <input type="email" id="supervisorEmail" name="email" required>
+                <span class="error-message" id="supervisorEmailError"></span>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" data-modal="createSupervisorModal">Cancel</button>
+                <button type="submit" class="btn-submit">Create Supervisor</button>
+            </div>
+        </form>
+    </div>
+</div>

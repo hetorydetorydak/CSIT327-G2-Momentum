@@ -226,19 +226,6 @@
     transform: scale(0.97);
 }
 
-/* Modal Content */
-.modal-content {
-    background-color: #ffffff;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh; /* Limit height to 90% of viewport */
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    animation: slideDown 0.3s ease;
-    overflow: hidden; /* Prevent overflow */
-}
 
 @keyframes slideDown {
     from {

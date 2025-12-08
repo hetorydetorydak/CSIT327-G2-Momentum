@@ -7,7 +7,13 @@ def calculate_attendance_rate(employee, period=None):
     """Calculate attendance rate for an employee"""
     try:
         today = timezone.now().date()
-        start_date = today.replace(day=1) # start of the month
+        
+        # Start from October 1st of the current year
+        start_date = today.replace(month=10, day=1)
+        
+        # If we're in a month before October, use October of previous year
+        if today.month < 10:
+            start_date = start_date.replace(year=today.year - 1)
         
         attendance_records = AttendanceRecord.objects.filter(
             employee=employee,
@@ -15,13 +21,19 @@ def calculate_attendance_rate(employee, period=None):
             date__lte=today
         )
         
+        print(f"DEBUG: Looking for attendance from {start_date} to {today}")
+        print(f"DEBUG: Found {attendance_records.count()} records")
+        
         if not attendance_records.exists():
             return 0.0
         
         total_days = attendance_records.count()
         present_days = attendance_records.filter(status='Present').count()
         
-        return round((present_days / total_days) * 100, 2) if total_days > 0 else 0.0
+        rate = round((present_days / total_days) * 100, 2) if total_days > 0 else 0.0
+        print(f"DEBUG: Calculated rate: {rate}%")
+        
+        return rate
     except Exception as e:
         print(f"Error calculating attendance: {e}")
         return 0.0

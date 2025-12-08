@@ -50,39 +50,31 @@
                 </div>
             </div>
 
-            {% if employee_data.recent_evaluations %}
-            <div class="evaluations-section">
-                <h3>Recent Evaluations</h3>
-                <div class="evaluations-list">
-                    {% for eval in employee_data.recent_evaluations %}
-                    <div class="evaluation-item">
-                        <div class="eval-period">{{ eval.period }}</div>
-                        <div class="eval-date">{{ eval.date }}</div>
-                        <div class="eval-kpis">
-                            {% for kpi in eval.kpi_scores %}
-                            <div class="kpi-line">
-                                <span class="kpi-name">{{ kpi.kpi_name }}:</span>
-                                <span class="kpi-values">{{ kpi.score|floatformat:2 }}/{{ kpi.target|floatformat:2 }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% else %}
-            <div class="no-data">No recent evaluations found.</div>
-            {% endif %}
-
             {% if employee_data.pending_tasks %}
-            <div class="tasks-section">
+            <div class="tasks-section pending-tasks-section">
                 <h3>Pending Tasks</h3>
                 <div class="tasks-list">
                     {% for task in employee_data.pending_tasks %}
-                    <div class="task-item {{ task.priority|lower }}">
-                        <span class="task-desc">{{ task.description }}</span>
-                        <span class="task-due">Due: {{ task.due_date }}</span>
-                        <span class="task-priority">{{ task.priority }}</span>
+                    <div class="task-item {{ task.priority|lower }} pending-task" data-task-id="{{ task.id }}">
+                        <div class="task-content">
+                            <span class="task-desc">{{ task.description }}</span>
+                            <span class="task-due">Due: {{ task.due_date }} | Status: {{ task.status }}</span>
+                            <span class="task-priority">{{ task.priority }}</span>
+                            {% if task.has_file %}
+                            <div class="task-file-info">
+                                <small>
+                                    <i class="fas fa-paperclip"></i> {{ task.file_name }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="task-actions">
+                            {% if task.has_file %}
+                            <button class="btn-file-view" onclick="viewTaskFile({{ task.id }})">
+                                <i class="fas fa-eye"></i> View File
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -90,6 +82,100 @@
             {% else %}
             <div class="no-data">No pending tasks found.</div>
             {% endif %}
+
+            <!-- Completed Tasks Section -->
+            {% if employee_data.completed_tasks %}
+            <div class="tasks-section completed-tasks-section">
+                <h3>Completed & Accepted Tasks</h3>
+                <div class="tasks-list">
+                    {% for task in employee_data.completed_tasks %}
+                    <div class="task-item {{ task.priority|lower }} 
+            {% if task.status == 'Accepted' %}accepted-task{% else %}completed-task{% endif %}"
+                        data-task-id="{{ task.id }}">
+                        <div class="task-content">
+                            <div class="task-header">
+                                <span class="task-desc">{{ task.description }}</span>
+                                <span class="task-status-badge 
+                        {% if task.review_status == 'Pending Review' %}pending-review
+                        {% elif task.review_status == 'Accepted' %}accepted
+                        {% elif task.review_status == 'Rejected' %}rejected
+                        {% endif %}">
+                                    {% if task.status == 'Accepted' %}
+                                    <i class="fas fa-check-circle"></i> Accepted
+                                    {% elif task.review_status == 'Pending Review' %}
+                                    {{ task.review_status }}
+                                    {% elif task.review_status == 'Rejected' %}
+                                    <i class="fas fa-times-circle"></i> Rejected
+                                    {% else %}
+                                    Completed
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="task-details">
+                                <span class="task-due">Due: {{ task.due_date }}</span>
+                                {% if task.completed_date %}
+                                <span class="task-completed">Completed: {{ task.completed_date }}</span>
+                                {% endif %}
+                                <span class="task-priority">{{ task.priority }}</span>
+                            </div>
+                            {% if task.has_file %}
+                            <div class="task-file-info">
+                                <small>
+                                    <i class="fas fa-paperclip"></i> {{ task.file_name }}
+                                    <br>
+                                    <small>Uploaded: {{ task.uploaded_at }}</small>
+                                </small>
+                            </div>
+                            {% endif %}
+
+                            {% if task.review_status == 'Accepted' or task.review_status == 'Rejected' %}
+                            <div class="review-info">
+                                <small>
+                                    <strong>Reviewed by:</strong> {{ task.reviewed_by }}<br>
+                                    <strong>Reviewed at:</strong> {{ task.reviewed_at }}<br>
+                                    {% if task.review_notes %}
+                                    <strong>Notes:</strong> {{ task.review_notes }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="task-actions">
+                            {% if task.has_file %}
+                            <button class="btn-file-view" onclick="viewTaskFile({{ task.id }})">
+                                <i class="fas fa-eye"></i> View File
+                            </button>
+                            {% else %}
+                            <span class="no-file">No file uploaded</span>
+                            {% endif %}
+
+                            {% if task.review_status == 'Pending Review' %}
+                            <div class="review-buttons">
+                                <button class="btn-accept" onclick="reviewTask({{ task.id }}, 'accept')">
+                                    <i class="fas fa-check"></i> Accept
+                                </button>
+                                <button class="btn-reject" onclick="reviewTask({{ task.id }}, 'reject')">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-data">No completed or accepted tasks found.</div>
+            {% endif %}
+
+            {% if employee_data.pending_tasks|length >= 10 or employee_data.completed_tasks|length >= 10 %}
+            <div class="view-all-tasks">
+                <button class="btn-view-all" onclick="loadAllTasks({{ employee_id }})">
+                    View All Tasks
+                </button>
+            </div>
+            {% endif %}
+
 
             {% if employee_data.attendance_history %}
             <div class="attendance-section">
@@ -143,9 +229,39 @@
             {% endif %}
 
             {% else %}
-            <!-- Default content when no data (initial state) -->
             <div class="loading">Select an employee to view performance details...</div>
             {% endif %}
         </div>
     </div>
+
+    <div id="reviewNotesModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeReviewModal">×</button>
+            <h2 id="reviewModalTitle">Review Task</h2>
+            <div class="modal-body">
+                <form id="reviewNotesForm">
+                    <input type="hidden" id="reviewTaskId">
+                    <input type="hidden" id="reviewAction">
+
+                    <div class="form-group">
+                        <label for="reviewNotesTextarea" id="reviewNotesLabel">
+                            Notes (optional)
+                        </label>
+                        <textarea id="reviewNotesTextarea" name="review_notes" rows="4"
+                            placeholder="Enter any notes or feedback for this task..." class="form-control"></textarea>
+                        <div class="form-text">
+                            These notes will be visible to the employee.
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-secondary" id="cancelReview">Cancel</button>
+                        <button type="submit" class="btn-primary" id="submitReview">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>

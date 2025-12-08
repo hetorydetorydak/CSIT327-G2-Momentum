@@ -41,9 +41,13 @@ def calculate_attendance_rate(employee, period=None):
 def calculate_backlog_count(employee):
     """Count pending backlog items for an employee"""
     try:
+        # count tasks that are Not Started, In Progress, or Completed but pending review
+        # exclude Accepted tasks
         return BacklogItem.objects.filter(
             employee=employee, 
-            status='Pending'
+            status__in=['Not Started', 'In Progress']
+        ).exclude(
+            review_status='Accepted'  # exclude accepted tasks from backlog count
         ).count()
     except Exception as e:
         print(f"Error calculating backlog: {e}")

@@ -22,7 +22,7 @@
 
                 <button class="btn">
                     <img src="{% static 'images/add-employee-icon.png' %}" alt="Add" class="add-icon">
-                    Create User
+                    Create Admin
                 </button>
             </div>
 
@@ -78,7 +78,7 @@
         </div>
 
         <div class="create-admin-wrapper collapsed" id="createSupervisorContent" aria-hidden="true">
-            <div class="kpi-wrapper">
+            <div class="kpi-wrapper-admin">
                 <div class="search-container">
                     <img src="{% static 'images/search-icon.png' %}" alt="search" class="search-icon">
                     <input type="text" id="searchSupervisorInput" placeholder="Search supervisors...">
@@ -139,3 +139,4 @@
 </main>
 
 <script src="{% static 'dashboard/js/admin-dashboard.js' %}"></script>
+ {% include 'dashboard/admin_create_modal.html' %}

@@ -124,3 +124,76 @@ class SupervisorPasswordResetForm(forms.Form):
             raise forms.ValidationError("New passwords do not match")
 
         return cleaned_data
+
+class AdminCreateUserForm(forms.Form):
+    # Common fields for both admin and supervisor
+    first_name = forms.CharField(max_length=150)
+    last_name = forms.CharField(max_length=150)
+    email = forms.EmailField()
+    department = forms.CharField(max_length=150, required=False)
+    position = forms.CharField(max_length=150, required=False)
+    username = forms.CharField(max_length=150)
+    password = forms.CharField(widget=forms.PasswordInput, min_length=8)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    require_password_change = forms.BooleanField(initial=True, required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.user_type = kwargs.pop('user_type', 'supervisor')  # 'admin' or 'supervisor'
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and Employee.email_exists(email):
+            raise forms.ValidationError("Email address already in use.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username and UserAccount.username_exists(username):
+            raise forms.ValidationError("Username already exists.")
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        print(f"DEBUG: Form cleaned data: {cleaned_data}")  # Add this
+        
+        # Check email
+        email = cleaned_data.get('email')
+        if email and Employee.email_exists(email):
+            self.add_error('email', 'Email address already in use.')
+        
+        # Check username
+        username = cleaned_data.get('username')
+        if username and UserAccount.username_exists(username):
+            self.add_error('username', 'Username already exists.')
+        
+        # Check password match
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', 'Passwords do not match!')
+        
+        return cleaned_data
+
+
+    def save(self):
+        employee_data = {
+            'first_name': self.cleaned_data['first_name'],
+            'last_name': self.cleaned_data['last_name'],
+            'email_address': self.cleaned_data['email'],
+            'department': self.cleaned_data.get('department'),
+            'position': self.cleaned_data.get('position'),
+        }
+        
+        if self.user_type == 'admin':
+            return UserAccount.create_admin_user(
+                employee_data=employee_data,
+                username=self.cleaned_data['username'],
+                password=self.cleaned_data['password']
+            )
+        else:  # supervisor
+            return UserAccount.create_supervisor_user(
+                employee_data=employee_data,
+                username=self.cleaned_data['username'],
+                password=self.cleaned_data['password']
+            )

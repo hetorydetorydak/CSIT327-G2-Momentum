@@ -11,4 +11,6 @@ urlpatterns = [
     path('check_username/', views.check_username_exists, name='check_username'),
     path('logout/', views.logout_view, name='logout'),
     path('handle-password-reset/', views.handle_password_reset, name='handle_password_reset'),
+    path('admin/create-supervisor/', views.admin_create_supervisor, name='admin_create_supervisor'),
+    path('admin/create-admin/', views.admin_create_admin, name='admin_create_admin'),
 ]

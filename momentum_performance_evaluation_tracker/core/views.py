@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import logout as auth_logout
 
-from .forms import SupervisorPasswordResetForm, LoginForm, RegistrationForm
+from .forms import SupervisorPasswordResetForm, LoginForm, RegistrationForm, AdminCreateUserForm
 from .models import UserAccount, Employee
+
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 def home_page(request):
     return render(request, "core/home.html")
@@ -106,3 +108,67 @@ def handle_password_reset(request):
                 messages.error(request, error)
 
     return redirect('dashboard:home')
+    
+def is_admin(user):
+    """Check if user is admin (role 301)"""
+    return user.is_authenticated and hasattr(user, 'role') and user.role.role_id == 301
+
+@login_required
+@user_passes_test(is_admin, login_url='/login/')
+def admin_create_supervisor(request):
+    """Admin creates a new supervisor"""
+    if request.method == 'POST':
+        form = AdminCreateUserForm(request.POST, user_type='supervisor')
+        if form.is_valid():
+            try:
+                supervisor = form.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Supervisor account created successfully for {supervisor.employee.first_name} {supervisor.employee.last_name}.',
+                    'user_id': supervisor.pk,
+                    'username': supervisor.username
+                })
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error creating supervisor: {str(e)}'
+                })
+        else:
+            errors = {field: error.get_json_data()[0]['message'] for field, error in form.errors.items()}
+            return JsonResponse({
+                'success': False,
+                'errors': errors,
+                'message': 'Please correct the errors below.'
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+@login_required
+@user_passes_test(is_admin, login_url='/login/')
+def admin_create_admin(request):
+    """Admin creates another admin (only admins can create admins)"""
+    if request.method == 'POST':
+        form = AdminCreateUserForm(request.POST, user_type='admin')
+        if form.is_valid():
+            try:
+                admin = form.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Admin account created successfully for {admin.employee.first_name} {admin.employee.last_name}.',
+                    'user_id': admin.pk,
+                    'username': admin.username
+                })
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error creating admin: {str(e)}'
+                })
+        else:
+            errors = {field: error.get_json_data()[0]['message'] for field, error in form.errors.items()}
+            return JsonResponse({
+                'success': False,
+                'errors': errors,
+                'message': 'Please correct the errors below.'
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})

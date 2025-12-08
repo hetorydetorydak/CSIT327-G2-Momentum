@@ -75,6 +75,60 @@ class UserAccount(models.Model):
             user.save()
         
         return user
+    
+    @classmethod
+    def create_supervisor_user(cls, employee_data, username, password, role_id=302):
+        from django.db import transaction
+        
+        role = Role.objects.filter(pk=role_id).first()
+        if not role:
+            role, _ = Role.objects.get_or_create(
+                role_id=302, 
+                defaults={
+                    "role_name": "Supervisor", 
+                    "description": "Team manager/supervisor"
+                }
+            )
+        
+        with transaction.atomic():
+            employee = Employee.objects.create(**employee_data)
+            user = cls(
+                employee=employee,
+                username=username,
+                role=role,
+                is_first_login=True  # Require password change on first login
+            )
+            user.set_password(password)
+            user.save()
+        
+        return user
+
+    @classmethod
+    def create_admin_user(cls, employee_data, username, password, role_id=301):
+        from django.db import transaction
+        
+        role = Role.objects.filter(pk=role_id).first()
+        if not role:
+            role, _ = Role.objects.get_or_create(
+                role_id=301, 
+                defaults={
+                    "role_name": "Admin", 
+                    "description": "System administrator"
+                }
+            )
+        
+        with transaction.atomic():
+            employee = Employee.objects.create(**employee_data)
+            user = cls(
+                employee=employee,
+                username=username,
+                role=role,
+                is_first_login=True  # Require password change on first login
+            )
+            user.set_password(password)
+            user.save()
+        
+        return user
 
     # make models work with Django's auth
     @property

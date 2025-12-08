@@ -1,78 +1,96 @@
-<!-- CREATE ADMIN MODAL -->
-<div id="createAdminModal" class="modal" style="display: none;">
+<!-- ADMIN CREATE MODAL -->
+<div id="adminCreateModal" class="modal" style="display: none;">
+    <div class="modal-backdrop"></div>
     <div class="modal-content">
-        <div class="modal-header">
-            <h2>Create Admin</h2>
-            <span class="close-modal" data-modal="createAdminModal">&times;</span>
-        </div>
-        <form id="createAdminForm" class="modal-form">
-            <div class="form-group">
-                <label for="adminUsername">Username <span class="required">*</span></label>
-                <input type="text" id="adminUsername" name="username" required>
-                <span class="error-message" id="adminUsernameError"></span>
+        <button class="modal-close" id="closeAdminModal">×</button>
+        
+        <!-- Modal header will be dynamically set -->
+        <h2 id="adminModalTitle">Create User</h2>
+        <p id="adminModalSubtitle" class="modal-subtitle">Fill in the details</p>
+
+        <div id="admin-create-message" class="messages"></div>
+        
+        <form id="adminCreateForm" class="form" method="POST">
+            {% csrf_token %}
+            
+            <!-- Step 1: Personal Details -->
+            <div class="form-step active">
+                <label>First Name *</label>
+                <input type="text" name="first_name" required>
+
+                <label>Last Name *</label>
+                <input type="text" name="last_name" required>
+
+                <label>Email Address *</label>
+                <input type="email" name="email" required>
+
+                <label>Position</label>
+                <input type="text" name="position" placeholder="e.g., Team Lead, Manager">
+
+                <label>Department</label>
+                <select name="department">
+                    <option value="">Select Department</option>
+                    <option value="IT">IT Department</option>
+                    <option value="HR">Human Resources</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Customer Service">Customer Service</option>
+                    <option value="Production">Production</option>
+                    <option value="Research">Research & Development</option>
+                </select>
+
+                <div class="form-footer">
+                    <button type="button" class="btn-submit next-btn">Next</button>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="adminEmployeeName">Employee Name <span class="required">*</span></label>
-                <input type="text" id="adminEmployeeName" name="employeeName" required>
-                <span class="error-message" id="adminEmployeeNameError"></span>
+            <!-- Step 2: Account Credentials -->
+            <div class="form-step">
+                <label>Username *</label>
+                <input type="text" name="username" required>
+                <small style="color: #666; font-size: 12px; display: block; margin-top: -8px; margin-bottom: 8px;">
+                    Must be unique
+                </small>
+
+                <label>Password *</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="generatedPassword" name="password" readonly 
+                           style="flex: 1; background-color: #f5f5f5; font-family: monospace;">
+                    <button type="button" id="generatePasswordBtn" class="btn-submit" 
+                            style="padding: 8px 12px; font-size: 12px; white-space: nowrap;">
+                        Generate
+                    </button>
+                </div>
+
+                <label>Confirm Password *</label>
+                <input type="password" name="confirm_password" required>
+
+                <div class="checkbox-group" style="margin: 15px 0;">
+                    <input type="checkbox" id="requirePasswordChange" name="require_password_change" checked>
+                    <label for="requirePasswordChange" style="font-size: 14px;">
+                        Require password change on first login
+                    </label>
+                </div>
+
+                <div class="form-footer">
+                    <button type="button" class="btn-submit prev-btn">Back</button>
+                    <button type="button" class="btn-submit next-btn">Next</button>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="adminPosition">Position <span class="required">*</span></label>
-                <input type="text" id="adminPosition" name="position" required>
-                <span class="error-message" id="adminPositionError"></span>
-            </div>
+            <!-- Step 3: Confirmation -->
+            <div class="form-step">
+                <h3>Confirmation</h3>
+                <p>Review the details before creating the account:</p>
+                
+                <div id="admin-confirmation-details" class="confirmation-box"></div>
 
-            <div class="form-group">
-                <label for="adminEmail">Email <span class="required">*</span></label>
-                <input type="email" id="adminEmail" name="email" required>
-                <span class="error-message" id="adminEmailError"></span>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" data-modal="createAdminModal">Cancel</button>
-                <button type="submit" class="btn-submit">Create Admin</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- CREATE SUPERVISOR MODAL -->
-<div id="createSupervisorModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Create Supervisor</h2>
-            <span class="close-modal" data-modal="createSupervisorModal">&times;</span>
-        </div>
-        <form id="createSupervisorForm" class="modal-form">
-            <div class="form-group">
-                <label for="supervisorUsername">Username <span class="required">*</span></label>
-                <input type="text" id="supervisorUsername" name="username" required>
-                <span class="error-message" id="supervisorUsernameError"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="supervisorEmployeeName">Employee Name <span class="required">*</span></label>
-                <input type="text" id="supervisorEmployeeName" name="employeeName" required>
-                <span class="error-message" id="supervisorEmployeeNameError"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="supervisorPosition">Position <span class="required">*</span></label>
-                <input type="text" id="supervisorPosition" name="position" required>
-                <span class="error-message" id="supervisorPositionError"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="supervisorEmail">Email <span class="required">*</span></label>
-                <input type="email" id="supervisorEmail" name="email" required>
-                <span class="error-message" id="supervisorEmailError"></span>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" data-modal="createSupervisorModal">Cancel</button>
-                <button type="submit" class="btn-submit">Create Supervisor</button>
+                <div class="form-footer">
+                    <button type="button" class="btn-submit prev-btn">Back</button>
+                    <button type="submit" id="adminCreateSubmitBtn" class="btn-submit">Create Account</button>
+                </div>
             </div>
         </form>
     </div>

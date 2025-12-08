@@ -74,202 +74,373 @@ document.addEventListener('DOMContentLoaded', function() {
     setupSelectAll('select-supervisor-all', 'supervisor-checkbox');
 
 
-    // ----------- MODAL FUNCTIONALITY -----------
-    console.log("Setting up modals...");
+      // ----------- ADMIN CREATE MODAL FUNCTIONALITY -----------
+    const adminCreateModal = document.getElementById('adminCreateModal');
+    const adminCreateForm = document.getElementById('adminCreateForm');
+    const generatePasswordBtn = document.getElementById('generatePasswordBtn');
+    const generatedPasswordInput = document.getElementById('generatedPassword');
     
-    // Check if modals exist
-    const adminModal = document.getElementById('createAdminModal');
-    const supervisorModal = document.getElementById('createSupervisorModal');
-    
-    console.log("Admin Modal found:", adminModal);
-    console.log("Supervisor Modal found:", supervisorModal);
+    let currentAdminStep = 0;
+    let adminFormSteps;
+    let currentUserType = ''; // 'admin' or 'supervisor'
+    let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Open modal function
-    function openModal(modalId) {
-        console.log("Opening modal:", modalId);
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'flex';
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-            console.log("Modal opened successfully");
-        } else {
-            console.error("Modal not found:", modalId);
-        }
+    // Initialize modal if it exists
+    if (adminCreateModal) {
+        const closeAdminModal = document.getElementById('closeAdminModal');
+        
+        // Close modal handlers
+        closeAdminModal.addEventListener('click', () => {
+            closeAdminCreateModal();
+        });
+        
+        adminCreateModal.querySelector('.modal-backdrop').addEventListener('click', () => {
+            closeAdminCreateModal();
+        });
     }
 
-    // Close modal function
-    function closeModal(modalId) {
-        console.log("Closing modal:", modalId);
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-            modal.classList.remove('show');
-            document.body.style.overflow = '';
-            // Reset form
-            const form = modal.querySelector('form');
-            if (form) {
-                form.reset();
-                clearErrors(form);
+    // Initialize form if it exists
+    if (adminCreateForm) {
+        adminFormSteps = adminCreateForm.querySelectorAll(".form-step");
+        const adminNextBtns = adminCreateForm.querySelectorAll(".next-btn");
+        const adminPrevBtns = adminCreateForm.querySelectorAll(".prev-btn");
+        
+        // Password generation
+        if (generatePasswordBtn && generatedPasswordInput) {
+            generatePasswordBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                generatePassword();
+            });
+            
+            // Generate initial password
+            generatePassword();
+        }
+        
+        // Clear input styles as you type
+        adminCreateForm.querySelectorAll("input, select").forEach(input => {
+            input.addEventListener("input", () => {
+                input.style.border = "1px solid #d1d5db"; 
+                input.style.backgroundColor = "white"; 
+                clearAdminMessage();
+            });
+        });
+        
+        // Next button handlers
+        adminNextBtns.forEach((btn) => {
+            btn.addEventListener("click", async () => {
+                clearAdminMessage();
+                
+                const inputs = adminFormSteps[currentAdminStep].querySelectorAll("input, select");
+                let allValid = true;
+                
+                // Validate required fields
+                inputs.forEach(input => {
+                    if (input.hasAttribute("required") && !input.value.trim()) {
+                        input.style.border = "2px solid #e63946"; 
+                        input.style.backgroundColor = "#ffe5e5";  
+                        allValid = false;
+                    }
+                });
+                
+                if (!allValid) {
+                    showAdminMessage("Please fill in all required fields (*)");
+                    return;
+                }
+                
+                // Step-specific validations
+                if (currentAdminStep === 0) {
+                    // Validate email
+                    const emailInput = adminCreateForm.querySelector("input[name='email']");
+                    const email = emailInput.value.trim();
+                    
+                    if (!emailPattern.test(email)) {
+                        showAdminMessage("Please enter a valid email address.");
+                        emailInput.style.border = "2px solid #e63946";
+                        emailInput.style.backgroundColor = "#ffe5e5";
+                        return;
+                    }
+                    
+                    // Check if email exists via AJAX
+                    try {
+                        const response = await fetch(`/core/check_email/?email=${encodeURIComponent(email)}`);
+                        const data = await response.json();
+                        if (data.exists) {
+                            showAdminMessage("Email address already in use.");
+                            emailInput.style.border = "2px solid #e63946";
+                            emailInput.style.backgroundColor = "#ffe5e5";
+                            return;
+                        }
+                    } catch (error) {
+                        console.error("Error checking email:", error);
+                        showAdminMessage("Error checking email availability.");
+                        return;
+                    }
+                }
+                
+                if (currentAdminStep === 1) {
+                    // Validate username
+                    const usernameInput = adminCreateForm.querySelector("input[name='username']");
+                    const username = usernameInput.value.trim();
+                    
+                    if (!username) {
+                        showAdminMessage("Username is required.");
+                        usernameInput.style.border = "2px solid #e63946";
+                        usernameInput.style.backgroundColor = "#ffe5e5";
+                        return;
+                    }
+                    
+                    // Check if username exists via AJAX
+                    try {
+                        const response = await fetch(`/core/check_username/?username=${encodeURIComponent(username)}`);
+                        const data = await response.json();
+                        if (data.exists) {
+                            showAdminMessage("Username already exists.");
+                            usernameInput.style.border = "2px solid #e63946";
+                            usernameInput.style.backgroundColor = "#ffe5e5";
+                            return;
+                        }
+                    } catch (error) {
+                        console.error("Error checking username:", error);
+                        showAdminMessage("Error checking username availability.");
+                        return;
+                    }
+                    
+                    // Validate password match
+                    const password = generatedPasswordInput.value;
+                    const confirmPassword = adminCreateForm.querySelector("input[name='confirm_password']").value;
+                    
+                    if (password !== confirmPassword) {
+                        showAdminMessage("Passwords do not match.");
+                        return;
+                    }
+                    
+                    if (password.length < 8) {
+                        showAdminMessage("Password must be at least 8 characters long.");
+                        return;
+                    }
+                }
+                
+                // Move to next step
+                if (currentAdminStep < adminFormSteps.length - 1) {
+                    currentAdminStep++;
+                    
+                    // Update confirmation details on last step
+                    if (currentAdminStep === 2) {
+                        const formData = new FormData(adminCreateForm);
+                        const confirmationDiv = document.getElementById('admin-confirmation-details');
+                        
+                        const userTypeDisplay = currentUserType === 'admin' ? 'Administrator' : 'Supervisor';
+                        
+                        let html = `
+                            <p><strong>Account Type:</strong> ${userTypeDisplay}</p>
+                            <p><strong>Name:</strong> ${formData.get("first_name")} ${formData.get("last_name")}</p>
+                            <p><strong>Email:</strong> ${formData.get("email")}</p>
+                            <p><strong>Position:</strong> ${formData.get("position") || 'Not specified'}</p>
+                            <p><strong>Department:</strong> ${formData.get("department") || 'Not specified'}</p>
+                            <p><strong>Username:</strong> ${formData.get("username")}</p>
+                            <p><strong>Password:</strong> <span style="font-family: monospace;">${formData.get("password")}</span></p>
+                            <p><strong>Require password change:</strong> ${formData.get("require_password_change") ? 'Yes' : 'No'}</p>
+                        `;
+                        
+                        confirmationDiv.innerHTML = html;
+                    }
+                    
+                    updateAdminStep(currentAdminStep);
+                }
+            });
+        });
+        
+        // Previous button handlers
+        adminPrevBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                if (currentAdminStep > 0) {
+                    currentAdminStep--;
+                    updateAdminStep(currentAdminStep);
+                }
+            });
+        });
+        
+        // Form submission
+        adminCreateForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            clearAdminMessage();
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = document.getElementById('adminCreateSubmitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(adminCreateForm);
+                
+                // Determine the correct endpoint based on user type
+                const endpoint = currentUserType === 'admin' 
+                    ? '/core/admin/create-admin/' 
+                    : '/core/admin/create-supervisor/';
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAdminMessage(result.message, false);
+                    
+                    // Reset form and close modal after success
+                    setTimeout(() => {
+                        closeAdminCreateModal();
+                        
+                        // Refresh the page to show new user
+                        location.reload();
+                    }, 2000);
+                } 
+                // else {
+                //     showAdminMessage(result.message || 'Error creating user');
+                    
+                //     // Highlight error fields
+                //     if (result.errors) {
+                //         Object.keys(result.errors).forEach(fieldName => {
+                //             const input = adminCreateForm.querySelector(`[name="${fieldName}"]`);
+                //             if (input) {
+                //                 input.style.border = "2px solid #e63946";
+                //                 input.style.backgroundColor = "#ffe5e5";
+                //             }
+                //         });
+                //     }
+                // }
+            } catch (error) {
+                showAdminMessage( 'Error creating user');
+                console.error('Submission error:', error);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
-            console.log("Modal closed successfully");
+        });
+        
+        updateAdminStep(currentAdminStep);
+    }
+
+    // ----------- HELPER FUNCTIONS -----------
+    function generatePassword() {
+        const length = 12;
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let password = "";
+        for (let i = 0; i < length; i++) {
+            password += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        generatedPasswordInput.value = password;
+        
+        // Also set the confirm password field
+        const confirmPasswordInput = adminCreateForm.querySelector("input[name='confirm_password']");
+        if (confirmPasswordInput) {
+            confirmPasswordInput.value = password;
         }
     }
 
-    // Clear all error messages
-    function clearErrors(form) {
-        const errorMessages = form.querySelectorAll('.error-message');
-        errorMessages.forEach(error => error.textContent = '');
-        const inputs = form.querySelectorAll('input');
-        inputs.forEach(input => input.classList.remove('error'));
+    function updateAdminStep(step) {
+        adminFormSteps.forEach((fs, i) => fs.classList.toggle("active", i === step));
     }
 
-    // Show error message
-    function showError(inputId, message) {
-        const input = document.getElementById(inputId);
-        const errorSpan = document.getElementById(inputId + 'Error');
-        if (input && errorSpan) {
-            input.classList.add('error');
-            errorSpan.textContent = message;
+    function showAdminCreateModal(userType) {
+        currentUserType = userType;
+        
+        // Set modal title and subtitle
+        const title = userType === 'admin' ? 'Create Admin Account' : 'Create Supervisor Account';
+        const subtitle = userType === 'admin' 
+            ? 'Admin: Create a new administrator account' 
+            : 'Admin: Create a new supervisor/manager account';
+        
+        document.getElementById('adminModalTitle').textContent = title;
+        document.getElementById('adminModalSubtitle').textContent = subtitle;
+        
+        // Set form action
+        adminCreateForm.action = userType === 'admin' 
+            ? "{% url 'core:admin_create_admin' %}" 
+            : "{% url 'core:admin_create_supervisor' %}";
+        
+        // Reset form and show modal
+        resetAdminCreateForm();
+        adminCreateModal.style.display = 'flex';
+    }
+
+    function closeAdminCreateModal() {
+        adminCreateModal.style.display = 'none';
+        resetAdminCreateForm();
+    }
+
+    function resetAdminCreateForm() {
+        if (adminCreateForm) {
+            adminCreateForm.reset();
+            currentAdminStep = 0;
+            
+            // Generate new password
+            generatePassword();
+            
+            // Reset styles
+            adminCreateForm.querySelectorAll("input, select").forEach(input => {
+                input.style.border = "1px solid #d1d5db";
+                input.style.backgroundColor = "white";
+            });
+            
+            // Check the password change checkbox by default
+            const passwordChangeCheckbox = document.getElementById('requirePasswordChange');
+            if (passwordChangeCheckbox) {
+                passwordChangeCheckbox.checked = true;
+            }
+            
+            if (adminFormSteps) {
+                updateAdminStep(currentAdminStep);
+            }
         }
     }
 
-    // Validate email
-    function validateEmail(email) {
-        return emailRegex.test(email) && email.includes('@') && email.includes('.com');
+    function showAdminMessage(msg, isError = true) {
+        const msgDiv = document.getElementById('admin-create-message');
+        const color = isError ? 'red' : 'green';
+        const bgColor = isError ? '#ffe5e5' : '#e5ffe5';
+        msgDiv.innerHTML = `<p style="color: ${color}; padding: 10px; background: ${bgColor}; border-radius: 4px; margin: 10px 0;">${msg}</p>`;
     }
 
-    // Form validation
-    function validateForm(formId, prefix) {
-        const form = document.getElementById(formId);
-        clearErrors(form);
-        
-        let isValid = true;
-        
-        // Validate username
-        const username = document.getElementById(prefix + 'Username').value.trim();
-        if (!username) {
-            showError(prefix + 'Username', 'Username is required');
-            isValid = false;
-        }
-        
-        // Validate employee name
-        const employeeName = document.getElementById(prefix + 'EmployeeName').value.trim();
-        if (!employeeName) {
-            showError(prefix + 'EmployeeName', 'Employee name is required');
-            isValid = false;
-        }
-        
-        // Validate position
-        const position = document.getElementById(prefix + 'Position').value.trim();
-        if (!position) {
-            showError(prefix + 'Position', 'Position is required');
-            isValid = false;
-        }
-        
-        // Validate email
-        const email = document.getElementById(prefix + 'Email').value.trim();
-        if (!email) {
-            showError(prefix + 'Email', 'Email is required');
-            isValid = false;
-        } else if (!validateEmail(email)) {
-            showError(prefix + 'Email', 'Please enter a valid email with @ and .com');
-            isValid = false;
-        }
-        
-        return isValid;
+    function clearAdminMessage() {
+        const msgDiv = document.getElementById('admin-create-message');
+        msgDiv.innerHTML = '';
     }
 
-    // Setup modal triggers on buttons
-    console.log("Looking for Create buttons...");
-    const allButtons = document.querySelectorAll('.btn');
-    console.log("Found buttons:", allButtons.length);
+    // ----------- MODAL TRIGGERS -----------
+    console.log("Setting up create buttons...");
     
-    allButtons.forEach((btn, index) => {
+    // Find all buttons and attach handlers
+    document.querySelectorAll('.btn').forEach((btn, index) => {
         const btnText = btn.textContent.trim();
-        console.log(`Button ${index}: "${btnText}"`);
         
         if (btnText === 'Create Admin') {
-            console.log("Attaching click handler to Create Admin button");
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log("Create Admin button clicked!");
-                openModal('createAdminModal');
+                showAdminCreateModal('admin');
             });
         } else if (btnText === 'Create Supervisor') {
-            console.log("Attaching click handler to Create Supervisor button");
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log("Create Supervisor button clicked!");
-                openModal('createSupervisorModal');
+                showAdminCreateModal('supervisor');
             });
         }
     });
 
-    // Close button handlers
-    document.querySelectorAll('.close-modal, .btn-cancel').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const modalId = this.getAttribute('data-modal');
-            closeModal(modalId);
-        });
-    });
-
-    // Click outside modal to close
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal(this.id);
-            }
-        });
-    });
-
-    // Form submissions
-    const adminForm = document.getElementById('createAdminForm');
-    if (adminForm) {
-        adminForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (validateForm('createAdminForm', 'admin')) {
-                const formData = {
-                    username: document.getElementById('adminUsername').value.trim(),
-                    employeeName: document.getElementById('adminEmployeeName').value.trim(),
-                    position: document.getElementById('adminPosition').value.trim(),
-                    email: document.getElementById('adminEmail').value.trim(),
-                    role: 'Admin'
-                };
-                
-                console.log('Admin form submitted:', formData);
-                // TODO: Send data to backend
-                alert('Admin created successfully!');
-                closeModal('createAdminModal');
-            }
-        });
-    }
-
-    const supervisorForm = document.getElementById('createSupervisorForm');
-    if (supervisorForm) {
-        supervisorForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (validateForm('createSupervisorForm', 'supervisor')) {
-                const formData = {
-                    username: document.getElementById('supervisorUsername').value.trim(),
-                    employeeName: document.getElementById('supervisorEmployeeName').value.trim(),
-                    position: document.getElementById('supervisorPosition').value.trim(),
-                    email: document.getElementById('supervisorEmail').value.trim(),
-                    role: 'Supervisor'
-                };
-                
-                console.log('Supervisor form submitted:', formData);
-                // TODO: Send data to backend
-                alert('Supervisor created successfully!');
-                closeModal('createSupervisorModal');
-            }
-        });
-    }
+    // Remove old modal-related code since we're using the new modal
+    // Remove the old createAdminModal and createSupervisorModal modals from the DOM
+    const oldAdminModal = document.getElementById('createAdminModal');
+    const oldSupervisorModal = document.getElementById('createSupervisorModal');
+    if (oldAdminModal) oldAdminModal.remove();
+    if (oldSupervisorModal) oldSupervisorModal.remove();
 });

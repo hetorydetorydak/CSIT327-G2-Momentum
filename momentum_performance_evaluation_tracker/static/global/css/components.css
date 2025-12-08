@@ -107,6 +107,20 @@ input:focus {
   box-shadow: 0 0 0 2px #2563eb33;
 }
 
+select{
+  height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+select:focus { 
+  outline: none; 
+  border-color: #2563eb; 
+  box-shadow: 0 0 0 2px #2563eb33;
+}
+
 .form-footer { 
   display: flex; 
   justify-content: space-between; 

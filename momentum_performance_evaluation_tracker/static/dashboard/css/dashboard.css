@@ -778,3 +778,466 @@
         opacity: 1;
     }
 }
+
+/* File Upload Button Styling */
+.btn-file-view, .btn-file-upload, .btn-file-remove{
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-file-remove:hover {
+    background: #b91c1c;
+}
+
+.btn-file-remove {
+    background: #d8291d;
+}
+
+.btn-file-upload:hover {
+    background: #1d4ed8;
+}
+
+.btn-file-upload {
+    background: #2557df;
+}
+
+.btn-file-view {
+    background: #10b981;
+}
+
+.btn-file-view:hover {
+    background: #0d9e6d;
+}
+
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* File Upload Modal */
+.file-upload-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-upload-modal .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.file-upload-modal .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    z-index: 10001;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.modal-close:hover {
+    color: #374151;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.file-indicator {
+    background: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.upload-file-btn, .view-file-btn {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+.completed-tasks-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.completed-task {
+    background: #f0f9f0;
+    border-color: #d1fae5;
+}
+
+.completed-task:hover {
+    background: #e6f7e6;
+    border-color: #a7f3d0;
+}
+
+.task-status-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+.task-status-badge.completed {
+    background: #10b981;
+    color: white;
+}
+
+.task-status-badge.pending {
+    background: #f59e0b;
+    color: white;
+}
+
+.task-status-badge.in-progress {
+    background: #3b82f6;
+    color: white;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.no-file {
+    color: #6b7280;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.view-all-tasks {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.btn-view-all {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-view-all:hover {
+    background: #4b5563;
+}
+
+
+.completed-task .task-content {
+    flex: 1;
+}
+
+.completed-task .task-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+.task-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.task-tab {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.task-tab:hover {
+    color: #374151;
+}
+
+.task-tab.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+/* Review Status Badges */
+.task-status-badge.pending-review {
+    background: #f59e0b;
+    color: white;
+}
+
+.task-status-badge.accepted {
+    background: #10b981;
+    color: white;
+}
+
+.task-status-badge.rejected {
+    background: #ef4444;
+    color: white;
+}
+
+/* Review Buttons */
+.review-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-accept, .btn-reject {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.btn-accept {
+    background: #10b981;
+    color: white;
+}
+
+.btn-accept:hover {
+    background: #0d9e6d;
+    transform: translateY(-1px);
+}
+
+.btn-reject {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-reject:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* Review Info */
+.review-info {
+    background: #f9fafb;
+    border-left: 3px solid #6b7280;
+    padding: 8px 12px;
+    margin-top: 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.review-info small {
+    color: #4b5563;
+}
+
+/* Review Notes Modal Specific Styles */
+#reviewNotesModal .modal-content {
+    max-width: 500px;
+}
+
+#reviewModalTitle {
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Review action indicators */
+.review-action-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.review-action-indicator.accept {
+    background: #f0f9f0;
+    border: 1px solid #d1fae5;
+    color: #065f46;
+}
+
+.review-action-indicator.reject {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #991b1b;
+}
+
+.review-action-indicator i {
+    font-size: 1.2rem;
+}
+
+/* Accepted/Rejected status badges */
+.task-status-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.task-status-badge.accepted {
+    background: #10b981;
+    color: white;
+}
+
+.task-status-badge.rejected {
+    background: #ef4444;
+    color: white;
+}
+
+.task-status-badge i {
+    margin-right: 3px;
+}
+
+/* Review feedback */
+.review-feedback {
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+    padding: 8px 12px;
+    margin-top: 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.review-feedback small {
+    color: #92400e;
+}
+
+/* Locked status */
+.status-locked {
+    padding: 6px 12px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-locked i {
+    color: #10b981;
+}
+
+
+/* Different background for accepted tasks */
+.accepted-task {
+    background: #f0f9f0;
+    border-color: #d1fae5;
+}
+
+.accepted-task:hover {
+    background: #e6f7e6;
+    border-color: #a7f3d0;
+}
+
+.completed-task {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+.completed-task:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+/* Task completion date */
+.task-completed {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-left: 1rem;
+}
+
+/* Adjust task details layout */
+.task-details {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+/* Section title update */
+.completed-tasks-section h3 {
+    color: #1f2937;
+    margin-bottom: 1rem;
+}

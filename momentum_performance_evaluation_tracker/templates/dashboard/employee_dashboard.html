@@ -15,16 +15,14 @@
         <div class="dashboard-card kpi-card">
             <div class="kpi-card-header">
                 <h3 class="card-title">Compliance </h3>
-                <img src="{% static 'images/compliance-icon.png' %}"
-                    class="kpi-card-header-icon">
+                <img src="{% static 'images/compliance-icon.png' %}" class="kpi-card-header-icon">
             </div>
 
             <p class="card-metric {% if kpi_data.compliance_rate >= 80 %}success{% else %}warning{% endif %}">
                 {{ kpi_data.compliance_rate|default:0 }}%
             </p>
 
-            <div
-                class="kpi-progress-wrapper">
+            <div class="kpi-progress-wrapper">
                 <div
                     style="width: {{ kpi_data.compliance_rate|default:0 }}%; height: 100%; background-color: #4caf50; border-radius: 10px 0 0 10px; transition: width 0.5s ease-in-out;">
                 </div>
@@ -86,7 +84,7 @@
         <!-- Task List Card -->
         <div class="dashboard-card wide-card">
             <h3 class="card-title">Task List</h3>
-            <div id="tasksList">
+            <div id="tasksList" class="tasks-list-container">
                 <div class="loading-message">Loading tasks...</div>
             </div>
         </div>

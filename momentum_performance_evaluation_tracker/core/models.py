@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
+from cloudinary.models import CloudinaryField
 
 class Role(models.Model):
     role_id = models.IntegerField(primary_key=True)
@@ -187,10 +188,8 @@ class AttendanceRecord(models.Model):
 class BacklogItem(models.Model):
     STATUS_CHOICES = [
         ('Not Started', 'Not Started'),
-        ('Pending', 'Pending'),
         ('Completed', 'Completed'),
         ('In Progress', 'In Progress'),
-        ('Cancelled', 'Cancelled'),
     ]
     
     PRIORITY_CHOICES = [
@@ -198,6 +197,12 @@ class BacklogItem(models.Model):
         ('Medium', 'Medium'),
         ('High', 'High'),
         ('Critical', 'Critical'),
+    ]
+
+    REVIEW_STATUS_CHOICES = [  # supervisor review
+        ('Pending Review', 'Pending Review'),
+        ('Accepted', 'Accepted'),
+        ('Rejected', 'Rejected'),
     ]
     
     backlog_id = models.AutoField(primary_key=True)
@@ -209,6 +214,17 @@ class BacklogItem(models.Model):
     created_date = models.DateField(auto_now_add=True)
     completed_date = models.DateField(blank=True, null=True)
     
+    # supervisor review fields
+    review_status = models.CharField(max_length=20, choices=REVIEW_STATUS_CHOICES, default='Pending Review')
+    reviewed_by = models.ForeignKey(UserAccount, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_tasks')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True, null=True)
+
+    # file upload fields
+    task_file = CloudinaryField('Task File', folder='momentum/tasks/', null=True, blank=True)
+    file_name = models.CharField(max_length=255, null=True, blank=True)
+    uploaded_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"Backlog {self.backlog_id} - {self.employee} - {self.status}"
     

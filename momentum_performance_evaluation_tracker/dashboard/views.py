@@ -11,6 +11,9 @@ from django.db.models import Q
 from core.models import BacklogItem
 from django.utils import timezone
 from datetime import datetime
+from django.shortcuts import get_object_or_404
+from dashboard.forms import TaskFileForm
+import json
 
 @never_cache
 @login_required(login_url='/login/')
@@ -309,6 +312,57 @@ def get_team_members_api(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
+def get_employee_completed_tasks_api(request, employee_id):
+    """API endpoint for supervisor to get completed tasks for a specific employee"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # Verify employee is in supervisor's team
+        from .models import TeamMember
+        if not TeamMember.objects.filter(
+            manager=request.user,
+            employee_id=employee_id,
+            is_active=True
+        ).exists():
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        employee = Employee.objects.get(id=employee_id)
+        
+        completed_tasks = BacklogItem.objects.filter(
+            employee=employee,
+            status='Completed',  # Only 'Completed' tasks
+            review_status='Pending Review'  # Only tasks pending review
+        ).order_by('-completed_date', '-created_date')
+        
+        tasks_data = []
+        for task in completed_tasks:
+            tasks_data.append({
+                'id': task.backlog_id,
+                'description': task.task_description,
+                'due_date': task.due_date.strftime('%Y-%m-%d'),
+                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None,
+                'priority': task.priority,
+                'status': task.status,
+                'created_date': task.created_date.strftime('%Y-%m-%d'),
+                'has_file': bool(task.task_file),
+                'file_name': task.file_name,
+                'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M') if task.uploaded_at else None,
+                'review_status': task.review_status,
+                'reviewed_by': f"{task.reviewed_by.employee.first_name} {task.reviewed_by.employee.last_name}" if task.reviewed_by else None,
+                'reviewed_at': task.reviewed_at.strftime('%Y-%m-%d %H:%M') if task.reviewed_at else None,
+                'review_notes': task.review_notes,
+                'employee_name': f"{employee.first_name} {employee.last_name}"
+            })
+        
+        return JsonResponse({'tasks': tasks_data})
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
 def employee_performance_modal(request, employee_id):
     """Render performance modal for a specific employee"""
     try:
@@ -328,6 +382,7 @@ def employee_performance_modal(request, employee_id):
             'performance_score': calculate_performance_score(employee),
             'recent_evaluations': [],
             'pending_tasks': [],
+            'completed_tasks': [],
             'attendance_history': []
         }
         
@@ -339,7 +394,7 @@ def employee_performance_modal(request, employee_id):
         for evaluation in recent_evaluations:
             performance_data['recent_evaluations'].append({
                 'period': evaluation.period,
-                'date': evaluation.evaluation_date.strftime('%Y-%m-%d'),
+                'date': evaluation.evaluation_date.strftime('%m-%d-%Y'),
                 'kpi_scores': [
                     {
                         'kpi_name': ekpi.kpi.name,
@@ -352,14 +407,40 @@ def employee_performance_modal(request, employee_id):
         # pending tasks
         pending_tasks = BacklogItem.objects.filter(
             employee=employee, 
-            status='Not Started'  # CHANGED FROM 'Pending' TO 'Not Started'
+            status__in=['Not Started', 'In Progress']
         ).order_by('due_date')[:10]
         
         for task in pending_tasks:
             performance_data['pending_tasks'].append({
+                'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date.strftime('%Y-%m-%d'),
-                'priority': task.priority
+                'due_date': task.due_date.strftime('%m-%d-%Y'),
+                'priority': task.priority,
+                'status': task.status,
+                'has_file': bool(task.task_file),
+                'file_name': task.file_name if task.task_file else None
+            })
+
+        # recently completed tasks (for review)
+        completed_tasks = BacklogItem.objects.filter(
+            employee=employee,
+            status__in=['Completed', 'Accepted']
+        ).order_by('-completed_date', '-created_date')[:10]
+        
+        for task in completed_tasks:
+            performance_data['completed_tasks'].append({
+                'id': task.backlog_id,
+                'description': task.task_description,
+                'due_date': task.due_date.strftime('%m-%d-%Y'),
+                'completed_date': task.completed_date.strftime('%m-%d-%Y') if task.completed_date else None,
+                'priority': task.priority,
+                'has_file': bool(task.task_file),
+                'file_name': task.file_name if task.task_file else None,
+                'uploaded_at': task.uploaded_at.strftime('%m-%d-%Y %H:%M') if task.uploaded_at else None,
+                'review_status': task.review_status,
+                'reviewed_by': task.reviewed_by.employee.first_name + ' ' + task.reviewed_by.employee.last_name if task.reviewed_by else None,
+                'reviewed_at': task.reviewed_at.strftime('%m-%d-%Y %H:%M') if task.reviewed_at else None,
+                'review_notes': task.review_notes
             })
         
         # Get recent attendance
@@ -376,12 +457,89 @@ def employee_performance_modal(request, employee_id):
         # combined template with data
         return render(request, "dashboard/employee_performance_modal.html", {
             'employee_data': performance_data,
-            'employee_id': employee_id
+            'employee_id': employee_id,
+            'user_is_manager': True
         })
         
     except Employee.DoesNotExist:
         return JsonResponse({'error': 'Employee not found'}, status=404)
     except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def review_task_api(request, task_id):
+    """API endpoint for supervisor to accept or reject a completed task"""
+    try:
+        if request.method != 'POST':
+            return JsonResponse({'error': 'Invalid request method'}, status=400)
+        
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # get the task
+        task = BacklogItem.objects.get(backlog_id=task_id)
+        
+        # verify employee is in supervisor's team
+        from .models import TeamMember
+        if not TeamMember.objects.filter(
+            manager=request.user,
+            employee=task.employee,
+            is_active=True
+        ).exists():
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        action = request.POST.get('action')
+        review_notes = request.POST.get('review_notes', '')
+        
+        if action not in ['accept', 'reject']:
+            return JsonResponse({'error': 'Invalid action'}, status=400)
+        
+        if action == 'accept':
+            # mark as accepted
+            task.review_status = 'Accepted'
+            task.status = 'Accepted'
+            task.reviewed_by = request.user
+            task.reviewed_at = timezone.now()
+            task.review_notes = review_notes
+            task.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Task accepted successfully!',
+                'task': {
+                    'id': task.backlog_id,
+                    'review_status': task.review_status,
+                    'status': task.status,
+                    'reviewed_by': f"{request.user.employee.first_name} {request.user.employee.last_name}",
+                    'reviewed_at': task.reviewed_at.strftime('%Y-%m-%d %H:%M:%S')
+                }
+            })
+        else:  # reject
+            # mark as rejected and change status back to In Progress
+            task.review_status = 'Rejected'
+            task.status = 'In Progress'  # change back to In Progress
+            task.reviewed_by = request.user
+            task.reviewed_at = timezone.now()
+            task.review_notes = review_notes
+            task.completed_date = None  # reset completed date
+            task.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Task rejected. It has been returned to In Progress status.',
+                'task': {
+                    'id': task.backlog_id,
+                    'review_status': task.review_status,
+                    'status': task.status,
+                    'reviewed_by': f"{request.user.employee.first_name} {request.user.employee.last_name}",
+                    'reviewed_at': task.reviewed_at.strftime('%Y-%m-%d %H:%M:%S')
+                }
+            })
+        
+    except BacklogItem.DoesNotExist:
+        return JsonResponse({'error': 'Task not found'}, status=404)
+    except Exception as e:
+        print("Error in review_task_api:", str(e))
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
@@ -444,7 +602,14 @@ def get_employee_tasks_api(request):
                 'status': task.status,
                 'priority': task.priority,
                 'created_date': task.created_date.strftime('%Y-%m-%d'),
-                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None
+                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None,
+                # ADD FILE INFO:
+                'has_file': bool(task.task_file),
+                'file_name': task.file_name,
+                'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M') if task.uploaded_at else None,
+                # ADD REVIEW INFO:
+                'review_status': task.review_status,
+                'review_notes': task.review_notes if task.review_notes else None,
             })
         
         return JsonResponse({'tasks': task_data})
@@ -461,27 +626,33 @@ def update_task_status_api(request, task_id):
             
         employee = request.user.employee
         
-        # Get the task and verify ownership
+        # get the task and verify ownership
         try:
             task = BacklogItem.objects.get(backlog_id=task_id, employee=employee)
         except BacklogItem.DoesNotExist:
             return JsonResponse({'error': 'Task not found or unauthorized'}, status=404)
         
+        # check if task is accepted - if so, prevent status changes
+        if task.review_status == 'Accepted':
+            return JsonResponse({'error': 'Cannot change status of accepted tasks'}, status=403)
+        
         new_status = request.POST.get('status')
         
-        # Validate status - now using 'Not Started' instead of 'Pending'
+        # validate status
         valid_statuses = ['Not Started', 'In Progress', 'Completed', 'Cancelled']
         if new_status not in valid_statuses:
             return JsonResponse({'error': 'Invalid task status'}, status=400)
         
-        # Update task status
+        # update task status
         task.status = new_status
         
-        # Set completed_date if task is being marked as completed
+        # set completed_date if task is being marked as completed
         if new_status == 'Completed' and not task.completed_date:
             task.completed_date = timezone.now().date()
+            task.review_status = 'Pending Review'  # set to pending review when completed
         elif new_status != 'Completed':
             task.completed_date = None
+            task.review_status = 'Pending Review'  # reset review status if not completed
             
         task.save()
         
@@ -491,12 +662,14 @@ def update_task_status_api(request, task_id):
             'task': {
                 'id': task.backlog_id,
                 'status': task.status,
-                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None
+                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None,
+                'review_status': task.review_status
             }
         })
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 @login_required
 def assign_task_api(request):
@@ -546,7 +719,6 @@ def assign_task_api(request):
             status='Not Started'
         )
         
-        print("DEBUG: Task created successfully - ID:", task.backlog_id)
         
         # Format the due_date for response
         if isinstance(task.due_date, str):
@@ -569,6 +741,113 @@ def assign_task_api(request):
         
     except Exception as e:
         print("DEBUG: Error in assign_task_api:", str(e))
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def upload_task_file_api(request, task_id):
+    """API endpoint for employee to upload file for a task"""
+    try:
+        if request.method != 'POST':
+            return JsonResponse({'error': 'Invalid request method'}, status=400)
+            
+        employee = request.user.employee
+        
+        # Get the task and verify ownership
+        try:
+            task = BacklogItem.objects.get(backlog_id=task_id, employee=employee)
+        except BacklogItem.DoesNotExist:
+            return JsonResponse({'error': 'Task not found or unauthorized'}, status=404)
+
+        # check if task is accepted - if so, prevent file removal
+        if task.review_status == 'Accepted':
+            return JsonResponse({'error': 'Cannot modify files for accepted tasks'}, status=403)
+
+        if request.content_type == "application/json":
+            body = json.loads(request.body)
+            if body.get("remove_file"):
+                # Delete from Cloudinary if exists
+                if task.task_file:
+                    try:
+                        cloudinary.uploader.destroy(task.task_file.public_id)
+                    except Exception as e:
+                        print("Error deleting Cloudinary file:", e)
+
+                # Reset database fields
+                task.task_file = None
+                task.file_name = None
+                task.uploaded_at = None
+                task.save()
+
+                return JsonResponse({'success': True, 'message': 'File removed successfully'})
+        
+        form = TaskFileForm(request.POST, request.FILES, instance=task)
+        
+        if form.is_valid():
+            task = form.save(commit=False)
+            if task.task_file:
+                task.file_name = task.task_file.name
+                task.uploaded_at = timezone.now()
+            task.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'File uploaded successfully!',
+                'file_info': {
+                    'file_name': task.file_name,
+                    'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if task.uploaded_at else None,
+                    'file_url': task.task_file.url if task.task_file else None
+                }
+            })
+        else:
+            return JsonResponse({'error': 'Invalid file upload'}, status=400)
+            
+    except Exception as e:
+        print("Error in upload_task_file_api:", str(e))
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def get_task_file_info_api(request, task_id):
+    """API endpoint to get file info for a task"""
+    try:
+        # For employees: can only see their own tasks
+        # For managers: can see tasks of employees in their team
+        if request.user.role.role_id == 303:  # Employee
+            task = BacklogItem.objects.get(backlog_id=task_id, employee=request.user.employee)
+        elif request.user.role.role_id == 302:  # Manager
+            task = BacklogItem.objects.get(backlog_id=task_id)
+            # Verify employee is in manager's team
+            from .models import TeamMember
+            if not TeamMember.objects.filter(
+                manager=request.user,
+                employee=task.employee,
+                is_active=True
+            ).exists():
+                return JsonResponse({'error': 'Unauthorized'}, status=403)
+        else:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        file_info = {}
+        if task.task_file:
+            file_info = {
+                'has_file': True,
+                'file_name': task.file_name,
+                'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') if task.uploaded_at else None,
+                'file_url': task.task_file.url,
+                'task_id': task.backlog_id,
+                'employee_name': f"{task.employee.first_name} {task.employee.last_name}"
+            }
+        else:
+            file_info = {
+                'has_file': False,
+                'task_id': task.backlog_id
+            }
+        
+        return JsonResponse(file_info)
+        
+    except BacklogItem.DoesNotExist:
+        return JsonResponse({'error': 'Task not found'}, status=404)
+    except Exception as e:
+        print("Error in get_task_file_info_api:", str(e))
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
@@ -597,7 +876,11 @@ def get_team_tasks_api(request):
                     'due_date': task.due_date.strftime('%Y-%m-%d'),
                     'status': task.status,
                     'priority': task.priority,
-                    'created_date': task.created_date.strftime('%Y-%m-%d')
+                    'created_date': task.created_date.strftime('%Y-%m-%d'),
+                    
+                    'has_file': bool(task.task_file),
+                    'file_name': task.file_name,
+                    'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M') if task.uploaded_at else None
                 })
             
             team_tasks.append({

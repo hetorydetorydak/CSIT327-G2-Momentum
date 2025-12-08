@@ -18,9 +18,10 @@ urlpatterns = [
     path('api/tasks/assign/', views.assign_task_api, name='assign_task'),
     path('api/tasks/team/', views.get_team_tasks_api, name='team_tasks'),
 
-    path('api/tasks/employee/', views.get_employee_tasks_api, name='employee_tasks'),
-    path('api/tasks/<int:task_id>/update-status/', views.update_task_status_api, name='update_task_status'),
-    path('api/tasks/assign/', views.assign_task_api, name='assign_task'),
-    path('api/tasks/team/', views.get_team_tasks_api, name='team_tasks'),
+    path('api/tasks/<int:task_id>/upload-file/', views.upload_task_file_api, name='upload_task_file'),
+    path('api/tasks/<int:task_id>/file-info/', views.get_task_file_info_api, name='task_file_info'),
+    path('api/employee/<int:employee_id>/completed-tasks/', views.get_employee_completed_tasks_api, name='employee_completed_tasks'),
+
+    path('api/tasks/<int:task_id>/review/', views.review_task_api, name='review_task'),
 
 ]

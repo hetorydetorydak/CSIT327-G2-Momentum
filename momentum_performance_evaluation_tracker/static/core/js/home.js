@@ -1,5 +1,7 @@
 const loginBtn = document.getElementById('loginBtn');
 const getStartedBtn = document.getElementById('getStartedBtn');
+const heroGetStarted = document.getElementById('heroGetStarted');
+const heroLearnMore = document.getElementById('heroLearnMore');
 const loginModal = document.getElementById('loginModal');
 const registerModal = document.getElementById('registerModal');
 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -192,11 +194,20 @@ if (registerForm) {
 
 // Open modals
 loginBtn.addEventListener('click', () => {
+    console.log("LOGIN BUTTON CLICKED");
     showLoginModal();
 });
 
 getStartedBtn.addEventListener('click', () => {
     showRegisterModal();
+});
+
+heroGetStarted.addEventListener('click', () => {
+    showRegisterModal();
+});
+
+heroLearnMore.addEventListener('click', () => {
+    window.location.href = "#about-section";
 });
 
 showRegisterFromLogin.addEventListener('click', (e) => {

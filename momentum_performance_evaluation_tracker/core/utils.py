@@ -210,7 +210,8 @@ def filter_team_performance(team_performance, department=None, status=None):
         status_mapping = {
             'Excellent': 'excellent',
             'Good': 'good', 
-            'Poor': ['needs_improvement', 'poor']  # combine needs_improvement and poor
+            'Needs Improvement' : 'needs_improvement',
+            'Poor': 'poor'
         }
         
         status_filter = status_mapping.get(status, status.lower())

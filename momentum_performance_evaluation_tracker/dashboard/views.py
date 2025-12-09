@@ -92,6 +92,10 @@ def dashboard_home(request):
     team_performance = []
     today_attendance = None
     recent_attendance = []
+    
+    # Initialize attendance_page and attendance_paginator at the start
+    attendance_page = None
+    attendance_paginator = None
 
     # DEBUG: Check user role
     print(f"DEBUG: User = {request.user}")
@@ -154,8 +158,6 @@ def dashboard_home(request):
             print(f"DEBUG: Found {len(recent_attendance)} recent attendance records")
 
             # === Paginated full attendance for UI (employee's entire history) ===
-            attendance_page = None
-            attendance_paginator = None
             try:
                 all_attendance_qs = AttendanceRecord.objects.filter(
                     employee=request.user.employee
@@ -184,10 +186,6 @@ def dashboard_home(request):
                 print("DEBUG: Error paginating attendance:", e)
                 attendance_page = None
                 attendance_paginator = None
-    else:
-        # role is None — ensure attendance_page variables still exist for context
-        attendance_page = None
-        attendance_paginator = None
 
     # Check if supervisor needs password reset
     if user_is_manager and getattr(request.user, 'is_first_login', False):

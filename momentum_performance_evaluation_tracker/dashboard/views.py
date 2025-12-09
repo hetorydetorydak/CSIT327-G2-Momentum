@@ -13,7 +13,55 @@ from django.utils import timezone
 from datetime import datetime
 from django.shortcuts import get_object_or_404
 from dashboard.forms import TaskFileForm
+from datetime import time  
 import json
+
+def mark_attendance(employee, request):
+    """Mark attendance for employee based on login time"""
+    today = timezone.now().date()
+    current_time = timezone.now().time()
+    
+    print(f"DEBUG: Today = {today}")
+    print(f"DEBUG: Current time = {current_time}")
+    
+    # Check if attendance already marked today
+    existing = AttendanceRecord.objects.filter(employee=employee, date=today).exists()
+    print(f"DEBUG: Attendance already exists? {existing}")
+    
+    if existing:
+        return False
+    
+    # Determine status based on time
+    start_time = time(7, 0)  # 7:00 AM
+    late_time = time(8, 0)   # 8:00 AM
+    
+    print(f"DEBUG: start_time = {start_time}, late_time = {late_time}")
+    print(f"DEBUG: Checking time conditions...")
+    
+    if start_time <= current_time < late_time:
+        status = 'Present'
+        print(f"DEBUG: Status = Present")
+    elif current_time >= late_time:
+        status = 'Late'
+        print(f"DEBUG: Status = Late")
+    else:
+        print(f"DEBUG: Before 7 AM - not marking")
+        return False
+    
+    # Create attendance record
+    try:
+        AttendanceRecord.objects.create(
+            employee=employee,
+            date=today,
+            status=status
+        )
+        print(f"Attendance marked for {employee.first_name} {employee.last_name}: {status}")
+        # Set flag to show notification
+        request.session['attendance_just_marked'] = True
+        return True
+    except Exception as e:
+        print(f"Error marking attendance: {e}")
+        return False
 
 @never_cache
 @login_required(login_url='/login/')
@@ -27,16 +75,69 @@ def dashboard_home(request):
     password_reset_form = None
     kpi_data = {}
     team_performance = []
+    today_attendance = None  # Initialize for all users
+    recent_attendance = []   # Initialize for all users
+    
+    # DEBUG: Check user role
+    print(f"DEBUG: User = {request.user}")
+    print(f"DEBUG: Has role? {hasattr(request.user, 'role')}")
+    if hasattr(request.user, 'role'):
+        print(f"DEBUG: Role ID = {request.user.role.role_id}")
     
     # Check if user is a manager
     if hasattr(request.user, 'role') and request.user.role.role_id == 302:
         user_is_manager = True
         team_performance = get_team_performance_data(request.user)
+        print("DEBUG: User is MANAGER")
 
     # Check if user is an admin (role_id = 301)
     if hasattr(request.user, 'role') and request.user.role.role_id == 301:
         user_is_admin = True
+        print("DEBUG: User is ADMIN")
     
+    # Mark attendance for employees (role_id = 303)
+    if hasattr(request.user, 'role') and request.user.role.role_id == 303:
+        print(f"DEBUG: Employee detected - role_id = {request.user.role.role_id}")
+        
+        # Check if attendance was marked this session
+        attendance_marked = request.session.get('attendance_marked_today')
+        print(f"DEBUG: attendance_marked_today in session? {attendance_marked}")
+        
+        if not request.session.get('attendance_marked_today'):
+            print("DEBUG: Calling mark_attendance...")
+            # Mark attendance and set flag for notification
+            marked = mark_attendance(request.user.employee, request)
+            print(f"DEBUG: mark_attendance returned: {marked}")
+            if marked:
+                request.session['attendance_marked_today'] = True
+                print("DEBUG: Set attendance_marked_today = True")
+            else:
+                # If attendance already exists or time not valid, clear the notification flag
+                request.session['attendance_just_marked'] = False
+                print("DEBUG: Set attendance_just_marked = False")
+        else:
+            print("DEBUG: Attendance already marked this session")
+            # Clear notification flag on subsequent page loads
+            request.session['attendance_just_marked'] = False
+        
+        # Get today's attendance for display
+        today = timezone.now().date()
+        try:
+            today_attendance = AttendanceRecord.objects.get(
+                employee=request.user.employee,
+                date=today
+            )
+            print(f"DEBUG: Found today_attendance: {today_attendance.status}")
+        except AttendanceRecord.DoesNotExist:
+            today_attendance = None
+            print("DEBUG: No attendance record found for today")
+        
+        # Get recent attendance history (last 10 records)
+        recent_attendance = AttendanceRecord.objects.filter(
+            employee=request.user.employee
+        ).order_by('-date')[:10]
+        print(f"DEBUG: Found {len(recent_attendance)} recent attendance records")
+
     # Check if supervisor needs password reset
     if hasattr(request.user, 'role') and user_is_manager and request.user.is_first_login:
         show_password_reset = True
@@ -55,6 +156,9 @@ def dashboard_home(request):
             'compliance_rate': calculate_compliance_rate(employee),
         }
     
+    print(f"DEBUG: Session attendance_just_marked = {request.session.get('attendance_just_marked')}")
+    print(f"DEBUG: today_attendance being passed to template = {today_attendance}")
+    
     context = {
         'user_account': request.user,
         'employee': request.user.employee,
@@ -64,6 +168,9 @@ def dashboard_home(request):
         'user_is_admin': user_is_admin,
         'kpi_data': kpi_data,
         'team_performance': team_performance,
+        'today_attendance': today_attendance,
+        'recent_attendance': recent_attendance,
+        'attendance_just_marked': request.session.get('attendance_just_marked', False),  
     }
     return render(request, "dashboard/dashboard.html", context)
 

@@ -270,4 +270,33 @@
             {% endif %}
         </div>
     </div>
+    <div id="reviewNotesModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeReviewModal">×</button>
+            <h2 id="reviewModalTitle">Review Task</h2>
+            <div class="modal-body">
+                <form id="reviewNotesForm">
+                    <input type="hidden" id="reviewTaskId">
+                    <input type="hidden" id="reviewAction">
+
+                    <div class="form-group">
+                        <label for="reviewNotesTextarea" id="reviewNotesLabel">
+                            Notes (optional)
+                        </label>
+                        <textarea id="reviewNotesTextarea" name="review_notes" rows="4"
+                            placeholder="Enter any notes or feedback for this task..." class="form-control"></textarea>
+                        <div class="form-text">
+                            These notes will be visible to the employee.
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="btn-secondary" id="cancelReview">Cancel</button>
+                        <button type="submit" class="btn-primary" id="submitReview">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

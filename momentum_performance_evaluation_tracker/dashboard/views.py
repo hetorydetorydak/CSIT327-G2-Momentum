@@ -14,9 +14,16 @@ from datetime import datetime
 from django.shortcuts import get_object_or_404
 from dashboard.forms import TaskFileForm
 import json
+from django.views.decorators.csrf import csrf_exempt
 from datetime import time as dt_time
 from django.utils import timezone
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+from core.utils import (
+    calculate_attendance_rate, 
+    calculate_backlog_count, 
+    get_employee_compliance_rate,
+    calculate_performance_score
+)
 
 def mark_attendance(employee, request):
     """Mark attendance for employee based on login time"""
@@ -242,7 +249,7 @@ def employee_performance_api(request, employee_id):
             'department': employee.department,
             'attendance_rate': calculate_attendance_rate(employee),
             'backlog_count': calculate_backlog_count(employee),
-            'compliance_rate': calculate_compliance_rate(employee),
+            'compliance_rate': compliance_rate,
             'performance_score': calculate_performance_score(employee),
             'recent_evaluations': [],
             'pending_tasks': [],
@@ -531,23 +538,65 @@ def employee_performance_modal(request, employee_id):
             return JsonResponse({'error': 'Unauthorized'}, status=403)
         
         employee = Employee.objects.get(id=employee_id)
+
+        # Use REAL-TIME compliance rate for dashboard display
+        real_time_compliance_rate = get_employee_compliance_rate(employee, real_time=True)
         
-        # detailed performance data
+        # Get last evaluation compliance rate for comparison
+        last_evaluation = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date').first()
+
+        last_eval_compliance_rate = last_evaluation.compliance_rate if last_evaluation else None
+        
+        # Calculate task statistics for the CURRENT PERIOD (since last evaluation or all time)
+        if last_evaluation:
+            # Tasks created since last evaluation
+            tasks = BacklogItem.objects.filter(
+                employee=employee,
+                created_date__gt=last_evaluation.evaluation_date
+            )
+            period_note = f"since last evaluation ({last_evaluation.evaluation_date})"
+        else:
+            # All tasks (no evaluation yet)
+            tasks = BacklogItem.objects.filter(employee=employee)
+            period_note = "all time"
+        
+        # Calculate current period task statistics
+        task_stats = {
+            'total_tasks': tasks.count(),
+            'accepted_tasks': tasks.filter(Q(status='Accepted') | Q(review_status='Accepted')).distinct().count(),
+            'completed_pending': tasks.filter(status='Completed', review_status='Pending Review').count(),
+            'rejected_tasks': tasks.filter(review_status='Rejected').count(),
+            'in_progress': tasks.filter(status='In Progress').count(),
+            'not_started': tasks.filter(status='Not Started').count(),
+        }
+        
+        # Calculate current period compliance rate
+        if task_stats['total_tasks'] > 0:
+            current_period_compliance_rate = round((task_stats['accepted_tasks'] / task_stats['total_tasks']) * 100, 2)
+        else:
+            current_period_compliance_rate = 0.0
+        
+        # Detailed performance data
         performance_data = {
             'employee_name': f"{employee.first_name} {employee.last_name}",
             'position': employee.position,
             'department': employee.department,
             'attendance_rate': calculate_attendance_rate(employee),
             'backlog_count': calculate_backlog_count(employee),
-            'compliance_rate': calculate_compliance_rate(employee),
+            'compliance_rate': real_time_compliance_rate,  # REAL-TIME rate
+            'last_eval_compliance_rate': last_eval_compliance_rate,  # For comparison
             'performance_score': calculate_performance_score(employee),
+            'current_task_stats': task_stats,
+            'period_note': period_note,
             'recent_evaluations': [],
             'pending_tasks': [],
             'completed_tasks': [],
             'attendance_history': []
         }
         
-        # recent evaluations - PASS DATE OBJECTS
+        # recent evaluations
         recent_evaluations = Evaluation.objects.filter(
             employee=employee
         ).order_by('-evaluation_date')[:5]
@@ -555,7 +604,7 @@ def employee_performance_modal(request, employee_id):
         for evaluation in recent_evaluations:
             performance_data['recent_evaluations'].append({
                 'period': evaluation.period,
-                'date': evaluation.evaluation_date,  # <-- DATE OBJECT, not string
+                'date': evaluation.evaluation_date,
                 'kpi_scores': [
                     {
                         'kpi_name': ekpi.kpi.name,
@@ -566,7 +615,7 @@ def employee_performance_modal(request, employee_id):
                 ]
             })
         
-        # pending tasks - PASS DATE OBJECTS
+        # pending tasks
         pending_tasks = BacklogItem.objects.filter(
             employee=employee, 
             status__in=['Not Started', 'In Progress']
@@ -576,14 +625,14 @@ def employee_performance_modal(request, employee_id):
             performance_data['pending_tasks'].append({
                 'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date,  # <-- DATE OBJECT, not string
+                'due_date': task.due_date,
                 'priority': task.priority,
                 'status': task.status,
                 'has_file': bool(task.task_file),
                 'file_name': task.file_name if task.task_file else None
             })
 
-        # recently completed tasks (for review) - PASS DATE/DATETIME OBJECTS
+        # recently completed tasks
         completed_tasks = BacklogItem.objects.filter(
             employee=employee,
             status__in=['Completed', 'Accepted']
@@ -593,26 +642,26 @@ def employee_performance_modal(request, employee_id):
             performance_data['completed_tasks'].append({
                 'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date,  # <-- DATE OBJECT, not string
-                'completed_date': task.completed_date if task.completed_date else None,  # <-- DATE OBJECT
+                'due_date': task.due_date,
+                'completed_date': task.completed_date if task.completed_date else None,
                 'priority': task.priority,
                 'has_file': bool(task.task_file),
                 'file_name': task.file_name if task.task_file else None,
-                'uploaded_at': task.uploaded_at if task.uploaded_at else None,  # <-- DATETIME OBJECT
+                'uploaded_at': task.uploaded_at if task.uploaded_at else None,
                 'review_status': task.review_status,
                 'reviewed_by': task.reviewed_by.employee.first_name + ' ' + task.reviewed_by.employee.last_name if task.reviewed_by else None,
-                'reviewed_at': task.reviewed_at if task.reviewed_at else None,  # <-- DATETIME OBJECT
+                'reviewed_at': task.reviewed_at if task.reviewed_at else None,
                 'review_notes': task.review_notes
             })
         
-        # Get recent attendance - PASS DATE OBJECTS
+        # Get recent attendance
         recent_attendance = AttendanceRecord.objects.filter(
             employee=employee
         ).order_by('-date')[:10]
         
         for attendance in recent_attendance:
             performance_data['attendance_history'].append({
-                'date': attendance.date,  # <-- DATE OBJECT, not string
+                'date': attendance.date,
                 'status': attendance.status
             })
         
@@ -626,6 +675,9 @@ def employee_performance_modal(request, employee_id):
     except Employee.DoesNotExist:
         return JsonResponse({'error': 'Employee not found'}, status=404)
     except Exception as e:
+        print(f"Error in employee_performance_modal: {e}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
@@ -1039,6 +1091,9 @@ def get_team_tasks_api(request):
                     'status': task.status,
                     'priority': task.priority,
                     'created_date': task.created_date,
+                    'review_status': task.review_status,
+                    'completed_date': task.completed_date,
+
                     
                     'has_file': bool(task.task_file),
                     'file_name': task.file_name,
@@ -1053,5 +1108,331 @@ def get_team_tasks_api(request):
         
         return JsonResponse({'team_tasks': team_tasks})
         
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# In dashboard/views.py, update the create_evaluation_api function:
+
+@login_required
+@csrf_exempt
+def create_evaluation_api(request, employee_id):
+    """Create evaluation based on task completion AND attendance"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # Verify employee is in manager's team
+        if not TeamMember.objects.filter(
+            manager=request.user,
+            employee_id=employee_id,
+            is_active=True
+        ).exists():
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        employee = Employee.objects.get(id=employee_id)
+        
+        if request.method == 'POST':
+            # Parse evaluation data
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+            
+            # Parse evaluation date
+            evaluation_date_str = data.get('evaluation_date')
+            try:
+                from datetime import datetime
+                evaluation_date = datetime.strptime(evaluation_date_str, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                evaluation_date = timezone.now().date()
+            
+            period = data.get('period', '')
+            
+            # Get last evaluation date
+            last_evaluation = Evaluation.objects.filter(
+                employee=employee
+            ).order_by('-evaluation_date').first()
+            
+            # CALCULATE ATTENDANCE FOR PERIOD
+            if last_evaluation:
+                attendance_records = AttendanceRecord.objects.filter(
+                    employee=employee,
+                    date__gt=last_evaluation.evaluation_date,
+                    date__lte=evaluation_date
+                )
+                attendance_period_note = f"since last evaluation ({last_evaluation.evaluation_date})"
+            else:
+                attendance_records = AttendanceRecord.objects.filter(
+                    employee=employee,
+                    date__lte=evaluation_date
+                )
+                attendance_period_note = "all time (first evaluation)"
+            
+            attendance_stats = {
+                'total_days': attendance_records.count(),
+                'present_days': attendance_records.filter(status='Present').count(),
+                'absent_days': attendance_records.filter(status='Absent').count(),
+                'late_days': attendance_records.filter(status='Late').count(),
+            }
+            
+            attendance_rate = 0.0
+            if attendance_stats['total_days'] > 0:
+                attendance_rate = round((attendance_stats['present_days'] / attendance_stats['total_days']) * 100, 2)
+            
+            # CALCULATE TASK COMPLIANCE FOR PERIOD
+            if last_evaluation:
+                tasks_for_evaluation = BacklogItem.objects.filter(
+                    employee=employee,
+                    created_date__gt=last_evaluation.evaluation_date,
+                    created_date__lte=evaluation_date
+                )
+                task_period_note = f"since last evaluation ({last_evaluation.evaluation_date})"
+            else:
+                tasks_for_evaluation = BacklogItem.objects.filter(
+                    employee=employee,
+                    created_date__lte=evaluation_date
+                )
+                task_period_note = "all time (first evaluation)"
+            
+            task_stats = {
+                'total_tasks': tasks_for_evaluation.count(),
+                'accepted_tasks': tasks_for_evaluation.filter(Q(status='Accepted') | Q(review_status='Accepted')).distinct().count(),
+                'completed_pending': tasks_for_evaluation.filter(status='Completed', review_status='Pending Review').count(),
+                'rejected_tasks': tasks_for_evaluation.filter(review_status='Rejected').count(),
+                'in_progress': tasks_for_evaluation.filter(status='In Progress').count(),
+                'not_started': tasks_for_evaluation.filter(status='Not Started').count(),
+            }
+            
+            compliance_rate = 0.0
+            if task_stats['total_tasks'] > 0:
+                compliance_rate = round((task_stats['accepted_tasks'] / task_stats['total_tasks']) * 100, 2)
+            
+            # CALCULATE OVERALL PERFORMANCE
+            overall_performance = round(
+                (attendance_rate * 0.4) +  # 40% weight for attendance
+                (compliance_rate * 0.6)    # 60% weight for compliance
+            , 2)
+            
+            # Create evaluation with all metrics
+            evaluation = Evaluation.objects.create(
+                employee=employee,
+                created_by=request.user,
+                evaluation_date=evaluation_date,
+                period=period,
+                compliance_rate=compliance_rate,
+                attendance_rate=attendance_rate,
+                overall_performance=overall_performance,
+                notes=data.get('notes', '')
+            )
+            
+            # Add comprehensive stats to notes
+            stats_summary = f"\n\nPERFORMANCE EVALUATION SUMMARY\n"
+            stats_summary += f"=========================================\n"
+            stats_summary += f"OVERALL PERFORMANCE: {overall_performance}%\n"
+            stats_summary += f"=========================================\n\n"
+            
+            stats_summary += f"ATTENDANCE ({attendance_period_note}):\n"
+            stats_summary += f"-----------------------------------------\n"
+            stats_summary += f"Attendance Rate: {attendance_rate}%\n"
+            stats_summary += f"Total Days: {attendance_stats['total_days']}\n"
+            stats_summary += f"Present: {attendance_stats['present_days']}\n"
+            stats_summary += f"Absent: {attendance_stats['absent_days']}\n"
+            stats_summary += f"Late: {attendance_stats['late_days']}\n\n"
+            
+            stats_summary += f"TASK COMPLIANCE ({task_period_note}):\n"
+            stats_summary += f"-----------------------------------------\n"
+            stats_summary += f"Compliance Rate: {compliance_rate}%\n"
+            stats_summary += f"Total Tasks: {task_stats['total_tasks']}\n"
+            stats_summary += f"Accepted/Approved: {task_stats['accepted_tasks']}\n"
+            stats_summary += f"Completed (Pending Review): {task_stats['completed_pending']}\n"
+            stats_summary += f"Rejected: {task_stats['rejected_tasks']}\n"
+            stats_summary += f"In Progress: {task_stats['in_progress']}\n"
+            stats_summary += f"Not Started: {task_stats['not_started']}\n\n"
+            
+            if last_evaluation:
+                stats_summary += f"COMPARISON WITH PREVIOUS EVALUATION:\n"
+                stats_summary += f"Previous Date: {last_evaluation.evaluation_date}\n"
+                stats_summary += f"Previous Overall: {last_evaluation.overall_performance}%\n"
+                stats_summary += f"Previous Attendance: {last_evaluation.attendance_rate}%\n"
+                stats_summary += f"Previous Compliance: {last_evaluation.compliance_rate}%\n"
+            
+            stats_summary += f"========================================="
+            
+            if not evaluation.notes:
+                evaluation.notes = ""
+            evaluation.notes += stats_summary
+            evaluation.save()
+            
+            # MARK DATA AS EVALUATED (for resetting dashboard rates)
+            # This prevents evaluated data from being counted again in real-time rates
+            
+            # Mark attendance records as counted
+            attendance_records.update(is_counted=True)
+            
+            # Mark tasks as evaluated
+            tasks_for_evaluation.update(is_evaluated=True)
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Evaluation created for {employee.first_name} {employee.last_name}',
+                'evaluation_id': evaluation.evaluation_id,
+                'evaluation_date': evaluation.evaluation_date.strftime('%Y-%m-%d'),
+                'overall_performance': overall_performance,
+                'attendance_rate': attendance_rate,
+                'compliance_rate': compliance_rate,
+                'attendance_stats': attendance_stats,
+                'task_stats': task_stats,
+                'tasks_evaluated': tasks_for_evaluation.count(),
+                'days_evaluated': attendance_stats['total_days']
+            })
+        
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+    except Exception as e:
+        print(f"Error creating evaluation: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def get_available_kpis_api(request):
+    """API endpoint to get available KPIs for evaluation"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        kpis = KPI.objects.all().values('kpi_id', 'name', 'description', 'target_value', 'kpi_type')
+        
+        return JsonResponse({'kpis': list(kpis)})
+        
+    except Exception as e:
+        print(f"Error getting KPIs: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def evaluation_modal(request, employee_id):
+    """Render evaluation creation modal"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        employee = Employee.objects.get(id=employee_id)
+        
+        # Verify employee is in manager's team
+        if not TeamMember.objects.filter(
+            manager=request.user,
+            employee=employee,
+            is_active=True
+        ).exists():
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        return render(request, "dashboard/evaluation_modal.html", {
+            'employee': employee,
+            'employee_id': employee_id,
+            'employee_name': f"{employee.first_name} {employee.last_name}"
+        })
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def get_last_evaluation_api(request, employee_id):
+    """API endpoint to get the last evaluation for an employee"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        employee = Employee.objects.get(id=employee_id)
+        
+        last_evaluation = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date').first()
+        
+        response_data = {'last_evaluation': None}
+        
+        if last_evaluation:
+            # Count tasks created since last evaluation
+            tasks_since_eval = BacklogItem.objects.filter(
+                employee=employee,
+                created_date__gt=last_evaluation.evaluation_date
+            ).count()
+            
+            response_data['last_evaluation'] = {
+                'evaluation_date': last_evaluation.evaluation_date.strftime('%Y-%m-%d'),
+                'compliance_rate': last_evaluation.compliance_rate,
+                'period': last_evaluation.period,
+                'tasks_since_evaluation': tasks_since_eval
+            }
+        
+        return JsonResponse(response_data)
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def get_employee_attendance_stats_api(request, employee_id):
+    """API endpoint for employee attendance statistics"""
+    try:
+        if request.user.role.role_id != 302:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        employee = Employee.objects.get(id=employee_id)
+        
+        # Verify employee is in manager's team
+        from .models import TeamMember
+        if not TeamMember.objects.filter(
+            manager=request.user,
+            employee=employee,
+            is_active=True
+        ).exists():
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # Get last evaluation date
+        last_evaluation = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date').first()
+        
+        # Calculate attendance for period since last evaluation
+        today = timezone.now().date()
+        if last_evaluation:
+            # Attendance since last evaluation
+            attendance_records = AttendanceRecord.objects.filter(
+                employee=employee,
+                date__gt=last_evaluation.evaluation_date,
+                date__lte=today
+            )
+        else:
+            # All attendance records (first evaluation)
+            attendance_records = AttendanceRecord.objects.filter(
+                employee=employee,
+                date__lte=today
+            )
+        
+        attendance_stats = {
+            'total_days': attendance_records.count(),
+            'present_days': attendance_records.filter(status='Present').count(),
+            'absent_days': attendance_records.filter(status='Absent').count(),
+            'late_days': attendance_records.filter(status='Late').count(),
+        }
+        
+        attendance_rate = 0.0
+        if attendance_stats['total_days'] > 0:
+            attendance_rate = round((attendance_stats['present_days'] / attendance_stats['total_days']) * 100, 2)
+        
+        return JsonResponse({
+            'attendance_rate': attendance_rate,
+            'attendance_stats': attendance_stats,
+            'last_evaluation_date': last_evaluation.evaluation_date if last_evaluation else None
+        })
+        
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

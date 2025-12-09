@@ -301,6 +301,10 @@ function initializeFilterSearch() {
     }
 }
 
+function filterCardsByAttributes() {
+    console.log('Filtering cards by attributes...');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeFilterSearch();
     filterCardsByAttributes(); // apply any filters from URL on page load

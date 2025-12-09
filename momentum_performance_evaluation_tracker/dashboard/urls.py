@@ -23,5 +23,11 @@ urlpatterns = [
     path('api/employee/<int:employee_id>/completed-tasks/', views.get_employee_completed_tasks_api, name='employee_completed_tasks'),
 
     path('api/tasks/<int:task_id>/review/', views.review_task_api, name='review_task'),
-
+    
+    path('api/evaluation/create/<int:employee_id>/', views.create_evaluation_api, name='create_evaluation_api'),
+    path('api/evaluation/kpis/', views.get_available_kpis_api, name='get_available_kpis_api'),
+    path('modal/evaluation/<int:employee_id>/', views.evaluation_modal, name='evaluation_modal'),
+    path('modal/employee/<int:employee_id>/performance/', views.employee_performance_modal, name='employee_performance_modal'),
+    path('api/employee/<int:employee_id>/last-evaluation/', views.get_last_evaluation_api, name='get_last_evaluation'),
+    path('api/employee/<int:employee_id>/attendance-stats/', views.get_employee_attendance_stats_api, name='employee_attendance_stats'),
 ]

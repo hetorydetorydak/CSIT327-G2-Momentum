@@ -149,6 +149,7 @@ class KPI(models.Model):
     kpi_type = models.CharField(max_length=50)
     description = models.TextField()
     target_value = models.FloatField()
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -159,9 +160,23 @@ class Evaluation(models.Model):
     created_by = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     evaluation_date = models.DateField()
     period = models.CharField(max_length=50)
-
+    notes = models.TextField(blank=True, null=True)
+    compliance_rate = models.FloatField(default=0.0)
+    attendance_rate = models.FloatField(default=0.0)
+    overall_performance = models.FloatField(default=0.0)
+    
     def __str__(self):
         return f"Evaluation {self.evaluation_id}"
+    
+    def save(self, *args, **kwargs):
+        # Calculate rates if not already set
+        if (self.compliance_rate == 0.0 or self.attendance_rate == 0.0) and not kwargs.get('update_fields'):
+            from .utils import calculate_evaluation_metrics
+            metrics = calculate_evaluation_metrics(self.employee, self.evaluation_date)
+            self.compliance_rate = metrics['compliance_rate']
+            self.attendance_rate = metrics['attendance_rate']
+            self.overall_performance = metrics['overall_performance']
+        super().save(*args, **kwargs)
 
 class EvaluationKPI(models.Model):
     eval_kpi_id = models.AutoField(primary_key=True)
@@ -178,6 +193,7 @@ class AttendanceRecord(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
     status = models.CharField(max_length=20)  # Present, Absent, Late
+    is_counted = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Attendance {self.attendance_id}"
@@ -213,6 +229,7 @@ class BacklogItem(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='Medium')
     created_date = models.DateField(auto_now_add=True)
     completed_date = models.DateField(blank=True, null=True)
+    is_evaluated = models.BooleanField(default=False)
     
     # supervisor review fields
     review_status = models.CharField(max_length=20, choices=REVIEW_STATUS_CHOICES, default='Pending Review')

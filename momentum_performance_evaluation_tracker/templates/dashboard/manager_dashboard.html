@@ -5,8 +5,7 @@
         <div class="dashboard-card kpi-card metric-black">
             <div class="card-header">
                 <h3 class="card-title">Total Employees </h3>
-                <img src="{% static 'images/employee-icon.png' %}" 
-                class="card-icon">
+                <img src="{% static 'images/employee-icon.png' %}" class="card-icon">
             </div>
             <p class="card-metric-kpi card-metric success">{{ kpi_data.total_employees|default:0 }}</p>
             <p class="card-detail">Active employees tracked</p>
@@ -16,17 +15,17 @@
         <div class="dashboard-card kpi-card metric-black">
             <div class="card-header">
                 <h3 class="card-title">Avg Compliance </h3>
-                <img src="{% static 'images/compliance-icon.png' %}"
-                class="card-icon">
+                <img src="{% static 'images/compliance-icon.png' %}" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric {% if kpi_data.avg_compliance >= 80 %}success{% else %}warning{% endif %}">
+            <p
+                class="card-metric-kpi card-metric {% if kpi_data.avg_compliance >= 80 %}success{% else %}warning{% endif %}">
                 {{ kpi_data.avg_compliance|default:0 }}%
             </p>
             <p class="card-detail">
                 {% if kpi_data.avg_compliance >= 80 %}
-                    Meeting targets
+                Meeting targets
                 {% else %}
-                    Needs improvement
+                Needs improvement
                 {% endif %}
             </p>
         </div>
@@ -35,17 +34,17 @@
         <div class="dashboard-card kpi-card metric-black">
             <div class="card-header">
                 <h3 class="card-title">Avg Attendance </h3>
-                <img src="{% static 'images/attendance2-icon.png' %}"
-                class="card-icon">
+                <img src="{% static 'images/attendance2-icon.png' %}" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric {% if kpi_data.avg_attendance >= 85 %}success{% else %}warning{% endif %}">
+            <p
+                class="card-metric-kpi card-metric {% if kpi_data.avg_attendance >= 85 %}success{% else %}warning{% endif %}">
                 {{ kpi_data.avg_attendance|default:0 }}%
             </p>
             <p class="card-detail">
                 {% if kpi_data.avg_attendance >= 90 %}
-                    Within target range
+                Within target range
                 {% else %}
-                    Below target
+                Below target
                 {% endif %}
             </p>
         </div>
@@ -54,17 +53,17 @@
         <div class="dashboard-card kpi-card metric-black">
             <div class="card-header">
                 <h3 class="card-title">Total Backlogs </h3>
-                <img src="{% static 'images/backlog-icon.png' %}"
-                class="card-icon">
+                <img src="{% static 'images/backlog-icon.png' %}" class="card-icon">
             </div>
-            <p class="card-metric-kpi card-metric {% if kpi_data.total_backlogs <= 15 %}success{% else %}warning{% endif %}">
+            <p
+                class="card-metric-kpi card-metric {% if kpi_data.total_backlogs <= 15 %}success{% else %}warning{% endif %}">
                 {{ kpi_data.total_backlogs|default:0 }}
             </p>
             <p class="card-detail">
                 {% if kpi_data.employees_needing_attention %}
-                    {{ kpi_data.employees_needing_attention_count|default:0 }} employees need attention
+                {{ kpi_data.employees_needing_attention_count|default:0 }} employees need attention
                 {% else %}
-                    Manageable workload
+                Manageable workload
                 {% endif %}
             </p>
         </div>
@@ -79,11 +78,12 @@
 
         <div class="performance-cards-grid">
             {% for employee in team_performance %}
-            <div class="performance-card" data-employee-id="{{ employee.employee_id }}">
+            <div class="performance-card" data-employee-id="{{ employee.employee_id }}"
+                data-department="{{ employee.department|default:'Not specified' }}" data-status="{{ employee.status }}"
+                data-name="{{ employee.name }}">
                 <div class="performance-card-header">
                     <div class="employee-avatar">
-                        <img src="{% static 'images/profile-icon.png' %}"
-                        alt="Employee Avatar">
+                        <img src="{% static 'images/profile-icon.png' %}" alt="Employee Avatar">
                     </div>
                     <div class="employee-info">
                         <h3 class="employee-name">{{ employee.name }}</h3>
@@ -121,19 +121,22 @@
                 <div class="quick-stats">
                     <div class="stat-item">
                         <span class="stat-label">Attendance</span>
-                        <span class="stat-value {% if employee.attendance_rate >= 85 %}success{% else %}warning{% endif %}">
+                        <span
+                            class="stat-value {% if employee.attendance_rate >= 85 %}success{% else %}warning{% endif %}">
                             {{ employee.attendance_rate|default:0 }}%
                         </span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Compliance</span>
-                        <span class="stat-value {% if employee.compliance_rate >= 80 %}success{% else %}warning{% endif %}">
+                        <span
+                            class="stat-value {% if employee.compliance_rate >= 80 %}success{% else %}warning{% endif %}">
                             {{ employee.compliance_rate|default:0 }}%
                         </span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Backlogs</span>
-                        <span class="stat-value {% if employee.backlog_count <= 2 %}success{% else %}warning{% endif %}">
+                        <span
+                            class="stat-value {% if employee.backlog_count <= 2 %}success{% else %}warning{% endif %}">
                             {{ employee.backlog_count|default:0 }}
                         </span>
                     </div>
@@ -142,8 +145,7 @@
                 <!-- Drilldown Button -->
                 <button class="drilldown-btn" onclick="viewEmployeeDetails({{ employee.employee_id }})">
                     View Details
-                    <img src="{% static 'images/drilldown-icon.png' %}"
-                    alt="View" class="drilldown-icon">
+                    <img src="{% static 'images/drilldown-icon.png' %}" alt="View" class="drilldown-icon">
                 </button>
             </div>
             {% empty %}
@@ -155,7 +157,7 @@
     </div>
 
     {%include 'dashboard/employee_performance_modal.html' %}
-    
+
 </main>
 
 <script src="{% static 'dashboard/js/task-assignment.js' %}"></script>

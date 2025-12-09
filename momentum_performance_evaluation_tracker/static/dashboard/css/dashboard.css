@@ -486,6 +486,7 @@
   cursor: pointer;
   appearance: none; /* removes default arrow */
   width: 160px;
+  margin-right: 1rem;
 
   /* custom dropdown arrow */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");

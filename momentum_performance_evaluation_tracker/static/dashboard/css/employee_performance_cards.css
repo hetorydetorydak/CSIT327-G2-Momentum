@@ -140,7 +140,15 @@
 .gauge-background {
     width: 100%;
     height: 100%;
-    background: #f0f2f5;
+    background: radial-gradient(
+        circle at left center, /* start from the left */
+        #f44336,               /* red */
+        #ff5722,
+        #ffc107,
+        #8bc34a,
+        #4caf50,
+        #f0f2f5               /* fallback / outer */
+    );
     border-radius: 120px 120px 0 0;
     overflow: hidden;
     position: relative;
@@ -152,14 +160,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: conic-gradient(
-        from 0.25turn,
-        #4caf50 0deg,
-        #8bc34a 90deg,
-        #ffc107 180deg,
-        #ff5722 270deg,
-        #f44336 360deg
-    );
+    background: #f0f2f5;
     transform-origin: bottom center;
     transition: transform 1s ease;
     border-radius: 120px 120px 0 0;

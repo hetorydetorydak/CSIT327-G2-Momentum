@@ -77,32 +77,41 @@ def dashboard_home(request):
     team_performance = []
     today_attendance = None  # Initialize for all users
     recent_attendance = []   # Initialize for all users
-    
+
     # DEBUG: Check user role
     print(f"DEBUG: User = {request.user}")
     print(f"DEBUG: Has role? {hasattr(request.user, 'role')}")
     if hasattr(request.user, 'role'):
         print(f"DEBUG: Role ID = {request.user.role.role_id}")
-    
+
     # Check if user is a manager
     if hasattr(request.user, 'role') and request.user.role.role_id == 302:
         user_is_manager = True
         team_performance = get_team_performance_data(request.user)
         print("DEBUG: User is MANAGER")
 
+        # Get filter parameters from request
+        department_filter = request.GET.get('department', '')
+        status_filter = request.GET.get('status', '')
+
+        # Apply filters if provided
+        if department_filter or status_filter:
+            from core.utils import filter_team_performance
+            team_performance = filter_team_performance(team_performance, department_filter, status_filter)
+
     # Check if user is an admin (role_id = 301)
     if hasattr(request.user, 'role') and request.user.role.role_id == 301:
         user_is_admin = True
         print("DEBUG: User is ADMIN")
-    
+
     # Mark attendance for employees (role_id = 303)
     if hasattr(request.user, 'role') and request.user.role.role_id == 303:
         print(f"DEBUG: Employee detected - role_id = {request.user.role.role_id}")
-        
+
         # Check if attendance was marked this session
         attendance_marked = request.session.get('attendance_marked_today')
         print(f"DEBUG: attendance_marked_today in session? {attendance_marked}")
-        
+
         if not request.session.get('attendance_marked_today'):
             print("DEBUG: Calling mark_attendance...")
             # Mark attendance and set flag for notification
@@ -119,7 +128,7 @@ def dashboard_home(request):
             print("DEBUG: Attendance already marked this session")
             # Clear notification flag on subsequent page loads
             request.session['attendance_just_marked'] = False
-        
+
         # Get today's attendance for display
         today = timezone.now().date()
         try:
@@ -131,7 +140,7 @@ def dashboard_home(request):
         except AttendanceRecord.DoesNotExist:
             today_attendance = None
             print("DEBUG: No attendance record found for today")
-        
+
         # Get recent attendance history (last 10 records)
         recent_attendance = AttendanceRecord.objects.filter(
             employee=request.user.employee
@@ -142,7 +151,7 @@ def dashboard_home(request):
     if hasattr(request.user, 'role') and user_is_manager and request.user.is_first_login:
         show_password_reset = True
         password_reset_form = SupervisorPasswordResetForm(user=request.user)
-    
+
     # Get KPI data based on user role
     if user_is_manager:
         # Manager dashboard - team KPIs
@@ -155,10 +164,10 @@ def dashboard_home(request):
             'backlog_count': calculate_backlog_count(employee),
             'compliance_rate': calculate_compliance_rate(employee),
         }
-    
+
     print(f"DEBUG: Session attendance_just_marked = {request.session.get('attendance_just_marked')}")
     print(f"DEBUG: today_attendance being passed to template = {today_attendance}")
-    
+
     context = {
         'user_account': request.user,
         'employee': request.user.employee,
@@ -170,7 +179,9 @@ def dashboard_home(request):
         'team_performance': team_performance,
         'today_attendance': today_attendance,
         'recent_attendance': recent_attendance,
-        'attendance_just_marked': request.session.get('attendance_just_marked', False),  
+        'attendance_just_marked': request.session.get('attendance_just_marked', False),
+        'selected_department': request.GET.get('department', ''),
+        'selected_status': request.GET.get('status', ''),
     }
     return render(request, "dashboard/dashboard.html", context)
 

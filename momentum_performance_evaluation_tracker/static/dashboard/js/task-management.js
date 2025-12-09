@@ -94,6 +94,8 @@ class TaskManager {
             });
     }
 
+    
+
     loadEmployeeTasks() {
         fetch('/dashboard/api/tasks/employee/')
             .then(response => response.json())
@@ -115,7 +117,7 @@ class TaskManager {
                     <div class="task-content">
                         <div class="task-description">${task.description}</div>
                         <div class="task-details">
-                            <span class="task-due-date">Due: ${task.due_date}</span>
+                            <span class="task-due-date">Due: ${formatDate(task.due_date)}</span>
                             <span class="task-priority ${task.priority.toLowerCase()}">${task.priority}</span>
                             ${task.review_status === 'Accepted' ? `
                             <span class="task-status-badge accepted" style="margin-left: 8px;">
@@ -133,7 +135,7 @@ class TaskManager {
                             <small>
                                 <i class="fas fa-paperclip"></i> ${task.file_name}
                                 <br>
-                                <small>Uploaded: ${task.uploaded_at}</small>
+                                <small>Uploaded: ${formatDateTime(task.uploaded_at)}</small>
                             </small>
                         </div>
                         ` : ''}
@@ -241,6 +243,44 @@ class TaskManager {
         return cookieValue || '';
     }
 }
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+
+    return date.toLocaleDateString('en-US', options);
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+
+    const optionsDate = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric'
+    };
+
+    let formattedDate = date.toLocaleDateString('en-US', optionsDate);
+
+    let hours = date.getHours();
+    let minutes = date.getMinutes().toString().padStart(2, "0");
+    let ampm = hours >= 12 ? "pm" : "am";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 → 12
+
+    return `${formattedDate} ${hours}:${minutes}${ampm}`;
+}
+
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

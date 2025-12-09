@@ -214,8 +214,8 @@ class UserManager {
         admins.forEach((admin, index) => {
             const rowClass = index % 2 === 0 ? 'user-row' : 'user-row alt-row';
             const firstLoginText = admin.is_first_login ? 
-                '<span style="color: #ef4444; font-weight: bold;">Yes</span>' : 
-                '<span style="color: #10b981;">No</span>';
+                '<span style="color: #10b981; font-weight: bold;">Yes</span>' : 
+                '<span style="color: #ef4444;">No</span>';
             
             html += `
                 <tr class="${rowClass}" data-user-id="${admin.id}">
@@ -228,11 +228,6 @@ class UserManager {
                     <td><span class="role-badge admin-badge">Admin</span></td>
                     <td>${firstLoginText}</td>
                     <td>${this.escapeHtml(admin.last_login)}</td>
-                    <td class="actions-cell">
-                        <button class="action-btn edit-btn" onclick="userManager.editUser(${admin.id}, 'admin')">Edit</button>
-                        <button class="action-btn reset-btn" onclick="userManager.resetPassword(${admin.id}, 'admin')">Reset PW</button>
-                        <button class="action-btn delete-btn" onclick="userManager.deleteUser(${admin.id}, 'admin')">Delete</button>
-                    </td>
                 </tr>
             `;
         });
@@ -259,8 +254,8 @@ class UserManager {
         supervisors.forEach((supervisor, index) => {
             const rowClass = index % 2 === 0 ? 'user-row' : 'user-row alt-row';
             const firstLoginText = supervisor.is_first_login ? 
-                '<span style="color: #ef4444; font-weight: bold;">Yes</span>' : 
-                '<span style="color: #10b981;">No</span>';
+                '<span style="color: #10b981; font-weight: bold;">Yes</span>' : 
+                '<span style="color: #ef4444;">No</span>';
             
             html += `
                 <tr class="${rowClass}" data-user-id="${supervisor.id}">
@@ -273,11 +268,6 @@ class UserManager {
                     <td><span class="role-badge supervisor-badge">Supervisor</span></td>
                     <td>${firstLoginText}</td>
                     <td>${this.escapeHtml(supervisor.last_login)}</td>
-                    <td class="actions-cell">
-                        <button class="action-btn edit-btn" onclick="userManager.editUser(${supervisor.id}, 'supervisor')">Edit</button>
-                        <button class="action-btn reset-btn" onclick="userManager.resetPassword(${supervisor.id}, 'supervisor')">Reset PW</button>
-                        <button class="action-btn delete-btn" onclick="userManager.deleteUser(${supervisor.id}, 'supervisor')">Delete</button>
-                    </td>
                 </tr>
             `;
         });

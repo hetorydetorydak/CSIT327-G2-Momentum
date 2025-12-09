@@ -16,6 +16,7 @@ from dashboard.forms import TaskFileForm
 import json
 from datetime import time as dt_time
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def mark_attendance(employee, request):
     """Mark attendance for employee based on login time"""
@@ -152,6 +153,42 @@ def dashboard_home(request):
             ).order_by('-date')[:10]
             print(f"DEBUG: Found {len(recent_attendance)} recent attendance records")
 
+            # === Paginated full attendance for UI (employee's entire history) ===
+            attendance_page = None
+            attendance_paginator = None
+            try:
+                all_attendance_qs = AttendanceRecord.objects.filter(
+                    employee=request.user.employee
+                ).order_by('-date')
+
+                # page and page_size come from query params; defaults: page 1, 10 items/page
+                page = request.GET.get('attendance_page', 1)
+                try:
+                    page_size = int(request.GET.get('attendance_page_size', 10))
+                    if page_size <= 0:
+                        page_size = 10
+                except (ValueError, TypeError):
+                    page_size = 10
+
+                paginator = Paginator(all_attendance_qs, page_size)
+                try:
+                    attendance_page = paginator.page(page)
+                except PageNotAnInteger:
+                    attendance_page = paginator.page(1)
+                except EmptyPage:
+                    attendance_page = paginator.page(paginator.num_pages)
+
+                attendance_paginator = paginator
+
+            except Exception as e:
+                print("DEBUG: Error paginating attendance:", e)
+                attendance_page = None
+                attendance_paginator = None
+    else:
+        # role is None — ensure attendance_page variables still exist for context
+        attendance_page = None
+        attendance_paginator = None
+
     # Check if supervisor needs password reset
     if user_is_manager and getattr(request.user, 'is_first_login', False):
         show_password_reset = True
@@ -182,6 +219,11 @@ def dashboard_home(request):
         'attendance_just_marked': request.session.get('attendance_just_marked', False),
         'selected_department': request.GET.get('department', ''),
         'selected_status': request.GET.get('status', ''),
+        # Paginated attendance context
+        'attendance_page': attendance_page,
+        'attendance_paginator': attendance_paginator,
+        'attendance_page_size': request.GET.get('attendance_page_size', 10),
+        'attendance_page_number': request.GET.get('attendance_page', 1),
     }
 
     return render(request, "dashboard/dashboard.html", context)

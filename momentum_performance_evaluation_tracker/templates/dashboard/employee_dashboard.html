@@ -89,6 +89,61 @@
             </div>
         </div>
 
+
+        {% if attendance_page %}
+        <div class="dashboard-card kpi-card">
+            <h3>Attendance History</h3>
+
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_page.object_list %}
+                    <tr class="attendance-row attendance-{{ record.status|lower }}">
+                        <td>
+                            {% if record.date %}
+                                <span data-date="{{ record.date|date:'c' }}">
+                                    {{ record.date|date:"F j, Y" }}
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ record.status }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">No attendance records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                {% if attendance_page.has_previous %}
+                    <a href="?attendance_page={{ attendance_page.previous_page_number }}">« Prev</a>
+                {% else %}
+                    <span class="disabled">« Prev</span>
+                {% endif %}
+
+                <span>
+                    Page {{ attendance_page.number }} of {{ attendance_page.paginator.num_pages }}
+                </span>
+
+                {% if attendance_page.has_next %}
+                    <a href="?attendance_page={{ attendance_page.next_page_number }}">Next »</a>
+                {% else %}
+                    <span class="disabled">Next »</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 </section>
 

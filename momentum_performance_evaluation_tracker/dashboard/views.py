@@ -109,7 +109,7 @@ def employee_performance_api(request, employee_id):
         for evaluation in recent_evaluations:
             performance_data['recent_evaluations'].append({
                 'period': evaluation.period,
-                'date': evaluation.evaluation_date.strftime('%Y-%m-%d'),
+                'date': evaluation.evaluation_date,
                 'kpi_scores': [
                     {
                         'kpi_name': ekpi.kpi.name,
@@ -129,7 +129,7 @@ def employee_performance_api(request, employee_id):
         for task in pending_tasks:
             performance_data['pending_tasks'].append({
                 'description': task.task_description,
-                'due_date': task.due_date.strftime('%Y-%m-%d'),
+                'due_date': task.due_date,
                 'priority': task.priority
             })
         
@@ -140,7 +140,7 @@ def employee_performance_api(request, employee_id):
         
         for attendance in recent_attendance:
             performance_data['attendance_history'].append({
-                'date': attendance.date.strftime('%Y-%m-%d'),
+                'date': attendance.date,
                 'status': attendance.status
             })
         
@@ -207,7 +207,7 @@ def search_employees_api(request):
                 'department': employee.department or 'Not specified',
                 'position': employee.position or 'Not specified',
                 'email': employee.email_address,
-                'hire_date': employee.hire_date.strftime('%Y-%m-%d') if employee.hire_date else 'Not specified'
+                'hire_date': employee.hire_date if employee.hire_date else 'Not specified'
             })
         
         return JsonResponse({'employees': employee_data})
@@ -314,7 +314,7 @@ def get_team_members_api(request):
                 'department': employee.department,
                 'position': employee.position,
                 'email': employee.email_address,
-                'added_date': member.added_date.strftime('%Y-%m-%d')
+                'added_date': member.added_date
             })
         
         return JsonResponse({'team_members': team_data})
@@ -351,17 +351,17 @@ def get_employee_completed_tasks_api(request, employee_id):
             tasks_data.append({
                 'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date.strftime('%Y-%m-%d'),
-                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None,
+                'due_date': task.due_date,
+                'completed_date': task.completed_date if task.completed_date else None,
                 'priority': task.priority,
                 'status': task.status,
-                'created_date': task.created_date.strftime('%Y-%m-%d'),
+                'created_date': task.created_date,
                 'has_file': bool(task.task_file),
                 'file_name': task.file_name,
-                'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M') if task.uploaded_at else None,
+                'uploaded_at': task.uploaded_at if task.uploaded_at else None,
                 'review_status': task.review_status,
                 'reviewed_by': f"{task.reviewed_by.employee.first_name} {task.reviewed_by.employee.last_name}" if task.reviewed_by else None,
-                'reviewed_at': task.reviewed_at.strftime('%Y-%m-%d %H:%M') if task.reviewed_at else None,
+                'reviewed_at': task.reviewed_at if task.reviewed_at else None,
                 'review_notes': task.review_notes,
                 'employee_name': f"{employee.first_name} {employee.last_name}"
             })
@@ -397,7 +397,7 @@ def employee_performance_modal(request, employee_id):
             'attendance_history': []
         }
         
-        # recent evaluations
+        # recent evaluations - PASS DATE OBJECTS
         recent_evaluations = Evaluation.objects.filter(
             employee=employee
         ).order_by('-evaluation_date')[:5]
@@ -405,7 +405,7 @@ def employee_performance_modal(request, employee_id):
         for evaluation in recent_evaluations:
             performance_data['recent_evaluations'].append({
                 'period': evaluation.period,
-                'date': evaluation.evaluation_date.strftime('%m-%d-%Y'),
+                'date': evaluation.evaluation_date,  # <-- DATE OBJECT, not string
                 'kpi_scores': [
                     {
                         'kpi_name': ekpi.kpi.name,
@@ -415,7 +415,8 @@ def employee_performance_modal(request, employee_id):
                     for ekpi in evaluation.kpi_scores.all()
                 ]
             })
-        # pending tasks
+        
+        # pending tasks - PASS DATE OBJECTS
         pending_tasks = BacklogItem.objects.filter(
             employee=employee, 
             status__in=['Not Started', 'In Progress']
@@ -425,14 +426,14 @@ def employee_performance_modal(request, employee_id):
             performance_data['pending_tasks'].append({
                 'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date.strftime('%m-%d-%Y'),
+                'due_date': task.due_date,  # <-- DATE OBJECT, not string
                 'priority': task.priority,
                 'status': task.status,
                 'has_file': bool(task.task_file),
                 'file_name': task.file_name if task.task_file else None
             })
 
-        # recently completed tasks (for review)
+        # recently completed tasks (for review) - PASS DATE/DATETIME OBJECTS
         completed_tasks = BacklogItem.objects.filter(
             employee=employee,
             status__in=['Completed', 'Accepted']
@@ -442,26 +443,26 @@ def employee_performance_modal(request, employee_id):
             performance_data['completed_tasks'].append({
                 'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date.strftime('%m-%d-%Y'),
-                'completed_date': task.completed_date.strftime('%m-%d-%Y') if task.completed_date else None,
+                'due_date': task.due_date,  # <-- DATE OBJECT, not string
+                'completed_date': task.completed_date if task.completed_date else None,  # <-- DATE OBJECT
                 'priority': task.priority,
                 'has_file': bool(task.task_file),
                 'file_name': task.file_name if task.task_file else None,
-                'uploaded_at': task.uploaded_at.strftime('%m-%d-%Y %H:%M') if task.uploaded_at else None,
+                'uploaded_at': task.uploaded_at if task.uploaded_at else None,  # <-- DATETIME OBJECT
                 'review_status': task.review_status,
                 'reviewed_by': task.reviewed_by.employee.first_name + ' ' + task.reviewed_by.employee.last_name if task.reviewed_by else None,
-                'reviewed_at': task.reviewed_at.strftime('%m-%d-%Y %H:%M') if task.reviewed_at else None,
+                'reviewed_at': task.reviewed_at if task.reviewed_at else None,  # <-- DATETIME OBJECT
                 'review_notes': task.review_notes
             })
         
-        # Get recent attendance
+        # Get recent attendance - PASS DATE OBJECTS
         recent_attendance = AttendanceRecord.objects.filter(
             employee=employee
         ).order_by('-date')[:10]
         
         for attendance in recent_attendance:
             performance_data['attendance_history'].append({
-                'date': attendance.date.strftime('%Y-%m-%d'),
+                'date': attendance.date,  # <-- DATE OBJECT, not string
                 'status': attendance.status
             })
         
@@ -609,16 +610,16 @@ def get_employee_tasks_api(request):
             task_data.append({
                 'id': task.backlog_id,
                 'description': task.task_description,
-                'due_date': task.due_date.strftime('%Y-%m-%d'),
+                'due_date': task.due_date,
                 'status': task.status,
                 'priority': task.priority,
-                'created_date': task.created_date.strftime('%Y-%m-%d'),
-                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None,
-                # ADD FILE INFO:
+                'created_date': task.created_date,
+                'completed_date': task.completed_date if task.completed_date else None,
+                
                 'has_file': bool(task.task_file),
                 'file_name': task.file_name,
-                'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M') if task.uploaded_at else None,
-                # ADD REVIEW INFO:
+                'uploaded_at': task.uploaded_at if task.uploaded_at else None,
+                
                 'review_status': task.review_status,
                 'review_notes': task.review_notes if task.review_notes else None,
             })
@@ -673,7 +674,7 @@ def update_task_status_api(request, task_id):
             'task': {
                 'id': task.backlog_id,
                 'status': task.status,
-                'completed_date': task.completed_date.strftime('%Y-%m-%d') if task.completed_date else None,
+                'completed_date': task.completed_date if task.completed_date else None,
                 'review_status': task.review_status
             }
         })
@@ -734,9 +735,9 @@ def assign_task_api(request):
         # Format the due_date for response
         if isinstance(task.due_date, str):
             due_date_obj = datetime.strptime(task.due_date, '%Y-%m-%d')
-            due_date_str = due_date_obj.strftime('%Y-%m-%d')
+            due_date_str = due_date_obj
         else:
-            due_date_str = task.due_date.strftime('%Y-%m-%d')
+            due_date_str = task.due_date
         
         return JsonResponse({
             'success': True,
@@ -884,14 +885,14 @@ def get_team_tasks_api(request):
                 employee_tasks.append({
                     'id': task.backlog_id,
                     'description': task.task_description,
-                    'due_date': task.due_date.strftime('%Y-%m-%d'),
+                    'due_date': task.due_date,
                     'status': task.status,
                     'priority': task.priority,
-                    'created_date': task.created_date.strftime('%Y-%m-%d'),
+                    'created_date': task.created_date,
                     
                     'has_file': bool(task.task_file),
                     'file_name': task.file_name,
-                    'uploaded_at': task.uploaded_at.strftime('%Y-%m-%d %H:%M') if task.uploaded_at else None
+                    'uploaded_at': task.uploaded_at if task.uploaded_at else None
                 })
             
             team_tasks.append({

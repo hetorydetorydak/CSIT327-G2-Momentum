@@ -1,4 +1,5 @@
-<!-- Performance Details Modal -->
+<!-- employee_performance_modal.html - FIXED VERSION -->
+
 <div id="performanceModal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
@@ -58,7 +59,16 @@
                     <div class="task-item {{ task.priority|lower }} pending-task" data-task-id="{{ task.id }}">
                         <div class="task-content">
                             <span class="task-desc">{{ task.description }}</span>
-                            <span class="task-due">Due: {{ task.due_date }} | Status: {{ task.status }}</span>
+                            <span class="task-due">Due: 
+                                {% if task.due_date %}
+                                    <span class="task-due-date" data-date="{{ task.due_date|date:'c' }}">
+                                        {{ task.due_date|date:"F j, Y" }}
+                                    </span>
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                                | Status: {{ task.status }}
+                            </span>
                             <span class="task-priority">{{ task.priority }}</span>
                             {% if task.has_file %}
                             <div class="task-file-info">
@@ -112,9 +122,21 @@
                                 </span>
                             </div>
                             <div class="task-details">
-                                <span class="task-due">Due: {{ task.due_date }}</span>
+                                <span class="task-due">Due: 
+                                    {% if task.due_date %}
+                                        <span class="task-due-date" data-date="{{ task.due_date|date:'c' }}">
+                                            {{ task.due_date|date:"F j, Y" }}
+                                        </span>
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </span>
                                 {% if task.completed_date %}
-                                <span class="task-completed">Completed: {{ task.completed_date }}</span>
+                                <span class="task-completed">Completed: 
+                                    <span class="task-completed-date" data-date="{{ task.completed_date|date:'c' }}">
+                                        {{ task.completed_date|date:"F j, Y" }}
+                                    </span>
+                                </span>
                                 {% endif %}
                                 <span class="task-priority">{{ task.priority }}</span>
                             </div>
@@ -123,7 +145,15 @@
                                 <small>
                                     <i class="fas fa-paperclip"></i> {{ task.file_name }}
                                     <br>
-                                    <small>Uploaded: {{ task.uploaded_at }}</small>
+                                    <small>Uploaded: 
+                                        {% if task.uploaded_at %}
+                                            <span class="task-uploaded-at" data-datetime="{{ task.uploaded_at|date:'c' }}">
+                                                {{ task.uploaded_at|date:"F j, Y g:ia" }}
+                                            </span>
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </small>
                                 </small>
                             </div>
                             {% endif %}
@@ -132,7 +162,15 @@
                             <div class="review-info">
                                 <small>
                                     <strong>Reviewed by:</strong> {{ task.reviewed_by }}<br>
-                                    <strong>Reviewed at:</strong> {{ task.reviewed_at }}<br>
+                                    <strong>Reviewed at:</strong> 
+                                    {% if task.reviewed_at %}
+                                        <span class="task-reviewed-at" data-datetime="{{ task.reviewed_at|date:'c' }}">
+                                            {{ task.reviewed_at|date:"F j, Y g:ia" }}
+                                        </span>
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                    <br>
                                     {% if task.review_notes %}
                                     <strong>Notes:</strong> {{ task.review_notes }}
                                     {% endif %}
@@ -168,22 +206,21 @@
             <div class="no-data">No completed or accepted tasks found.</div>
             {% endif %}
 
-            {% if employee_data.pending_tasks|length >= 10 or employee_data.completed_tasks|length >= 10 %}
-            <div class="view-all-tasks">
-                <button class="btn-view-all" onclick="loadAllTasks({{ employee_id }})">
-                    View All Tasks
-                </button>
-            </div>
-            {% endif %}
-
-
             {% if employee_data.attendance_history %}
             <div class="attendance-section">
                 <h3>Recent Attendance</h3>
                 <div class="attendance-list">
                     {% for attendance in employee_data.attendance_history %}
                     <div class="attendance-item {{ attendance.status|lower }}">
-                        <span class="attendance-date">{{ attendance.date }}</span>
+                        <span class="attendance-date">
+                            {% if attendance.date %}
+                                <span data-date="{{ attendance.date|date:'c' }}">
+                                    {{ attendance.date|date:"F j, Y" }}
+                                </span>
+                            {% else %}
+                                No date
+                            {% endif %}
+                        </span>
                         <span class="attendance-status">{{ attendance.status }}</span>
                     </div>
                     {% endfor %}
@@ -233,35 +270,4 @@
             {% endif %}
         </div>
     </div>
-
-    <div id="reviewNotesModal" class="modal hidden">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content">
-            <button class="modal-close" id="closeReviewModal">×</button>
-            <h2 id="reviewModalTitle">Review Task</h2>
-            <div class="modal-body">
-                <form id="reviewNotesForm">
-                    <input type="hidden" id="reviewTaskId">
-                    <input type="hidden" id="reviewAction">
-
-                    <div class="form-group">
-                        <label for="reviewNotesTextarea" id="reviewNotesLabel">
-                            Notes (optional)
-                        </label>
-                        <textarea id="reviewNotesTextarea" name="review_notes" rows="4"
-                            placeholder="Enter any notes or feedback for this task..." class="form-control"></textarea>
-                        <div class="form-text">
-                            These notes will be visible to the employee.
-                        </div>
-                    </div>
-
-                    <div class="modal-buttons">
-                        <button type="button" class="btn-secondary" id="cancelReview">Cancel</button>
-                        <button type="submit" class="btn-primary" id="submitReview">Submit Review</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 </div>

@@ -1,0 +1,20 @@
+{% load static %}
+
+<!-- Attendance Toast Notification -->
+
+{% if today_attendance and attendance_just_marked %}
+<div id="attendanceToast" class="attendance-toast {% if today_attendance.status == 'Late' %}toast-late{% else %}toast-present{% endif %}">
+    <div class="toast-content">
+        <svg class="toast-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.667 5L7.5 14.167L3.333 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="toast-text">
+            <strong>Attendance Logged</strong>
+            <p>Status: {{ today_attendance.status }}</p>
+        </div>
+    </div>
+</div>
+
+
+<script src="{% static 'dashboard/js/attendance_notif.js' %}"></script>
+{% endif %}

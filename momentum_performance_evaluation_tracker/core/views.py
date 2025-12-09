@@ -8,6 +8,7 @@ from .forms import SupervisorPasswordResetForm, LoginForm, RegistrationForm, Adm
 from .models import UserAccount, Employee
 
 from django.contrib.auth.decorators import login_required, user_passes_test
+import time
 
 def home_page(request):
     return render(request, "core/home.html")

@@ -1,8 +1,6 @@
 {% load static %}
 <main class="dashboard-main extra-padding">
 
-
-
     <div class="create-user-container">
 
         <!-- ========================= -->
@@ -17,10 +15,11 @@
             <div class="kpi-wrapper-admin">
                 <div class="search-container">
                     <img src="{% static 'images/search-icon.png' %}" alt="search" class="search-icon">
-                    <input type="text" id="searchAdminInput" placeholder="Search employees...">
+                    <input type="text" id="searchAdminInput" placeholder="Search admins..." 
+                           onkeyup="searchAdmins(this.value)">
                 </div>
 
-                <button class="btn">
+                <button class="btn" id="createAdminBtn">
                     <img src="{% static 'images/add-employee-icon.png' %}" alt="Add" class="add-icon">
                     Create Admin
                 </button>
@@ -39,33 +38,24 @@
                             <th>ROLE</th>
                             <th>IS FIRST LOGIN</th>
                             <th>LAST LOGIN</th>
+                            <th>ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="user-row">
-                            <td class="checkbox-col">
-                                <input type="checkbox" class="user-checkbox table-checkbox admin-checkbox">
+                    <tbody id="adminTableBody">
+                        <!-- Admins will be loaded here dynamically -->
+                        <tr id="adminLoadingRow">
+                            <td colspan="8" style="text-align: center; padding: 40px;">
+                                <div style="display: inline-block;">
+                                    <div style="margin-bottom: 10px;">Loading admins...</div>
+                                    <div style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                                </div>
                             </td>
-                            <td>kiran</td>
-                            <td>Kiran Koko</td>
-                            <td>connect@telusko.com</td>
-                            <td>Admin</td>
-                            <td>true</td>
-                            <td>2025-12-01</td>
-                        </tr>
-                        <tr class="user-row alt-row">
-                            <td class="checkbox-col">
-                                <input type="checkbox" class="user-checkbox table-checkbox admin-checkbox">
-                            </td>
-                            <td>navin</td>
-                            <td>Navin Never</td>
-                            <td>connect@telusko.com</td>
-                            <td>Admin</td>
-                            <td>false</td>
-                            <td>2025-12-01</td>
                         </tr>
                     </tbody>
                 </table>
+                <div id="adminPagination" class="pagination-controls" style="display: none;">
+                    <!-- Pagination will be added here -->
+                </div>
             </div>
         </div>
 
@@ -81,10 +71,11 @@
             <div class="kpi-wrapper-admin">
                 <div class="search-container">
                     <img src="{% static 'images/search-icon.png' %}" alt="search" class="search-icon">
-                    <input type="text" id="searchSupervisorInput" placeholder="Search supervisors...">
+                    <input type="text" id="searchSupervisorInput" placeholder="Search supervisors..." 
+                           onkeyup="searchSupervisors(this.value)">
                 </div>
 
-                <button class="btn">
+                <button class="btn" id="createSupervisorBtn">
                     <img src="{% static 'images/add-employee-icon.png' %}" alt="Add" class="add-icon">
                     Create Supervisor
                 </button>
@@ -103,40 +94,137 @@
                             <th>ROLE</th>
                             <th>IS FIRST LOGIN</th>
                             <th>LAST LOGIN</th>
+                            <th>ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="user-row">
-                            <td class="checkbox-col">
-                                <input type="checkbox" class="user-checkbox table-checkbox supervisor-checkbox">
+                    <tbody id="supervisorTableBody">
+                        <!-- Supervisors will be loaded here dynamically -->
+                        <tr id="supervisorLoadingRow">
+                            <td colspan="8" style="text-align: center; padding: 40px;">
+                                <div style="display: inline-block;">
+                                    <div style="margin-bottom: 10px;">Loading supervisors...</div>
+                                    <div style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                                </div>
                             </td>
-                            <td>josie</td>
-                            <td>Josie Lane</td>
-                            <td>josie@example.com</td>
-                            <td>Supervisor</td>
-                            <td>true</td>
-                            <td>2025-12-01</td>
-                        </tr>
-                        <tr class="user-row alt-row">
-                            <td class="checkbox-col">
-                                <input type="checkbox" class="user-checkbox table-checkbox supervisor-checkbox">
-                            </td>
-                            <td>harry</td>
-                            <td>Harry Stone</td>
-                            <td>harry@example.com</td>
-                            <td>Supervisor</td>
-                            <td>false</td>
-                            <td>2025-12-01</td>
                         </tr>
                     </tbody>
                 </table>
+                <div id="supervisorPagination" class="pagination-controls" style="display: none;">
+                    <!-- Pagination will be added here -->
+                </div>
             </div>
         </div>
-
     </div>
 
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 16px; margin-bottom: 15px;">Loading...</div>
+            <div style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+        </div>
+    </div>
 
 </main>
 
-<script src="{% static 'dashboard/js/admin-dashboard.js' %}"></script>
- {% include 'dashboard/admin_create_modal.html' %}
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .pagination-btn {
+        padding: 8px 16px;
+        margin: 0 5px;
+        border: 1px solid #d1d5db;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .pagination-btn:hover:not(:disabled) {
+        background: #f3f4f6;
+    }
+    
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .pagination-info {
+        margin: 0 15px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+    
+    .page-number {
+        padding: 6px 12px;
+        margin: 0 3px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    
+    .page-number.active {
+        background: #2563eb;
+        color: white;
+    }
+    
+    .page-number:hover:not(.active) {
+        background: #f3f4f6;
+    }
+    
+    .actions-cell {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .edit-btn {
+        background: #3b82f6;
+        color: white;
+    }
+    
+    .edit-btn:hover {
+        background: #2563eb;
+    }
+    
+    .delete-btn {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .delete-btn:hover {
+        background: #dc2626;
+    }
+    
+    .reset-btn {
+        background: #f59e0b;
+        color: white;
+    }
+    
+    .reset-btn:hover {
+        background: #d97706;
+    }
+</style>
+
+{% block extra_js %}
+    <script src="{% static 'dashboard/js/admin-dashboard.js' %}"></script>
+    <script src="{% static 'dashboard/js/user-management.js' %}"></script>
+{% endblock %}
+{% include 'dashboard/admin_create_modal.html' %}

@@ -13,4 +13,8 @@ urlpatterns = [
     path('handle-password-reset/', views.handle_password_reset, name='handle_password_reset'),
     path('admin/create-supervisor/', views.admin_create_supervisor, name='admin_create_supervisor'),
     path('admin/create-admin/', views.admin_create_admin, name='admin_create_admin'),
+    path('admin/get-admins/', views.get_admins_api, name='get_admins_api'),
+    path('admin/get-supervisors/', views.get_supervisors_api, name='get_supervisors_api'),
+    path('admin/get-employees/', views.get_employees_api, name='get_employees_api'),
+    path('admin/get-all-users/', views.get_all_users_api, name='get_all_users_api'),
 ]

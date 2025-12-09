@@ -172,3 +172,196 @@ def admin_create_admin(request):
             })
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+from django.core.paginator import Paginator
+from django.db.models import Q
+
+@login_required
+@user_passes_test(is_admin, login_url='/login/')
+def get_admins_api(request):
+    """API endpoint to get all admin users"""
+    try:
+        # Get all admin users (role_id = 301)
+        admins = UserAccount.objects.filter(
+            role__role_id=301
+        ).select_related('employee', 'role')
+        
+        # Convert to list
+        admin_data = []
+        for admin in admins:
+            admin_data.append({
+                'id': admin.pk,
+                'username': admin.username,
+                'employee_name': f"{admin.employee.first_name} {admin.employee.last_name}",
+                'email': admin.employee.email_address,
+                'role': admin.role.role_name,
+                'is_first_login': admin.is_first_login,
+                'last_login': admin.last_login.strftime('%Y-%m-%d %H:%M') if admin.last_login else 'Never',
+                'position': admin.employee.position or '',
+                'department': admin.employee.department or '',
+                'hire_date': admin.employee.hire_date.strftime('%Y-%m-%d') if admin.employee.hire_date else ''
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'admins': admin_data,
+            'count': len(admin_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+@login_required
+@user_passes_test(is_admin, login_url='/login/')
+def get_supervisors_api(request):
+    """API endpoint to get all supervisor users"""
+    try:
+        # Get all supervisor users (role_id = 302)
+        supervisors = UserAccount.objects.filter(
+            role__role_id=302
+        ).select_related('employee', 'role')
+        
+        # Convert to list
+        supervisor_data = []
+        for supervisor in supervisors:
+            supervisor_data.append({
+                'id': supervisor.pk,
+                'username': supervisor.username,
+                'employee_name': f"{supervisor.employee.first_name} {supervisor.employee.last_name}",
+                'email': supervisor.employee.email_address,
+                'role': supervisor.role.role_name,
+                'is_first_login': supervisor.is_first_login,
+                'last_login': supervisor.last_login.strftime('%Y-%m-%d %H:%M') if supervisor.last_login else 'Never',
+                'position': supervisor.employee.position or '',
+                'department': supervisor.employee.department or '',
+                'hire_date': supervisor.employee.hire_date.strftime('%Y-%m-%d') if supervisor.employee.hire_date else ''
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'supervisors': supervisor_data,
+            'count': len(supervisor_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+@login_required
+@user_passes_test(is_admin, login_url='/login/')
+def get_employees_api(request):
+    """API endpoint to get all regular employees"""
+    try:
+        # Get all regular employees (role_id = 303)
+        employees = UserAccount.objects.filter(
+            role__role_id=303
+        ).select_related('employee', 'role')
+        
+        # Convert to list
+        employee_data = []
+        for employee in employees:
+            employee_data.append({
+                'id': employee.pk,
+                'username': employee.username,
+                'employee_name': f"{employee.employee.first_name} {employee.employee.last_name}",
+                'email': employee.employee.email_address,
+                'role': employee.role.role_name,
+                'is_first_login': employee.is_first_login,
+                'last_login': employee.last_login.strftime('%Y-%m-%d %H:%M') if employee.last_login else 'Never',
+                'position': employee.employee.position or '',
+                'department': employee.employee.department or '',
+                'hire_date': employee.employee.hire_date.strftime('%Y-%m-%d') if employee.employee.hire_date else ''
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'employees': employee_data,
+            'count': len(employee_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+@login_required
+@user_passes_test(is_admin, login_url='/login/')
+def get_all_users_api(request):
+    """API endpoint to get all users with search and pagination"""
+    try:
+        # Get parameters
+        role_filter = request.GET.get('role', 'all')  # 'admin', 'supervisor', 'employee', 'all'
+        search_query = request.GET.get('search', '').strip()
+        page = int(request.GET.get('page', 1))
+        per_page = int(request.GET.get('per_page', 20))
+        
+        # Base queryset
+        users = UserAccount.objects.select_related('employee', 'role')
+        
+        # Apply role filter
+        if role_filter == 'admin':
+            users = users.filter(role__role_id=301)
+        elif role_filter == 'supervisor':
+            users = users.filter(role__role_id=302)
+        elif role_filter == 'employee':
+            users = users.filter(role__role_id=303)
+        
+        # Apply search filter
+        if search_query:
+            users = users.filter(
+                Q(username__icontains=search_query) |
+                Q(employee__first_name__icontains=search_query) |
+                Q(employee__last_name__icontains=search_query) |
+                Q(employee__email_address__icontains=search_query) |
+                Q(employee__position__icontains=search_query) |
+                Q(employee__department__icontains=search_query)
+            )
+        
+        # Get total count
+        total_count = users.count()
+        
+        # Pagination
+        paginator = Paginator(users, per_page)
+        page_obj = paginator.get_page(page)
+        
+        # Convert to list
+        user_data = []
+        for user in page_obj:
+            user_data.append({
+                'id': user.pk,
+                'username': user.username,
+                'employee_name': f"{user.employee.first_name} {user.employee.last_name}",
+                'email': user.employee.email_address,
+                'role_id': user.role.role_id,
+                'role': user.role.role_name,
+                'is_first_login': user.is_first_login,
+                'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never',
+                'position': user.employee.position or '',
+                'department': user.employee.department or '',
+                'hire_date': user.employee.hire_date.strftime('%Y-%m-%d') if user.employee.hire_date else ''
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'users': user_data,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': paginator.num_pages,
+                'total_count': total_count,
+                'has_next': page_obj.has_next(),
+                'has_previous': page_obj.has_previous()
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })

@@ -332,6 +332,8 @@ def search_employees_api(request):
             id=request.user.employee.id  # exclude self
         ).exclude(
             accounts__role__role_id=302  # exclude other managers
+        ).exclude(
+            accounts__role__role_id=301  # exclude other admins
         ).distinct()
         
         if search_query:

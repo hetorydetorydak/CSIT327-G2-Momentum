@@ -34,13 +34,30 @@ class LoginForm(forms.Form):
         
         return cleaned_data
 
+DEPARTMENT_CHOICES = [
+    ('', 'Select Department'),
+    ('IT', 'IT Department'),
+    ('HR', 'Human Resources'),
+    ('Finance', 'Finance'),
+    ('Operations', 'Operations'),
+    ('Sales', 'Sales'),
+    ('Marketing', 'Marketing'),
+    ('Customer Service', 'Customer Service'),
+    ('Production', 'Production'),
+    ('Research', 'Research & Development'),
+]
+
 class RegistrationForm(forms.Form):
     first_name = forms.CharField(max_length=150)
     last_name = forms.CharField(max_length=150)
     email = forms.EmailField()
     date_hired = forms.DateField(required=False)
     position = forms.CharField(max_length=150, required=False)
-    department = forms.CharField(max_length=150, required=False)
+    department = forms.ChoiceField(
+        choices=DEPARTMENT_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput, min_length=8)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
@@ -130,7 +147,11 @@ class AdminCreateUserForm(forms.Form):
     first_name = forms.CharField(max_length=150)
     last_name = forms.CharField(max_length=150)
     email = forms.EmailField()
-    department = forms.CharField(max_length=150, required=False)
+    department = forms.ChoiceField(
+        choices=DEPARTMENT_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     position = forms.CharField(max_length=150, required=False)
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput, min_length=8)

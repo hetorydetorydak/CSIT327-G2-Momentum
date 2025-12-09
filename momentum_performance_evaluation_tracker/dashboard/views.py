@@ -32,6 +32,15 @@ def dashboard_home(request):
     if hasattr(request.user, 'role') and request.user.role.role_id == 302:
         user_is_manager = True
         team_performance = get_team_performance_data(request.user)
+        
+        # Get filter parameters from request
+        department_filter = request.GET.get('department', '')
+        status_filter = request.GET.get('status', '')
+        
+        # Apply filters if provided
+        if department_filter or status_filter:
+            from core.utils import filter_team_performance
+            team_performance = filter_team_performance(team_performance, department_filter, status_filter)
 
     # Check if user is an admin (role_id = 301)
     if hasattr(request.user, 'role') and request.user.role.role_id == 301:
@@ -64,6 +73,8 @@ def dashboard_home(request):
         'user_is_admin': user_is_admin,
         'kpi_data': kpi_data,
         'team_performance': team_performance,
+        'selected_department': request.GET.get('department', ''),
+        'selected_status': request.GET.get('status', ''),
     }
     return render(request, "dashboard/dashboard.html", context)
 

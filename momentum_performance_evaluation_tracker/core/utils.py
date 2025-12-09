@@ -21,9 +21,7 @@ def calculate_attendance_rate(employee, period=None):
             date__lte=today
         )
         
-        print(f"DEBUG: Looking for attendance from {start_date} to {today}")
-        print(f"DEBUG: Found {attendance_records.count()} records")
-        
+                
         if not attendance_records.exists():
             return 0.0
         
@@ -31,7 +29,6 @@ def calculate_attendance_rate(employee, period=None):
         present_days = attendance_records.filter(status='Present').count()
         
         rate = round((present_days / total_days) * 100, 2) if total_days > 0 else 0.0
-        print(f"DEBUG: Calculated rate: {rate}%")
         
         return rate
     except Exception as e:
@@ -159,7 +156,6 @@ def get_employee_status(employee):
 def get_team_performance_data(manager_user):
     """Get performance data for manager's team members"""
     try:
-    
         team_members = TeamMember.objects.filter(
             manager=manager_user, 
             is_active=True
@@ -196,9 +192,33 @@ def get_team_performance_data(manager_user):
                 'status': status
             })
         
-        print(f"DEBUG: Found {len(team_performance)} team members for {manager_user.username}")
         return team_performance
         
     except Exception as e:
         print(f"Error getting team performance data: {e}")
         return []
+
+def filter_team_performance(team_performance, department=None, status=None):
+    """Filter team performance data by department and/or status"""
+    filtered_data = team_performance.copy()
+    
+    if department:
+        filtered_data = [emp for emp in filtered_data if emp.get('department') == department]
+    
+    if status:
+        # map status filter values to status categories
+        status_mapping = {
+            'Excellent': 'excellent',
+            'Good': 'good', 
+            'Poor': ['needs_improvement', 'poor']  # combine needs_improvement and poor
+        }
+        
+        status_filter = status_mapping.get(status, status.lower())
+        
+        if isinstance(status_filter, list):
+            # if status_filter is a list, check if employee status is in the list
+            filtered_data = [emp for emp in filtered_data if emp.get('status') in status_filter]
+        else:
+            filtered_data = [emp for emp in filtered_data if emp.get('status') == status_filter]
+
+    return filtered_data

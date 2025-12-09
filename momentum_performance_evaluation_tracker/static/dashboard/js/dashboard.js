@@ -243,3 +243,81 @@ function getCSRFToken() {
         ?.split('=')[1];
     return cookieValue || '';
 }
+
+// update card counts
+function updateCardCounts() {
+    const visibleCards = document.querySelectorAll('.performance-card[style*="display: block"], .performance-card:not([style*="display: none"])');
+    const totalCards = document.querySelectorAll('.performance-card').length;
+    
+    // update any count display elements if they exist
+    const countElement = document.querySelector('.employee-count-btn .count-box');
+    if (countElement) {
+        countElement.textContent = visibleCards.length;
+    }
+    
+}
+
+// initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFilterSearch();
+    
+    // also trigger search filter when department/status filters change
+    document.getElementById('departmentFilter')?.addEventListener('change', updateCardCounts);
+    document.getElementById('statusFilter')?.addEventListener('change', updateCardCounts);
+});
+
+
+// function to apply client-side filtering for the search input
+function initializeFilterSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.performance-card');
+            
+            cards.forEach(card => {
+                const employeeName = card.getAttribute('data-name').toLowerCase();
+                const employeeDepartment = card.getAttribute('data-department').toLowerCase();
+                const employeeStatus = card.getAttribute('data-status');
+                
+                // also get text from card elements as fallback
+                const nameElement = card.querySelector('.employee-name');
+                const positionElement = card.querySelector('.employee-position');
+                const nameText = nameElement ? nameElement.textContent.toLowerCase() : '';
+                const positionText = positionElement ? positionElement.textContent.toLowerCase() : '';
+                
+                if (employeeName.includes(searchTerm) || 
+                    nameText.includes(searchTerm) ||
+                    positionText.includes(searchTerm) || 
+                    employeeDepartment.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            updateCardCounts();
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFilterSearch();
+    filterCardsByAttributes(); // apply any filters from URL on page load
+    
+    // also trigger update when department/status filters change
+    const departmentFilter = document.getElementById('departmentFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    if (departmentFilter) {
+        departmentFilter.addEventListener('change', function() {
+            // this will trigger a page reload through applyFilters()
+        });
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            // this will trigger a page reload through applyFilters()
+        });
+    }
+});

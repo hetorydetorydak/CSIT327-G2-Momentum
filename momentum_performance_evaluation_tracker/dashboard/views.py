@@ -4,7 +4,7 @@ from django.views.decorators.cache import never_cache
 from core.forms import SupervisorPasswordResetForm
 from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_kpis
 from django.http import JsonResponse
-from core.models import Employee, Evaluation, BacklogItem, AttendanceRecord
+from core.models import Employee, Evaluation, BacklogItem, AttendanceRecord, KPI
 from core.utils import calculate_attendance_rate, calculate_backlog_count, calculate_compliance_rate, get_team_performance_data, calculate_performance_score
 from .models import TeamMember
 from django.db.models import Q 
@@ -258,7 +258,7 @@ def employee_performance_api(request, employee_id):
             'department': employee.department,
             'attendance_rate': calculate_attendance_rate(employee),
             'backlog_count': calculate_backlog_count(employee),
-            'compliance_rate': compliance_rate,
+            'compliance_rate': get_employee_compliance_rate(employee, real_time=True),
             'performance_score': calculate_performance_score(employee),
             'recent_evaluations': [],
             'pending_tasks': [],

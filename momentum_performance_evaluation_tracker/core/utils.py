@@ -1,7 +1,8 @@
 from django.utils import timezone
 from datetime import timedelta
-from .models import AttendanceRecord, BacklogItem, EvaluationKPI, KPI, Employee
+from .models import AttendanceRecord, BacklogItem, EvaluationKPI, KPI, Employee, Evaluation
 from dashboard.models import TeamMember
+from django.db.models import Q
 
 def calculate_attendance_rate(employee, period=None):
     """Calculate attendance rate for an employee"""
@@ -52,90 +53,68 @@ def calculate_backlog_count(employee):
         print(f"Error calculating backlog: {e}")
         return 0
 
-def calculate_compliance_rate(employee, period=None):
-    """calculate compliance rate based on KPI evaluations"""
+def calculate_compliance_rate(employee, period_days=None, since_last_evaluation=False, real_time=True):
+    """Calculate compliance rate for tasks"""
     try:
-        # latest evaluation for this employee
-        latest_evaluation = employee.evaluations.order_by('-evaluation_date').first()
+        from django.utils import timezone
+        from datetime import timedelta
         
-        if not latest_evaluation:
+        # Base queryset
+        tasks = BacklogItem.objects.filter(employee=employee)
+        
+        # Exclude evaluated tasks in real-time mode
+        if real_time:
+            # Exclude tasks that were already evaluated
+            tasks = tasks.filter(is_evaluated=False)
+        
+        # Apply date filters if period_days is specified
+        if period_days:
+            end_date = timezone.now().date()
+            start_date = end_date - timedelta(days=period_days)
+            tasks = tasks.filter(
+                created_date__gte=start_date,
+                created_date__lte=end_date
+            )
+        
+        # Filter for tasks since last evaluation if requested
+        if since_last_evaluation:
+            last_evaluation = Evaluation.objects.filter(
+                employee=employee
+            ).order_by('-evaluation_date').first()
+            
+            if last_evaluation:
+                tasks = tasks.filter(created_date__gt=last_evaluation.evaluation_date)
+        
+        if not tasks.exists():
             return 0.0
         
-        kpi_scores = EvaluationKPI.objects.filter(evaluation=latest_evaluation)
+        total_tasks = tasks.count()
         
-        if not kpi_scores.exists():
-            return 0.0
+        # Calculate accepted tasks
+        accepted_tasks = tasks.filter(
+            Q(status='Accepted') | 
+            Q(review_status='Accepted')
+        ).distinct().count()
         
-        total_percentage = 0
-        kpi_count = 0
+        # Simple compliance rate calculation
+        compliance_rate = (accepted_tasks / total_tasks) * 100 if total_tasks > 0 else 0.0
         
-        for kpi_score in kpi_scores:
-            # calc percentage for each KPI (capped at 100%)
-            kpi_percentage = min((kpi_score.value / kpi_score.target) * 100, 100)
-            total_percentage += kpi_percentage
-            kpi_count += 1
-        
-        # return average of all KPI percentages
-        return round(total_percentage / kpi_count, 2) if kpi_count > 0 else 0.0
+        return round(compliance_rate, 2)
         
     except Exception as e:
         print(f"Error calculating compliance: {e}")
         return 0.0
 
-def get_team_kpis(manager_user):
-    """Get KPI data for manager's team"""
-    try:
-        team_members = TeamMember.objects.filter(
-            manager=manager_user, 
-            is_active=True
-        ).select_related('employee')
-        
-        if not team_members.exists():
-            return {
-                'total_employees': 0,
-                'avg_compliance': 0,
-                'avg_attendance': 0,
-                'total_backlogs': 0
-            }
-        total_employees = team_members.count()
-        total_compliance = 0
-        total_attendance = 0
-        total_backlogs = 0
-        
-        for team_member in team_members:
-            employee = team_member.employee
-            total_compliance += calculate_compliance_rate(employee)
-            total_attendance += calculate_attendance_rate(employee)
-            total_backlogs += calculate_backlog_count(employee)
-        
-        return {
-            'total_employees': total_employees,
-            'avg_compliance': round(total_compliance / total_employees, 2),
-            'avg_attendance': round(total_attendance / total_employees, 2),
-            'total_backlogs': total_backlogs
-        }
-        
-    except Exception as e:
-        print(f"Error getting team KPIs: {e}")
-        return {
-            'total_employees': 0,
-            'avg_compliance': 0,
-            'avg_attendance': 0,
-            'total_backlogs': 0
-        }
-
 def calculate_performance_score(employee):
     """Calculate overall performance score for an employee"""
     try:
         attendance_rate = calculate_attendance_rate(employee)
-        backlog_count = calculate_backlog_count(employee)
-        compliance_rate = calculate_compliance_rate(employee)
+        compliance_rate = calculate_compliance_rate(employee, real_time=True)
         
         # Simple weighted average calculation
         performance_score = (
-            (attendance_rate * 0.4) + 
-            ((100 - min(backlog_count * 10, 100)) * 0.3) + 
-            (compliance_rate * 0.3)
+            (attendance_rate * 0.4) +
+            (compliance_rate * 0.6)
         )
         
         return round(performance_score, 2)
@@ -146,7 +125,7 @@ def calculate_performance_score(employee):
 def get_employee_status(employee):
     """Determine employee performance status"""
     score = calculate_performance_score(employee)
-    if score >= 85:
+    if score >= 80:
         return 'excellent'
     elif score >= 70:
         return 'good'
@@ -170,7 +149,7 @@ def get_team_performance_data(manager_user):
             
             attendance_rate = calculate_attendance_rate(employee)
             backlog_count = calculate_backlog_count(employee)
-            compliance_rate = calculate_compliance_rate(employee)
+            compliance_rate = calculate_compliance_rate(employee, real_time=True)
             performance_score = calculate_performance_score(employee)
             
             if performance_score >= 90:
@@ -402,3 +381,47 @@ def reset_rates_after_evaluation(employee):
     except Exception as e:
         print(f"Error resetting rates: {e}")
         return False
+
+
+def get_team_kpis(manager_user):
+    """Get KPI data for manager's team"""
+    try:
+        team_members = TeamMember.objects.filter(
+            manager=manager_user, 
+            is_active=True
+        ).select_related('employee')
+        
+        if not team_members.exists():
+            return {
+                'total_employees': 0,
+                'avg_compliance': 0,
+                'avg_attendance': 0,
+                'total_backlogs': 0
+            }
+        
+        total_employees = team_members.count()
+        total_compliance = 0
+        total_attendance = 0
+        total_backlogs = 0
+        
+        for team_member in team_members:
+            employee = team_member.employee
+            total_compliance += get_employee_compliance_rate(employee, real_time=True)  # REAL-TIME
+            total_attendance += calculate_attendance_rate(employee)
+            total_backlogs += calculate_backlog_count(employee)
+        
+        return {
+            'total_employees': total_employees,
+            'avg_compliance': round(total_compliance / total_employees, 2) if total_employees > 0 else 0,
+            'avg_attendance': round(total_attendance / total_employees, 2) if total_employees > 0 else 0,
+            'total_backlogs': total_backlogs
+        }
+        
+    except Exception as e:
+        print(f"Error getting team KPIs: {e}")
+        return {
+            'total_employees': 0,
+            'avg_compliance': 0,
+            'avg_attendance': 0,
+            'total_backlogs': 0
+        }

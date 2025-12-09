@@ -14,6 +14,68 @@ from datetime import datetime
 from django.shortcuts import get_object_or_404
 from dashboard.forms import TaskFileForm
 import json
+from datetime import time as dt_time
+from django.utils import timezone
+
+def mark_attendance(employee, request):
+    """Mark attendance for employee based on login time"""
+    # Get today's date and current time (timezone-aware)
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    current_time = now.time()
+    
+    print(f"DEBUG: Today = {today}")
+    print(f"DEBUG: Current time = {current_time}")
+    
+    # Check if attendance already marked today
+    existing = AttendanceRecord.objects.filter(employee=employee, date=today).exists()
+    print(f"DEBUG: Attendance already exists? {existing}")
+    
+    if existing:
+        return False
+    
+    # Time thresholds
+    start_time = dt_time(7, 0)   # 7:00 AM
+    late_time = dt_time(8, 0)    # 8:00 AM
+    absent_time = dt_time(20, 0) # 8:00 PM
+
+    print(f"DEBUG: start_time = {start_time}, late_time = {late_time}, absent_time = {absent_time}")
+    print(f"DEBUG: Checking time conditions...")
+
+    # Mark ABSENT after 8:00 PM
+    if current_time >= absent_time:
+        status = "Absent"
+        print("DEBUG: Status = Absent (after 8 PM)")
+
+    # Normal logic
+    elif start_time <= current_time < late_time:
+        status = "Present"
+        print("DEBUG: Status = Present")
+    elif late_time <= current_time < absent_time:
+        status = "Late"
+        print("DEBUG: Status = Late")
+    else:
+        # Before 7 AM → do not mark attendance
+        print("DEBUG: Before 7 AM - not marking")
+        return False
+    
+    # Create attendance record
+    try:
+        AttendanceRecord.objects.create(
+            employee=employee,
+            date=today,
+            status=status
+        )
+        print(f"Attendance marked for {employee.first_name} {employee.last_name}: {status}")
+        
+        # Set session flag for notification
+        request.session['attendance_just_marked'] = True
+        request.session['attendance_marked_today'] = True
+        return True
+
+    except Exception as e:
+        print(f"Error marking attendance: {e}")
+        return False
 
 @never_cache
 @login_required(login_url='/login/')
@@ -27,55 +89,101 @@ def dashboard_home(request):
     password_reset_form = None
     kpi_data = {}
     team_performance = []
-    
-    # Check if user is a manager
-    if hasattr(request.user, 'role') and request.user.role.role_id == 302:
-        user_is_manager = True
-        team_performance = get_team_performance_data(request.user)
-        
-        # Get filter parameters from request
-        department_filter = request.GET.get('department', '')
-        status_filter = request.GET.get('status', '')
-        
-        # Apply filters if provided
-        if department_filter or status_filter:
-            from core.utils import filter_team_performance
-            team_performance = filter_team_performance(team_performance, department_filter, status_filter)
+    today_attendance = None
+    recent_attendance = []
 
-    # Check if user is an admin (role_id = 301)
-    if hasattr(request.user, 'role') and request.user.role.role_id == 301:
-        user_is_admin = True
-    
+    # DEBUG: Check user role
+    print(f"DEBUG: User = {request.user}")
+    if hasattr(request.user, 'role'):
+        print(f"DEBUG: Role ID = {request.user.role.role_id}")
+
+    role = getattr(request.user, 'role', None)
+
+    # Check roles
+    if role:
+        # Manager
+        if role.role_id == 302:
+            user_is_manager = True
+            team_performance = get_team_performance_data(request.user)
+            print("DEBUG: User is MANAGER")
+
+            # Department/status filters
+            department_filter = request.GET.get('department', '')
+            status_filter = request.GET.get('status', '')
+            if department_filter or status_filter:
+                from core.utils import filter_team_performance
+                team_performance = filter_team_performance(team_performance, department_filter, status_filter)
+
+        # Admin
+        elif role.role_id == 301:
+            user_is_admin = True
+            print("DEBUG: User is ADMIN")
+
+        # Employee
+        elif role.role_id == 303:
+            print(f"DEBUG: Employee detected - role_id = {role.role_id}")
+
+            attendance_marked = request.session.get('attendance_marked_today')
+            print(f"DEBUG: attendance_marked_today in session? {attendance_marked}")
+
+            if not attendance_marked:
+                print("DEBUG: Calling mark_attendance...")
+                marked = mark_attendance(request.user.employee, request)
+                print(f"DEBUG: mark_attendance returned: {marked}")
+                request.session['attendance_marked_today'] = bool(marked)
+                request.session['attendance_just_marked'] = bool(marked)
+            else:
+                print("DEBUG: Attendance already marked this session")
+                request.session['attendance_just_marked'] = False
+
+            today = timezone.now().date()
+            try:
+                today_attendance = AttendanceRecord.objects.get(
+                    employee=request.user.employee,
+                    date=today
+                )
+                print(f"DEBUG: Found today_attendance: {today_attendance.status}")
+            except AttendanceRecord.DoesNotExist:
+                today_attendance = None
+                print("DEBUG: No attendance record found for today")
+
+            recent_attendance = AttendanceRecord.objects.filter(
+                employee=request.user.employee
+            ).order_by('-date')[:10]
+            print(f"DEBUG: Found {len(recent_attendance)} recent attendance records")
+
     # Check if supervisor needs password reset
-    if hasattr(request.user, 'role') and user_is_manager and request.user.is_first_login:
+    if user_is_manager and getattr(request.user, 'is_first_login', False):
         show_password_reset = True
         password_reset_form = SupervisorPasswordResetForm(user=request.user)
-    
-    # Get KPI data based on user role
+
+    # KPI data
     if user_is_manager:
-        # Manager dashboard - team KPIs
         kpi_data = get_team_kpis(request.user)
-    else:
-        # Employee dashboard - individual KPIs
+    elif getattr(request.user, 'employee', None):
         employee = request.user.employee
         kpi_data = {
             'attendance_rate': calculate_attendance_rate(employee),
             'backlog_count': calculate_backlog_count(employee),
             'compliance_rate': calculate_compliance_rate(employee),
         }
-    
+
     context = {
         'user_account': request.user,
-        'employee': request.user.employee,
+        'employee': getattr(request.user, 'employee', None),
         'show_password_reset': show_password_reset,
         'password_reset_form': password_reset_form,
         'user_is_manager': user_is_manager,
         'user_is_admin': user_is_admin,
         'kpi_data': kpi_data,
         'team_performance': team_performance,
+        'today_attendance': today_attendance,
+        'recent_attendance': recent_attendance,
+        'attendance_just_marked': request.session.get('attendance_just_marked', False),
         'selected_department': request.GET.get('department', ''),
         'selected_status': request.GET.get('status', ''),
     }
+
     return render(request, "dashboard/dashboard.html", context)
 
 @login_required

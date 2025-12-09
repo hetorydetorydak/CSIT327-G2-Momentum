@@ -1,0 +1,76 @@
+.attendance-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    min-width: 280px;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.attendance-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-present {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.toast-late {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    color: #333;
+}
+
+.toast-absent {
+    background: linear-gradient(135deg, #dc3545 0%, #e63946 100%);
+    color: white;
+}
+
+.toast-absent .toast-icon {
+    color: white;
+}
+
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    color: white;
+}
+
+.toast-late .toast-icon {
+    color: #333;
+}
+
+.toast-text strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.toast-text p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .attendance-toast {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+    }
+}

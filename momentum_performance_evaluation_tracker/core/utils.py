@@ -21,6 +21,8 @@ def calculate_attendance_rate(employee, period=None):
             date__lte=today
         )
         
+        attendance_records = attendance_records.filter(is_counted=False)
+        
                 
         if not attendance_records.exists():
             return 0.0
@@ -223,3 +225,180 @@ def filter_team_performance(team_performance, department=None, status=None):
             filtered_data = [emp for emp in filtered_data if emp.get('status') == status_filter]
 
     return filtered_data
+
+def get_employee_compliance_rate(employee, real_time=True):
+    """
+    Get employee compliance rate.
+    """
+    try:
+        print(f"DEBUG: Getting compliance for {employee} - real_time={real_time}")
+        
+        if real_time:
+            # REAL-TIME calculation - exclude evaluated tasks
+            rate = calculate_compliance_rate(employee, real_time=True)
+            print(f"DEBUG: Real-time compliance rate = {rate}")
+            return rate
+        else:
+            # Get from latest evaluation
+            latest_evaluation = Evaluation.objects.filter(
+                employee=employee
+            ).order_by('-evaluation_date').first()
+            
+            if latest_evaluation and latest_evaluation.compliance_rate is not None:
+                print(f"DEBUG: Using evaluation compliance rate = {latest_evaluation.compliance_rate}")
+                return latest_evaluation.compliance_rate
+            else:
+                rate = calculate_compliance_rate(employee, real_time=False)
+                print(f"DEBUG: Calculated compliance rate = {rate}")
+                return rate
+    except Exception as e:
+        print(f"Error getting compliance rate: {e}")
+        return calculate_compliance_rate(employee, real_time=real_time)
+
+def calculate_evaluation_metrics(employee, evaluation_date=None):
+    """
+    Calculate comprehensive evaluation metrics including attendance
+    """
+    try:
+        # Calculate attendance rate for evaluation period
+        attendance_rate = calculate_attendance_rate_for_period(employee, evaluation_date)
+        
+        # Calculate compliance rate for evaluation period
+        compliance_rate = calculate_compliance_rate_for_evaluation(employee, evaluation_date)
+        
+        # Calculate overall performance with weights
+        # You can adjust these weights as needed
+        overall_performance = (
+            (attendance_rate * 0.4) +  # 40% attendance
+            (compliance_rate * 0.6)    # 60% compliance
+        )
+        
+        return {
+            'attendance_rate': round(attendance_rate, 2),
+            'compliance_rate': round(compliance_rate, 2),
+            'overall_performance': round(overall_performance, 2)
+        }
+        
+    except Exception as e:
+        print(f"Error calculating evaluation metrics: {e}")
+        return {
+            'attendance_rate': 0.0,
+            'compliance_rate': 0.0,
+            'overall_performance': 0.0
+        }
+
+def calculate_attendance_rate_for_period(employee, evaluation_date=None):
+    """Calculate attendance rate for a specific period"""
+    try:
+        # Get last evaluation date or default period
+        last_evaluation = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date').first()
+        
+        if evaluation_date:
+            end_date = evaluation_date
+        else:
+            end_date = timezone.now().date()
+        
+        if last_evaluation:
+            # Calculate for period since last evaluation
+            start_date = last_evaluation.evaluation_date
+            attendance_records = AttendanceRecord.objects.filter(
+                employee=employee,
+                date__gt=start_date,  # After last evaluation
+                date__lte=end_date    # Up to current evaluation
+            )
+        else:
+            # First evaluation - use all records
+            attendance_records = AttendanceRecord.objects.filter(
+                employee=employee,
+                date__lte=end_date
+            )
+        
+        if not attendance_records.exists():
+            return 0.0
+        
+        total_days = attendance_records.count()
+        present_days = attendance_records.filter(status='Present').count()
+        
+        rate = (present_days / total_days) * 100 if total_days > 0 else 0.0
+        return round(rate, 2)
+        
+    except Exception as e:
+        print(f"Error calculating attendance for period: {e}")
+        return 0.0
+
+def calculate_compliance_rate_for_evaluation(employee, evaluation_date=None):
+    """Calculate compliance rate for evaluation period"""
+    try:
+        # Get last evaluation date
+        last_evaluation = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date').first()
+        
+        if evaluation_date:
+            end_date = evaluation_date
+        else:
+            end_date = timezone.now().date()
+        
+        # Get tasks for the evaluation period
+        tasks = BacklogItem.objects.filter(employee=employee)
+        
+        if last_evaluation:
+            # Only tasks created after last evaluation
+            tasks = tasks.filter(
+                created_date__gt=last_evaluation.evaluation_date,
+                created_date__lte=end_date
+            )
+        else:
+            # First evaluation - all tasks up to evaluation date
+            tasks = tasks.filter(created_date__lte=end_date)
+        
+        if not tasks.exists():
+            return 0.0
+        
+        total_tasks = tasks.count()
+        accepted_tasks = tasks.filter(
+            Q(status='Accepted') | 
+            Q(review_status='Accepted')
+        ).distinct().count()
+        
+        compliance_rate = (accepted_tasks / total_tasks) * 100 if total_tasks > 0 else 0.0
+        return round(compliance_rate, 2)
+        
+    except Exception as e:
+        print(f"Error calculating compliance for evaluation: {e}")
+        return 0.0
+
+def reset_rates_after_evaluation(employee):
+    """
+    Reset rates in dashboard by marking tasks/attendance as 'evaluated'
+    This is a conceptual approach - you might need different implementation
+    """
+    try:
+        # Get latest evaluation
+        latest_evaluation = Evaluation.objects.filter(
+            employee=employee
+        ).order_by('-evaluation_date').first()
+        
+        if not latest_evaluation:
+            return False
+        
+        # Mark tasks created before evaluation as 'evaluated'
+        # You might need to add an 'evaluated' field to BacklogItem
+        BacklogItem.objects.filter(
+            employee=employee,
+            created_date__lte=latest_evaluation.evaluation_date
+        ).update(is_evaluated=True)  # Assuming you add this field
+        
+        # Mark attendance before evaluation as 'counted'
+        AttendanceRecord.objects.filter(
+            employee=employee,
+            date__lte=latest_evaluation.evaluation_date
+        ).update(is_counted=True)  # Assuming you add this field
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error resetting rates: {e}")
+        return False

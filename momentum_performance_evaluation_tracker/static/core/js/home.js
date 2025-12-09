@@ -224,14 +224,12 @@ showLoginFromRegister.addEventListener('click', (e) => {
 closeModals.forEach(closeModal => {
   closeModal.addEventListener('click', () => {
     closeAllModals();
-    resetRegisterForm();
   });
 });
 
 backdrops.forEach(backdrop => {
   backdrop.addEventListener('click', () => {
     closeAllModals();
-    resetRegisterForm();
   });
 });
 

@@ -1,0 +1,637 @@
+<div id="evaluationModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeEvaluationModal()"></div>
+    <div class="modal-content" style="max-width: 600px;">
+        <button class="modal-close" onclick="closeEvaluationModal()">×</button>
+
+        <div class="modal-header">
+            <h2>Create Task Performance Evaluation</h2>
+            <p>for <strong id="evaluationEmployeeName">{{ employee_name }}</strong></p>
+        </div>
+
+        <div class="modal-body">
+            <div class="task-performance-summary" id="taskPerformanceSummary">
+                <div class="loading-message">
+                    <p>Loading task performance data...</p>
+                </div>
+            </div>
+
+            <form id="evaluationForm">
+                <input type="hidden" id="evaluationEmployeeId" value="{{ employee_id }}">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="evaluationDate">Evaluation Date *</label>
+                        <input type="date" id="evaluationDate" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="evaluationPeriod">Period *</label>
+                        <input type="text" id="evaluationPeriod" class="form-control" required
+                            placeholder="e.g., January 2024">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="evaluationNotes">Performance Notes</label>
+                    <textarea id="evaluationNotes" class="form-control" rows="4"
+                        placeholder="Overall performance assessment..."></textarea>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeEvaluationModal()">Cancel</button>
+            <button class="btn-primary" onclick="submitEvaluation()" id="submitEvaluationBtn">
+                Create Evaluation
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function openEvaluationModal(employeeId, employeeName) {
+        document.getElementById('evaluationEmployeeId').value = employeeId;
+        document.getElementById('evaluationEmployeeName').textContent = employeeName;
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('evaluationDate').value = today;
+
+        const now = new Date();
+        const month = now.toLocaleString('default', { month: 'long' });
+        const year = now.getFullYear();
+        document.getElementById('evaluationPeriod').value = `${month} ${year}`;
+
+        loadTaskPerformanceData(employeeId);
+
+        document.getElementById('evaluationModal').classList.remove('hidden');
+    }
+
+    function closeEvaluationModal() {
+        document.getElementById('evaluationModal').classList.add('hidden');
+    }
+
+    function loadTaskPerformanceData(employeeId) {
+        const summaryDiv = document.getElementById('taskPerformanceSummary');
+        summaryDiv.innerHTML = `
+<div class="loading-message">
+    <p>Analyzing task completion data...</p>
+    <div class="spinner"></div>
+</div>
+`;
+
+        fetch(`/dashboard/api/employee/${employeeId}/last-evaluation/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch last evaluation');
+                }
+                return response.json();
+            })
+            .then(evalData => {
+                let lastEvaluationDate = null;
+                let lastEvaluationCompliance = null;
+
+                if (evalData.last_evaluation) {
+                    lastEvaluationDate = evalData.last_evaluation.evaluation_date;
+                    lastEvaluationCompliance = evalData.last_evaluation.compliance_rate;
+                }
+
+                const lastEvalElement = document.getElementById('lastEvaluationCompliance');
+                if (lastEvalElement) {
+                    if (lastEvaluationCompliance !== null) {
+                        lastEvalElement.textContent = `${lastEvaluationCompliance}%`;
+                        lastEvalElement.className = `comparison-value ${lastEvaluationCompliance >= 80 ? 'good' : lastEvaluationCompliance >= 60 ? 'average' : 'poor'}`;
+                    } else {
+                        lastEvalElement.textContent = 'No previous evaluation';
+                        lastEvalElement.className = 'comparison-value';
+                    }
+                }
+
+                fetch(`/dashboard/api/tasks/team/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            summaryDiv.innerHTML = `
+                    <div class="error-message">
+                        <p>Error loading task data: ${data.error}</p>
+                    </div>
+                `;
+                            return;
+                        }
+
+                        let allTasks = [];
+                        if (data.team_tasks) {
+                            for (const teamMember of data.team_tasks) {
+                                if (parseInt(teamMember.employee_id) === parseInt(employeeId)) {
+                                    allTasks = teamMember.tasks || [];
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (allTasks.length === 0) {
+                            return fetch(`/dashboard/api/employee/${employeeId}/completed-tasks/`)
+                                .then(response => response.json())
+                                .then(completedData => {
+                                    if (completedData.error) {
+                                        throw new Error(completedData.error);
+                                    }
+                                    allTasks = completedData.tasks || [];
+
+                                    fetch(`/dashboard/api/employee/${employeeId}/attendance-stats/`)
+                                        .then(response => response.json())
+                                        .then(attendanceData => {
+                                            
+                                            calculateAndDisplayStats(allTasks, employeeId, summaryDiv, lastEvaluationDate, lastEvaluationCompliance, attendanceData);
+                                        })
+                                        .catch(attendanceError => {
+                                            console.error('Error loading attendance data:', attendanceError);
+                                            
+                                            calculateAndDisplayStats(allTasks, employeeId, summaryDiv, lastEvaluationDate, lastEvaluationCompliance, null);
+                                        });
+                                });
+                        }
+
+                        fetch(`/dashboard/api/employee/${employeeId}/attendance-stats/`)
+                            .then(response => response.json())
+                            .then(attendanceData => {
+                               
+                                calculateAndDisplayStats(allTasks, employeeId, summaryDiv, lastEvaluationDate, lastEvaluationCompliance, attendanceData);
+                            })
+                            .catch(attendanceError => {
+                                console.error('Error loading attendance data:', attendanceError);
+                                calculateAndDisplayStats(allTasks, employeeId, summaryDiv, lastEvaluationDate, lastEvaluationCompliance, null);
+                            });
+                    });
+            })
+            .catch(error => {
+                console.error('Error loading evaluation data:', error);
+                summaryDiv.innerHTML = `
+        <div class="error-message">
+            <p>Error loading evaluation data. Please try again.</p>
+            <p><small>${error.message}</small></p>
+        </div>
+    `;
+            });
+    }
+
+    function calculateAndDisplayStats(allTasks, employeeId, summaryDiv, lastEvaluationDate, lastEvaluationCompliance, attendanceData) {
+        console.log('All tasks for calculation:', allTasks);
+        console.log('Last evaluation date:', lastEvaluationDate);
+        console.log('Attendance data:', attendanceData);
+
+        let tasksForEvaluation = allTasks;
+
+        if (lastEvaluationDate) {
+            const lastEvalDateObj = new Date(lastEvaluationDate);
+            tasksForEvaluation = allTasks.filter(task => {
+                const taskDate = new Date(task.created_date || task.due_date || Date.now());
+                return taskDate > lastEvalDateObj;
+            });
+            console.log('Tasks after last evaluation:', tasksForEvaluation.length);
+        }
+
+        const periodNote = lastEvaluationDate ?
+            `since last evaluation (${new Date(lastEvaluationDate).toLocaleDateString()})` :
+            'all time (no previous evaluation)';
+
+        const totalTasks = tasksForEvaluation.length;
+        const acceptedTasks = tasksForEvaluation.filter(t =>
+            t.review_status === 'Accepted' || t.status === 'Accepted'
+        ).length;
+        const pendingTasks = tasksForEvaluation.filter(t =>
+            t.status === 'Completed' && t.review_status === 'Pending Review'
+        ).length;
+        const rejectedTasks = tasksForEvaluation.filter(t =>
+            t.review_status === 'Rejected'
+        ).length;
+        const inProgressTasks = tasksForEvaluation.filter(t =>
+            t.status === 'In Progress'
+        ).length;
+        const notStartedTasks = tasksForEvaluation.filter(t =>
+            t.status === 'Not Started'
+        ).length;
+
+        const complianceRate = totalTasks > 0 ?
+            (acceptedTasks / totalTasks * 100).toFixed(2) : 0.00;
+
+        let attendanceRate = 0;
+        let presentDays = 0;
+        let absentDays = 0;
+        let lateDays = 0;
+        let totalDays = 0;
+        let overallPerformance = 0;
+
+        if (attendanceData && !attendanceData.error) {
+            attendanceRate = attendanceData.attendance_rate || 0;
+            presentDays = attendanceData.attendance_stats?.present_days || 0;
+            absentDays = attendanceData.attendance_stats?.absent_days || 0;
+            lateDays = attendanceData.attendance_stats?.late_days || 0;
+            totalDays = attendanceData.attendance_stats?.total_days || 0;
+
+            overallPerformance = ((attendanceRate * 0.4) + (parseFloat(complianceRate) * 0.6)).toFixed(2);
+        }
+
+        let htmlContent = `
+    <h4>Performance Evaluation Summary</h4>`;
+
+        if (attendanceData && !attendanceData.error) {
+            htmlContent += `
+    <div class="performance-metrics-grid">
+        <!-- Attendance Section -->
+        <div class="metric-section">
+            <h5>Attendance</h5>
+            <div class="metric-value ${attendanceRate >= 85 ? 'good' : attendanceRate >= 70 ? 'average' : 'poor'}">
+                ${attendanceRate}%
+            </div>
+            <div class="metric-details">
+                <div class="detail-item">
+                    <span class="detail-label">Present:</span>
+                    <span class="detail-value">${presentDays}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Absent:</span>
+                    <span class="detail-value">${absentDays}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Late:</span>
+                    <span class="detail-value">${lateDays}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Days:</span>
+                    <span class="detail-value">${totalDays}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Compliance Section -->
+        <div class="metric-section">
+            <h5>Task Compliance</h5>
+            <div class="metric-value ${complianceRate >= 80 ? 'good' : complianceRate >= 60 ? 'average' : 'poor'}">
+                ${complianceRate}%
+            </div>
+            <div class="metric-details">
+                <div class="detail-item">
+                    <span class="detail-label">Accepted:</span>
+                    <span class="detail-value">${acceptedTasks}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Pending:</span>
+                    <span class="detail-value">${pendingTasks}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Rejected:</span>
+                    <span class="detail-value">${rejectedTasks}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Tasks:</span>
+                    <span class="detail-value">${totalTasks}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Overall Performance -->
+        <div class="metric-section overall">
+            <h5>Overall Performance</h5>
+            <div class="metric-value ${overallPerformance >= 80 ? 'good' : overallPerformance >= 65 ? 'average' : 'poor'}">
+                ${overallPerformance}%
+            </div>
+            <div class="performance-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Attendance (40%):</span>
+                    <span class="breakdown-value">${(attendanceRate * 0.4).toFixed(1)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Compliance (60%):</span>
+                    <span class="breakdown-value">${(parseFloat(complianceRate) * 0.6).toFixed(1)}</span>
+                </div>
+            </div>
+        </div>
+    </div>`;
+        } else {
+            htmlContent += `
+    <div class="task-stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">${totalTasks}</div>
+            <div class="stat-label">Total Tasks</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-value">${acceptedTasks}</div>
+            <div class="stat-label">Accepted</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-value">${pendingTasks}</div>
+            <div class="stat-label">Pending Review</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-value">${rejectedTasks}</div>
+            <div class="stat-label">Rejected</div>
+        </div>
+    </div>
+    
+    <div class="compliance-rate-display">
+        <div class="compliance-label">Task Compliance Rate</div>
+        <div class="compliance-value ${complianceRate >= 80 ? 'good' : complianceRate >= 60 ? 'average' : 'poor'}">
+            ${complianceRate}%
+        </div>
+        <div class="compliance-bar">
+            <div class="compliance-fill" style="width: ${Math.min(complianceRate, 100)}%"></div>
+        </div>
+    </div>`;
+        }
+
+        htmlContent += `
+    <!-- COMPLIANCE COMPARISON SECTION -->
+    <div class="compliance-comparison">
+        <div class="comparison-item">
+            <span class="comparison-label">Last Evaluation Compliance:</span>
+            <span class="comparison-value" id="lastEvaluationCompliance">
+                ${lastEvaluationCompliance !== null ? `${lastEvaluationCompliance}%` : '-'}
+            </span>
+        </div>
+    </div>
+    
+    ${totalTasks === 0 ? `
+        <div class="no-tasks-warning">
+            <p>⚠ No tasks found for this evaluation period.</p>
+            <p><small>${lastEvaluationDate ? 'All tasks were evaluated in the previous period.' : 'No tasks have been assigned yet.'}</small></p>
+        </div>
+    ` : ''}
+    
+    <div class="evaluation-note">
+        <small>Note: This evaluation will calculate overall performance using attendance (40%) and task compliance (60%).</small>
+    </div>`;
+
+        summaryDiv.innerHTML = htmlContent;
+
+        const lastEvalElement = document.getElementById('lastEvaluationCompliance');
+        if (lastEvalElement && lastEvaluationCompliance !== null) {
+            lastEvalElement.className = `comparison-value ${lastEvaluationCompliance >= 80 ? 'good' : lastEvaluationCompliance >= 60 ? 'average' : 'poor'}`;
+        }
+    }
+
+    function submitEvaluation() {
+        const employeeId = document.getElementById('evaluationEmployeeId').value;
+        const evaluationDate = document.getElementById('evaluationDate').value;
+        const evaluationPeriod = document.getElementById('evaluationPeriod').value.trim();
+        const evaluationNotes = document.getElementById('evaluationNotes').value;
+
+        // Validate
+        if (!evaluationDate || !evaluationPeriod) {
+            alert('Please fill in date and period');
+            return;
+        }
+
+        // Prepare data
+        const evaluationData = {
+            evaluation_date: evaluationDate,
+            period: evaluationPeriod,
+            notes: evaluationNotes || ''
+        };
+
+        // Show loading
+        const submitBtn = document.getElementById('submitEvaluationBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Creating Evaluation...';
+        submitBtn.disabled = true;
+
+        // Submit
+        fetch(`/dashboard/api/evaluation/create/${employeeId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(evaluationData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const message = `✅ Performance Evaluation Created!\n\n` +
+                        `Employee: ${document.getElementById('evaluationEmployeeName').textContent}\n` +
+                        `Period: ${evaluationPeriod}\n` +
+                        `Overall Performance: ${data.overall_performance}%\n` +
+                        `Attendance Rate: ${data.attendance_rate}%\n` +
+                        `Task Compliance Rate: ${data.compliance_rate}%\n` +
+                        `Evaluated ${data.days_evaluated} days and ${data.tasks_evaluated} tasks`;
+
+                    alert(message);
+                    closeEvaluationModal();
+
+                    // Refresh page to update all rates
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to create evaluation'));
+                }
+            })
+            .catch(error => {
+                alert('Error creating evaluation: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+    }
+
+    // Helper function to get CSRF token
+    function getCSRFToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookieValue || '';
+    }
+</script>
+
+<style>
+    /* Task Performance Modal Styles */
+    .task-performance-summary {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .task-performance-summary h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .task-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 1px solid #dee2e6;
+    }
+
+    .stat-card.success {
+        border-color: #28a745;
+        background-color: #f8fff9;
+    }
+
+    .stat-card.warning {
+        border-color: #ffc107;
+        background-color: #fffdf6;
+    }
+
+    .stat-card.danger {
+        border-color: #dc3545;
+        background-color: #fff8f8;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .compliance-rate-display {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #e9ecef;
+    }
+
+    .compliance-label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .compliance-value {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .compliance-value.good {
+        color: #28a745;
+    }
+
+    .compliance-value.average {
+        color: #ffc107;
+    }
+
+    .compliance-value.poor {
+        color: #dc3545;
+    }
+
+    .compliance-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .compliance-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        transition: width 0.5s ease;
+    }
+
+    .compliance-explanation {
+        font-size: 13px;
+        color: #666;
+        font-style: italic;
+    }
+
+    .evaluation-explanation {
+        background-color: #e8f4fc;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #2196F3;
+    }
+
+    .evaluation-explanation ul {
+        margin: 10px 0 0 0;
+        padding-left: 20px;
+    }
+
+    .evaluation-explanation li {
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    .loading-message {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+
+    .loading-message .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #2196F3;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 10px auto;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .error-message {
+        background-color: #ffe6e6;
+        border: 1px solid #ffcccc;
+        border-radius: 6px;
+        padding: 15px;
+        color: #d32f2f;
+        text-align: center;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    @media (max-width: 768px) {
+        .task-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>

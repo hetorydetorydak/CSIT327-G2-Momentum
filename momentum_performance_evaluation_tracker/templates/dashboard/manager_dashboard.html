@@ -143,10 +143,14 @@
                 </div>
 
                 <!-- Drilldown Button -->
-                <button class="drilldown-btn" onclick="viewEmployeeDetails({{ employee.employee_id }})">
-                    View Details
-                    <img src="{% static 'images/drilldown-icon.png' %}" alt="View" class="drilldown-icon">
-                </button>
+                    <button class="drilldown-btn" onclick="viewEmployeeDetails({{ employee.employee_id }})">
+                        View Details
+                        <img src="{% static 'images/drilldown-icon.png' %}" alt="View" class="drilldown-icon">
+                    </button>
+                    <button class="evaluation-btn"
+                        onclick="openEvaluationModal({{ employee.employee_id }}, '{{ employee.name|escapejs }}')">
+                        Add Evaluation
+                    </button>
             </div>
             {% empty %}
             <div class="no-employees-message">
@@ -157,6 +161,7 @@
     </div>
 
     {%include 'dashboard/employee_performance_modal.html' %}
+    {% include "dashboard/evaluation_modal.html" %}
 
 </main>
 

@@ -144,6 +144,77 @@
         </div>
         {% endif %}
 
+        <!-- Employee Evaluations (KPI style) -->
+        {% if evaluations %}
+        <div class="dashboard-card wide-card">
+            <h3 class="card-title">My Evaluations</h3>
+
+            <div class="evaluations-kpi-grid">
+                {% for ev in evaluations %}
+                <article class="evaluation-kpi">
+
+                    <!-- Header -->
+                    <div class="evaluation-header">
+                        <div class="evaluation-meta">
+                            <div class="evaluation-date">
+                                {{ ev.evaluation_date|date:"F j, Y" }}
+                            </div>
+                            <div class="evaluation-period">
+                                {{ ev.period }}
+                            </div>
+                        </div>
+
+                        <div class="evaluation-overall">
+                            <div class="card-metric
+                                {% if ev.overall_performance >= 80 %}success
+                                {% elif ev.overall_performance >= 60 %}average
+                                {% else %}warning{% endif %}">
+                                {{ ev.overall_performance|floatformat:1 }}%
+                            </div>
+                            <div class="overall-label">Overall</div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="evaluation-metrics">
+                        <div class="metric-line">
+                            <span class="metric-label">Attendance</span>
+                            <div class="metric-bar">
+                                <div class="metric-fill attendance"
+                                    style="width:{{ ev.attendance_rate|default:0 }}%"></div>
+                            </div>
+                            <span class="metric-value">
+                                {{ ev.attendance_rate|floatformat:1 }}%
+                            </span>
+                        </div>
+
+                        <div class="metric-line">
+                            <span class="metric-label">Compliance</span>
+                            <div class="metric-bar">
+                                <div class="metric-fill compliance"
+                                    style="width:{{ ev.compliance_rate|default:0 }}%"></div>
+                            </div>
+                            <span class="metric-value">
+                                {{ ev.compliance_rate|floatformat:1 }}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="evaluation-notes">
+                        <strong>Notes:</strong>
+                        <div class="notes-text">
+                            {{ ev.notes|default:"—" }}
+                        </div>
+                    </div>
+
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+
     </div>
 </section>
 

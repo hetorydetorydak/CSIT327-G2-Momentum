@@ -1,3 +1,134 @@
+/* ===== Evaluations KPI Grid ===== */
+.evaluations-kpi-grid {
+    margin-top: 1rem;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+/* ===== Individual KPI Card ===== */
+.evaluation-kpi {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 14px;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ===== Header ===== */
+.evaluation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.evaluation-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.evaluation-date {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #222;
+}
+
+.evaluation-period {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.evaluation-overall {
+    text-align: right;
+    min-width: 90px;
+}
+
+.overall-label {
+    font-size: 0.75rem;
+    color: #777;
+    margin-top: 4px;
+}
+
+/* ===== Metrics ===== */
+.evaluation-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.metric-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.metric-label {
+    width: 80px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.metric-bar {
+    flex: 1;
+    height: 10px;
+    background: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.metric-fill {
+    height: 100%;
+    border-radius: 8px;
+}
+
+.metric-fill.attendance {
+    background-color: #4caf50;
+}
+
+.metric-fill.compliance {
+    background-color: #2196f3;
+}
+
+.metric-value {
+    width: 48px;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #444;
+}
+
+/* ===== Notes ===== */
+.evaluation-notes {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f3f5;
+    font-size: 0.88rem;
+    color: #444;
+}
+
+.notes-text {
+    margin-top: 6px;
+    color: #555;
+}
+
+/* ===== Scrollbar polish (optional) ===== */
+.evaluations-kpi-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.evaluations-kpi-grid::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 6px;
+}
+
 /* dashboard/css/kpi-inline.css */
 
 /* header flex used in each KPI card */

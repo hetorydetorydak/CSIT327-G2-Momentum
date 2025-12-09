@@ -17,6 +17,8 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from datetime import time as dt_time
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from core.utils import (
     calculate_attendance_rate, 
@@ -104,6 +106,11 @@ def dashboard_home(request):
     attendance_page = None
     attendance_paginator = None
 
+    if hasattr(request.user, 'employee'):
+        employee = request.user.employee
+        evaluations = employee.evaluations.all().order_by('-evaluation_date')
+    else:
+        evaluations = None
     # DEBUG: Check user role
     print(f"DEBUG: User = {request.user}")
     if hasattr(request.user, 'role'):
@@ -229,6 +236,8 @@ def dashboard_home(request):
         'attendance_paginator': attendance_paginator,
         'attendance_page_size': request.GET.get('attendance_page_size', 10),
         'attendance_page_number': request.GET.get('attendance_page', 1),
+        'employee': getattr(request.user, 'employee', None),
+        'evaluations': evaluations,
     }
 
     return render(request, "dashboard/dashboard.html", context)

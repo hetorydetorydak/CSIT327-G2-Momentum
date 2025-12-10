@@ -78,12 +78,15 @@
 }
 
 .metric-bar {
-    flex: 1;
+    position: relative;
+    flex: 1;           /* this can stay if using flexbox, or replace with fixed width */
+    max-width: 500px;  /* limit bar width */
     height: 10px;
     background: #e9ecef;
     border-radius: 8px;
     overflow: hidden;
 }
+
 
 .metric-fill {
     height: 100%;
@@ -117,6 +120,7 @@
 .notes-text {
     margin-top: 6px;
     color: #555;
+    white-space: pre-wrap; 
 }
 
 /* ===== Scrollbar polish (optional) ===== */
